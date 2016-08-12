@@ -1,0 +1,32 @@
+{
+  "name": "serverless-artillery",
+  "version": "0.0.1",
+  "description": "Simple load testing with Artillery in a serverless way (using AWS Lambda)",
+  "main": "index.js",
+  "scripts": {
+    "test": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nordstrom/serverless-artillery.git"
+  },
+  "files": [
+    "index.js",
+    "LICENSE",
+    "README.md"
+  ],
+  "keywords": [
+    "serverless",
+    "load",
+    "test",
+    "testing",
+    "artillery",
+    "lambda"
+  ],
+  "author": "Erik Erikson, Jane Savina, Jason Olmstead, Greg Smith, Rob Gruhl, Andy Day",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Nordstrom/serverless-artillery/issues"
+  },
+  "homepage": "https://github.com/Nordstrom/serverless-artillery#readme"
+}
