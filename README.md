@@ -1,4 +1,4 @@
-# serverless-artillery
+# serverless-artillery [![Build Status](https://travis-ci.org/Nordstrom/serverless-artillery.svg)](https://travis-ci.org/Nordstrom/serverless-artillery)
 
 ## Install
 
