@@ -1,0 +1,46 @@
+{
+  "name": "serverless-artillery",
+  "version": "0.0.1",
+  "description": "A serverless performance testing tool. `serverless` + `artillery` = crush.  a.k.a. Orbital Laziers",
+  "main": "index.js",
+  "scripts": {
+    "jscs": "jscs .",
+    "jshint": "jshint --exclude node_modules .",
+    "test": "mocha -r aws-sdk -r artillery-core --recursive -R min tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nordstrom/serverless-artillery.git"
+  },
+  "keywords": [
+    "serverless",
+    "artillery",
+    "performance",
+    "load",
+    "testing",
+    "scale"
+  ],
+  "author": "Erik Erikson <erik.m.erikson@nordstrom.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Nordstrom/serverless-artillery/issues"
+  },
+  "homepage": "https://github.com/Nordstrom/serverless-artillery#readme",
+  "dependencies": {
+    "artillery-core": "^2.0.0-0",
+    "aws-sdk": "^2.5.0",
+    "ntp-client": "^0.5.3"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "jscs": "^3.0.7",
+    "jshint": "^2.9.2",
+    "mocha": "^3.0.2",
+    "pre-commit": "^1.1.3"
+  },
+  "pre-commit": [
+    "jscs",
+    "jshint",
+    "test"
+  ]
+}

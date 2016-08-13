@@ -1,0 +1,6 @@
+.editorconfig
+.gitignore
+.jscsrc
+.jshintrc
+tests
+docs
