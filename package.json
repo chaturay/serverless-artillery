@@ -18,9 +18,10 @@
     "performance",
     "load",
     "testing",
-    "scale"
+    "scale",
+    "lambda"
   ],
-  "author": "Erik Erikson <erik.m.erikson@nordstrom.com>",
+  "author": "Erik Erikson, Jane Savina, Jason Olmstead, Greg Smith, Rob Gruhl, Andy Day",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/Nordstrom/serverless-artillery/issues"
