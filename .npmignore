@@ -1,6 +1,10 @@
+# project files
 .editorconfig
 .gitignore
 .jscsrc
 .jshintrc
 tests
 docs
+
+# OS files
+.DS_Store
