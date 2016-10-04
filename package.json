@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "A serverless performance testing tool. `serverless` + `artillery` = crush.  a.k.a. Orbital Laziers",
   "main": "index.js",
+  "bin": {
+    "slsart": "./bin/slsart"
+  },
   "scripts": {
     "jscs": "jscs .",
     "jshint": "jshint --exclude node_modules .",
