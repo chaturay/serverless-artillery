@@ -2,23 +2,12 @@
 
 'use strict';
 
-let command   = process.argv[1];
+let program = require('commander');
+let packageJson = require('../package.json');
 
-try {
-    switch(command.toLowerCase()) {
-        case 'deploy':
-            // Deploy the Testing Lambda to AWS.
-            break;
-        case 'run':
-            // Invoke the Testing Lambda using provided event.json.
-            break;
-        case 'cleanup':
-            // Delete the Testing Lambda from AWS.
-            break;
-        default:
-            throw new Error(`Unrecognized command: ${command}`);
-    }
-} catch(ex) {
-    console.error(`Error invoking ${process.argv[0]}.`);
-    console.error(`${ex.message}`);
-}
+program
+    .version(packageJson.version) // TODO: read this from package.json?
+    .command('deploy', 'deploy the testing Lambda to AWS')
+    .command('run [test]', 'run the testing Lambda with an optional Test Script')
+    .command('cleanup', 'delete the testing Lambda from AWS')
+    .parse(process.argv);
