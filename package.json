@@ -10,7 +10,7 @@
     "jscs": "jscs .",
     "jshint": "jshint --exclude node_modules .",
     "test": "mocha -r aws-sdk -r artillery-core --recursive -R min tests",
-    "postinstall": "pushd lib && npm install && popd"
+    "postinstall": "cd lib && npm install && cd .."
   },
   "repository": {
     "type": "git",
