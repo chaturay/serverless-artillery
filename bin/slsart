@@ -2,12 +2,16 @@
 
 'use strict';
 
-let program = require('commander');
-let packageJson = require('../package.json');
+const packageJson = require('../package.json');
+const program = require('commander');
+const slsArt = require('../lib/slsart-impl');
 
 program
-    .version(packageJson.version) // TODO: read this from package.json?
-    .command('deploy', 'deploy the testing Lambda to AWS')
-    .command('run [test]', 'run the testing Lambda with an optional Test Script')
-    .command('cleanup', 'delete the testing Lambda from AWS')
+    .version(packageJson.version)
+    .usage('slsart <action>')
+    .description('Load test using Serverless and Artillery')
+    .option('-s, --script <testScript>', 'Path to Artillery test script (required for "run" action)')
+    .action((action, options) => {
+        slsArt[action](options);
+    })
     .parse(process.argv);

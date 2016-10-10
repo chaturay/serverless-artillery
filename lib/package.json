@@ -1,0 +1,15 @@
+{
+  "name": "lib",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "artillery-core": "^2.0.3-0",
+    "ntp-client": "^0.5.3"
+  }
+}

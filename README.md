@@ -5,18 +5,15 @@ Combine [`serverless`](serverless.com) with [`artillery`](artillery.io) and you 
 We assume you have node.js installed.  Likewise you should have the serverless framework.
 
 ```
-npm install serverless-artillery
+npm install -g serverless-artillery
+npm install -g slsart
 ```
 
 ## Use
 
-`slsart`
-
-or
-
 ```
-slsart deploy  // and then
-slsart run     // repeat as desired, before
+slsart deploy                                  // and then
+slsart run  -s /path/to/your/test-script.yml   // repeat as desired, before
 slsart cleanup
 ```
 

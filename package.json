@@ -9,7 +9,8 @@
   "scripts": {
     "jscs": "jscs .",
     "jshint": "jshint --exclude node_modules .",
-    "test": "mocha -r aws-sdk -r artillery-core --recursive -R min tests"
+    "test": "mocha -r aws-sdk -r artillery-core --recursive -R min tests",
+    "postinstall": "pushd lib && npm install && popd"
   },
   "repository": {
     "type": "git",
