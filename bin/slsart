@@ -8,7 +8,7 @@ const slsArt = require('../lib/slsart-impl');
 
 program
     .version(packageJson.version)
-    .usage('slsart <action>')
+    .usage('<action>')
     .description('Load test using Serverless and Artillery')
     .option('-s, --script <testScript>', 'Path to Artillery test script (required for "run" action)')
     .action((action, options) => {
