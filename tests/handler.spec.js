@@ -1,7 +1,7 @@
 'use strict';
 
 var expect = require('chai').expect,
-    handler = require(__dirname + '/../lib/handler.js'),
+    handler = require(__dirname + '/../lib/lambda/handler.js'),
     script,
     phase,
     result,

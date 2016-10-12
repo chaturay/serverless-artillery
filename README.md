@@ -1,5 +1,5 @@
 # serverless-artillery [![Build Status](https://travis-ci.org/Nordstrom/serverless-artillery.svg)](https://travis-ci.org/Nordstrom/serverless-artillery)
-Combine [`serverless`](https://serverless.com) with [`artillery`](https://artillery.io) and you get `serverless-artillery` (a.k.a. `slsart`) for instant, cheap, and easy performance testing at scale
+Combine [`serverless`](https://serverless.com) with [`artillery`](https://artillery.io) and you get `serverless-artillery` (a.k.a. `serverless-artillery`) for instant, cheap, and easy performance testing at scale
 
 ## Installation
 We assume you have node.js installed.  Likewise you should have the serverless framework.
@@ -12,8 +12,8 @@ npm install -g serverless-artillery
 ## Use
 
 ```
-slsart deploy                                  // and then
-slsart run  -s /path/to/your/test-script.yml   // repeat as desired, before
+slsart deploy   // and then
+slsart run      // repeat as desired, before
 slsart cleanup
 ```
 
