@@ -20,7 +20,7 @@ program
     copy    - Copy Lambda service files to current directory`
     )
     .option('-s, --script <testScript>', 'Path to Artillery test script (for "run" action)')
-    .option('-n, --name <functionName>', 'Name of Lambda function')
+    .option('-f, --func <functionName>', 'Name of Lambda function', 'serverlessArtilleryLoadTester')
     .action((action, options) => {
         if (slsArt[action] === undefined) {
             console.error(`ERROR: Action '${action}' is not valid.`);
