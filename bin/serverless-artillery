@@ -19,8 +19,8 @@ program
     cleanup - Remove the testing Lambda from AWS 
     copy    - Copy Lambda service files to current directory`
     )
-    .option('-s, --script <testScript>', 'Path to Artillery test script (for "run" action)')
-    .option('-f, --func <functionName>', 'Name of Lambda function', 'serverlessArtilleryLoadTester')
+    .option('-s, --script <testScript>', 'Path to Artillery test script (for "run" action)', 'event.json')
+    .option('-f, --func <functionName>', 'Name of Lambda function', 'loadGenerator')
     .action((action, options) => {
         if (slsArt[action] === undefined) {
             console.error(`ERROR: Action '${action}' is not valid.`);
