@@ -1,0 +1,23 @@
+# We're excited that this project has provided you enough value that you are looking at its code!
+#
+# This is a standard [Serverless Framework](https://www.serverless.com) project and you should
+# feel welcome to customize it to your needs and delight.
+#
+# If you do something super cool and would like to share the capability, please open a PR against
+# https://www.github.com/Nordstrom/serverless-artillery.
+#
+# Thanks!
+
+service: serverless-artillery-test
+
+provider:                       # Using Node JS v4.3 on AWS
+  name: aws
+  runtime: nodejs4.3
+
+# you can overwrite defaults here
+#  region: us-east-1
+
+functions:
+  serverlessArtilleryLoadTester:
+    handler: handler.handler    # the serverlessArtilleryLoadTester handler() method can be found in the handler.js source file
+    timeout: 300                # set timeout to be 5 minutes (max for Lambda)

@@ -1,0 +1,34 @@
+#!/usr/bin/env node
+
+'use strict';
+
+const packageJson = require('../package.json');
+const program = require('commander');
+const slsArt = require('../lib/');
+
+program
+    .version(packageJson.version)
+    .usage('<action>')
+    .description(
+`Load testing using Serverless and Artillery.
+
+  Actions:
+  
+    deploy  - Upload testing Lambda to AWS
+    run     - Use Lambda to perform test
+    cleanup - Remove the testing Lambda from AWS 
+    copy    - Copy Lambda service files to current directory`
+    )
+    .option('-s, --script <testScript>', 'Path to Artillery test script (for "run" action)')
+    .option('-f, --func <functionName>', 'Name of Lambda function', 'serverlessArtilleryLoadTester')
+    .action((action, options) => {
+        if (slsArt[action] === undefined) {
+            console.error(`ERROR: Action '${action}' is not valid.`);
+            process.exit(1);
+        }
+
+        slsArt[action](options);
+    })
+    .parse(process.argv);
+
+if (!program.args.length) program.help();

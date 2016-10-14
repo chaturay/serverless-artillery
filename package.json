@@ -3,10 +3,15 @@
   "version": "0.0.1",
   "description": "A serverless performance testing tool. `serverless` + `artillery` = crush.  a.k.a. Orbital Laziers",
   "main": "index.js",
+  "bin": {
+    "serverless-artillery": "./bin/serverless-artillery",
+    "slsart": "./bin/serverless-artillery"
+  },
   "scripts": {
     "jscs": "jscs .",
-    "jshint": "jshint --exclude node_modules .",
-    "test": "mocha -r aws-sdk -r artillery-core --recursive -R min tests"
+    "jshint": "jshint .",
+    "test": "mocha -r aws-sdk -r artillery-core --recursive -R min tests",
+    "postinstall": "cd lib/lambda && npm install && cd ../.."
   },
   "repository": {
     "type": "git",
@@ -30,6 +35,8 @@
   "dependencies": {
     "artillery-core": "^2.0.0-0",
     "aws-sdk": "^2.5.0",
+    "commander": "^2.9.0",
+    "ncp": "^2.0.0",
     "ntp-client": "^0.5.3"
   },
   "devDependencies": {
