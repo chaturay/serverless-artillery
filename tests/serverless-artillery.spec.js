@@ -15,9 +15,9 @@ let serverlessMock = {
     _findParameterValue(param) {
         let result = null;
 
-        if(serverlessMock.argv) {
+        if (serverlessMock.argv) {
             let paramIndex = serverlessMock.argv.indexOf('-' + param);
-            if(paramIndex != -1 && paramIndex < (serverlessMock.argv.length - 1)) {
+            if (paramIndex !== -1 && paramIndex < (serverlessMock.argv.length - 1)) {
                 result = serverlessMock.argv[paramIndex + 1];
             }
         }
@@ -38,8 +38,10 @@ describe('serverless-artillery implementation', function() {
 
     describe('deploy actions', function() {
         it('is not interactive', function() {
-            slsart.deploy({ func: functionName  });
+            slsart.deploy({ func: functionName });
+            /*jshint -W030 */
             expect(serverlessMock.config.interactive).to.be.false;
+            /*jshint +W030 */
         });
 
         // it('must use Serverless deploy command', () => {
@@ -58,8 +60,6 @@ describe('serverless-artillery implementation', function() {
         //     slsart.run({ func: functionName  });
         //     expect(serverlessMock.argv[2]).to.be.equal('invoke');
         // });
-
-
     });
 
     describe('cleanup actions', function() {
@@ -67,12 +67,9 @@ describe('serverless-artillery implementation', function() {
         //     slsart.cleanup({ func: functionName  });
         //     expect(serverlessMock.argv[2]).to.be.equal('remove');
         // });
-
-
     });
 
     describe('copy actions', function() {
-
     });
 });
 
