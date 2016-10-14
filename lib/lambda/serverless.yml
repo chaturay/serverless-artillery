@@ -8,7 +8,7 @@
 #
 # Thanks!
 
-service: serverless-artillery-test
+service: serverless-artillery
 
 provider:                       # Using Node JS v4.3 on AWS
   name: aws
@@ -18,6 +18,6 @@ provider:                       # Using Node JS v4.3 on AWS
 #  region: us-east-1
 
 functions:
-  serverlessArtilleryLoadTester:
+  loadGenerator: # Do not edit this name
     handler: handler.handler    # the serverlessArtilleryLoadTester handler() method can be found in the handler.js source file
     timeout: 300                # set timeout to be 5 minutes (max for Lambda)

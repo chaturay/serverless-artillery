@@ -2,11 +2,10 @@
 Combine [`serverless`](https://serverless.com) with [`artillery`](https://artillery.io) and you get `serverless-artillery` (a.k.a. `serverless-artillery`) for instant, cheap, and easy performance testing at scale
 
 ## Installation
-We assume you have node.js (v4 or better) installed.  Likewise you should have the serverless framework.
+We assume you have node.js (v4 or better) installed.  Likewise you should have the serverless framework (v1.0+) either installed globally or available in the local `node_modules`.
 
 ```
-npm install -global serverless
-npm install -global serverless-artillery
+npm install -g serverless-artillery
 ```
 
 ## Usage
@@ -52,9 +51,13 @@ long | short | description | example
 
 ### Customization
 
+**WARNING!**
+
+In order to avoid naming collisions with the global serverless-artillery deployment or other copies of it, edit the `service` attribute in `./serverless.yml` with a unique name.  If you do not edit the service name you will overwrite the lambda deployed by the global deployment or other copies which can create confusing results.
+
 ```
-cd ~
 mkdir myCustomLoadTest    // Make your own test directory
+cd myCustomLoadTest
 slsart copy               // Use slsart to get basic files
 nano event.json           // Edit event.json to change test endpoint
 
@@ -85,7 +88,20 @@ and up the duration of the test to one minute and provide more load:
 Then run the test again using:
 
 ```
-slsart run -f ./event.json
+slsart run
+```
+
+Now you can create a copy of the test and run a different test.
+
+```
+cp event.json trafficSpike.json
+nano trafficSpike.json
+```
+
+Update the test spec ...
+
+```
+slsart run -f trafficSpike.json
 ```
 
 ## References
