@@ -33,15 +33,13 @@ mock('../lib/serverless-fx', function(config) {
 
 let slsart = require('../lib');
 
-describe('serverless-artillery implementation', function() {
+describe('serverless-artillery command line interactions', function() {
     const functionName = 'testFunctionName';
 
     describe('deploy actions', function() {
         it('is not interactive', function() {
             slsart.deploy({ func: functionName });
-            /*jshint -W030 */
-            expect(serverlessMock.config.interactive).to.be.false;
-            /*jshint +W030 */
+            expect(serverlessMock.config.interactive).to.equal(false);
         });
 
         // it('must use Serverless deploy command', () => {

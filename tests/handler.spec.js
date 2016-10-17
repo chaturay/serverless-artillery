@@ -7,7 +7,7 @@ var expect = require('chai').expect,
     result,
     expected;
 
-describe('`serverless-artillery` Handler Tests', function() {
+describe('serverless-artillery Handler Tests', function() {
     before(() => {
         console.log('Running `serverless-artillery` Handler Tests');
     });
@@ -17,7 +17,7 @@ describe('`serverless-artillery` Handler Tests', function() {
     /**
      * SPLIT PHASE BY LENGTH
      */
-    describe('The handler splits PHASES that are TOO LONG', function() {
+    describe('#splitPhaseByLength splits PHASES that are TOO LONG', function() {
         it(`splitting a constant rate phase of three chunk's length into two parts.`, () => {
             phase = {
                 duration: 3 * handler.constants.MAX_CHUNK_DURATION_IN_SECONDS,
@@ -115,7 +115,7 @@ describe('`serverless-artillery` Handler Tests', function() {
     /**
      * SPLIT SCRIPT BY LENGTH
      */
-    describe('The handler splits SCRIPTS that are TOO LONG', function() {
+    describe('#splitScriptByLength The handler splits SCRIPTS that are TOO LONG', function() {
         it(`splitting a script where there is a natural phase split at MAX_CHUNK_DURATION between two phases.`, () => {
             script = {
                 config: {
@@ -276,7 +276,7 @@ describe('`serverless-artillery` Handler Tests', function() {
     /**
      * SPLIT PHASE BY WIDTH
      */
-    describe('The handler splits PHASES that are TOO WIDE (RPS > MAX_RPS)', function() {
+    describe('#splitPhaseByWidth The handler splits PHASES that are TOO WIDE (RPS > MAX_RPS)', function() {
         // min >= chunkSize
         it(`splitting a ramp phase that at all times exceeds a rate of MAX_CHUNK_REQUESTS_PER_SECOND into a constant rate and remainder ramp phases.`, () => {
             phase = {
@@ -495,7 +495,7 @@ describe('`serverless-artillery` Handler Tests', function() {
     /**
      * SPLIT SCRIPT BY WIDTH
      */
-    describe('The handler splits SCRIPTS that are TOO WIDE', function() {
+    describe('#splitScriptByWidth the handler splits SCRIPTS that are TOO WIDE', function() {
         it(`splitting a script where there is a single phase that specifies twice MAX_CHUNK_REQUESTS_PER_SECOND load to split.`, () => {
             script = {
                 config: {
@@ -579,6 +579,56 @@ describe('`serverless-artillery` Handler Tests', function() {
             };
             result = handler.impl.splitScriptByWidth(script, handler.constants.MAX_CHUNK_REQUESTS_PER_SECOND);
             expect(result).to.deep.equal(expected);
+        });
+    });
+    describe('#readPayload', () => {
+        it('reads a single payload file.', () => {
+            let script = {
+                    config: {
+                        payload: {
+                            path: `${__dirname}/example.0.csv`
+                        }
+                    }
+                },
+                payload = handler.impl.readPayload(script);
+            expect(payload).to.deep.equal([
+                ['123456', 'John Doe'],
+                ['234567', 'Jane Doe'],
+                ['345678', 'Baby Doe']
+            ]);
+        });
+        it('reads a set of payload files.', () => {
+            let script = {
+                    config: {
+                        payload: [
+                            {
+                                path: `${__dirname}/example.0.csv`
+                            },
+                            {
+                                path: `${__dirname}/example.1.csv`
+                            }
+                        ]
+                    }
+                },
+                payload = handler.impl.readPayload(script);
+            expect(payload).to.deep.equal([
+                {
+                    path: `${__dirname}/example.0.csv`,
+                    data: [
+                        ['123456', 'John Doe'],
+                        ['234567', 'Jane Doe'],
+                        ['345678', 'Baby Doe']
+                    ]
+                },
+                {
+                    path: `${__dirname}/example.1.csv`,
+                    data: [
+                        ['123457', 'John Jones'],
+                        ['234568', 'Jane Jones'],
+                        ['345679', 'Baby Jones']
+                    ]
+                }
+            ]);
         });
     });
 });
