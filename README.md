@@ -45,14 +45,6 @@ slsart cleanup
 
 ### Options
 
-#### global options (available for all commands)
-```
-Options:
-  --help       Show help                                               [boolean]
-  --version    Show version number                                     [boolean]
-  --debug, -D  Run the command in debug mode.
-```
-
 #### deploy
 ```
 slsart deploy --help
