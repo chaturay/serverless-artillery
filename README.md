@@ -10,7 +10,42 @@ We assume you have node.js (v4 or better) installed.  Likewise you should have t
 npm install -g serverless-artillery
 ```
 
-## Usage
+### Quick Start & Finish
+
+```
+slsart deploy   // and then
+slsart run      // repeat as desired, before...
+slsart cleanup
+```
+
+### Deeper Dive
+```
+slsart deploy   // and then
+slsart script   // adds script.yml to your current working directory
+nano script.yml // specify your endpoint and the desired load
+slsart run      // iterate on editting and running as desired, before...
+slsart cleanup
+```
+
+### More advanced use cases
+
+Use arbitrary script files
+
+`slsart -s my.other.script.yml`
+
+Configure a generated script on the CLI
+
+`slsart script -e http://your.endpoint.com -d 60 -r 10 -t 25`
+
+Create a local copy of the function that can be editted and redeployed with the new settings.  This enables more advanced configurations of the function to load VPC hosted services or other non-default use cases.  Similarly, you'll want to do this if you need to alter hard-coded limits.  See https://docs.serverless.com for configuration related documentation.
+
+```
+slsart configure
+nano serverless.yml
+nano handler.js
+```
+
+## Detailed Usage
 
 ```
 $ slsart --help
@@ -35,24 +70,16 @@ Options:
   --verbose, -v  Run the command in verbose mode.
 ```
 
-### Quick Start & Finish
-
-```
-slsart deploy   // and then
-slsart run      // repeat as desired, before
-slsart cleanup
-```
-
 ### Options
 
 #### deploy
 ```
-slsart deploy --help
+$ slsart deploy --help
 ```
 
 #### run
 ```
-slsart run --help
+$ slsart run --help
 
 Options:
   --script, -s  The Artillery script to execute.                        [string]
@@ -60,12 +87,12 @@ Options:
 
 #### cleanup
 ```
-slsart cleanup --help
+$ slsart cleanup --help
 ```
 
 #### script
 ```
-slsart script --help
+$ slsart script --help
 
 Options:
   --endpoint, -e  The endpoint to load with traffic.                    [string]
@@ -79,16 +106,16 @@ Options:
 
 #### configure
 ```
-slsart configure
+$ slsart configure
 ```
 
 ### Script Customization
 
 ```
-mkdir myCustomLoadTest    // Make your own test directory
-cd myCustomLoadTest
-slsart script             // Use slsart to get basic files
-nano script.yml           // Edit event.json to change test endpoint
+$ mkdir myCustomLoadTest    // Make your own test directory
+$ cd myCustomLoadTest
+$ slsart script             // Use slsart to get basic files
+$ nano script.yml           // Edit event.json to change test endpoint
 ```
 
 Modify the script.yml file to point at your own endpoint with the load profile that you want to test your application with.  See https://artillery.io for documentation on scripts.
@@ -116,20 +143,20 @@ and up the duration of the test to one minute and provide more load:
 Then run the test again using:
 
 ```
-slsart run
+$ slsart run
 ```
 
 Now you can create a copy of the test and run a different test.
 
 ```
-cp script.yml trafficSpike.yml
-nano trafficSpike.yml
+$ cp script.yml trafficSpike.yml
+$ nano trafficSpike.yml
 ```
 
 Update the test spec...  Then run it!
 
 ```
-slsart run -f trafficSpike.yml
+$ slsart run -f trafficSpike.yml
 ```
 
 ### Function Customization
@@ -138,3 +165,4 @@ TODO
 
 ## References
 1. [artillery.io](https://artillery.io) for documentation about how to define your load shape, volume, targets, inputs, et cetera
+2. [serverless.com](https://docs.serverless.com) for documentation about how to create a custom function configuration
