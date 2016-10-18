@@ -14,29 +14,28 @@ npm install -g serverless-artillery
 
 ```
 $ slsart --help
+Commands:
+  deploy     Deploy a default version of the function that will execute your
+             Artillery scripts.
+  run        Run your Artillery script.  Will prefer a script given by `-s` over
+             a `script.[yml|json]` in the current directory over the default
+             script.
+  cleanup    Remove the function and the associated resources created for or by
+             it.
+  script     Create a local Artillery script so that you can customize it for
+             your specific load requirements.  See https://artillery.io for
+             documentation.
+  configure  Create a local copy of the deployment assets for modification and
+             deployment.  See https://docs.serverless.com for documentation.
 
-  Usage: serverless-artillery <action>
-
-  Load testing using Serverless and Artillery.
-
-  Actions:
-
-    deploy  - Upload testing Lambda to AWS
-    run     - Use Lambda to perform test
-    cleanup - Remove the testing Lambda from AWS
-    copy    - Copy Lambda service files to current directory
-
-  Options:
-
-    -h, --help                 output usage information
-    -V, --version              output the version number
-    -s, --script <testScript>  Path to Artillery test script (for "run" action)
-    -f, --func <functionName>  Name of Lambda function
-
-
+Options:
+  --help         Show help                                             [boolean]
+  --version      Show version number                                   [boolean]
+  --debug, -D    Run the command in debug mode.
+  --verbose, -v  Run the command in verbose mode.
 ```
 
-### Example
+### Quick Start & Finish
 
 ```
 slsart deploy   // and then
@@ -46,26 +45,75 @@ slsart cleanup
 
 ### Options
 
-long | short | description | example
----- | ----- | ----------- | -------
-`--script` | `-s` | specify the artilery script to use | `-s yourfile.json` or `-s yourfile.yaml` or `-s yourfile.yml`
-`--func` | `-f` | specify the function name to use | `-f gnarlySuperLoadTestLambda`
+#### deploy
+```
+slsart deploy --help
+bin/serverless-artillery deploy
 
-### Customization
+Options:
+  --help       Show help                                               [boolean]
+  --version    Show version number                                     [boolean]
+  --debug, -D  Run the command in debug mode.
+```
 
-**WARNING!**
+#### run
+```
+slsart run --help
 
-In order to avoid naming collisions with the global serverless-artillery deployment or other copies of it, edit the `service` attribute in `./serverless.yml` with a unique name.  If you do not edit the service name you will overwrite the lambda deployed by the global deployment or other copies which can create confusing results.
+Options:
+  --help        Show help                                              [boolean]
+  --version     Show version number                                    [boolean]
+  --debug, -D   Run the command in debug mode.
+  --script, -s  The Artillery script to execute.                        [string]
+```
+
+#### cleanup
+```
+slsart cleanup --help
+
+Options:
+  --help       Show help                                               [boolean]
+  --version    Show version number                                     [boolean]
+  --debug, -D  Run the command in debug mode.
+```
+
+#### script
+```
+slsart script --help
+
+Options:
+  --help          Show help                                            [boolean]
+  --version       Show version number                                  [boolean]
+  --debug, -D     Run the command in debug mode.
+  --endpoint, -e  The endpoint to load with traffic.                    [string]
+  --duration, -d  The duration, in seconds, to load the given endpoint. [number]
+  --rate, -r      The rate, in requests per second, at which to load the given
+                  endpoint.                                             [number]
+  --rampTo, -t    The rate to adjust towards away from the given rate, in
+                  requests per second at which to load the given endpoint.
+                                                                        [number]
+```
+
+#### configure
+```
+slsart configure
+
+Options:
+  --help       Show help                                               [boolean]
+  --version    Show version number                                     [boolean]
+  --debug, -D  Run the command in debug mode.
+```
+
+### Script Customization
 
 ```
 mkdir myCustomLoadTest    // Make your own test directory
 cd myCustomLoadTest
-slsart copy               // Use slsart to get basic files
-nano event.json           // Edit event.json to change test endpoint
-
+slsart script             // Use slsart to get basic files
+nano script.yml           // Edit event.json to change test endpoint
 ```
 
-Modify the event.json file to test your application.
+Modify the script.yml file to point at your own endpoint with the load profile that you want to test your application with.  See https://artillery.io for documentation on scripts.
 
 For example, change the "flow" to hit your application:
 
@@ -96,15 +144,19 @@ slsart run
 Now you can create a copy of the test and run a different test.
 
 ```
-cp event.json trafficSpike.json
-nano trafficSpike.json
+cp script.yml trafficSpike.yml
+nano trafficSpike.yml
 ```
 
-Update the test spec ...
+Update the test spec...  Then run it!
 
 ```
-slsart run -f trafficSpike.json
+slsart run -f trafficSpike.yml
 ```
+
+### Function Customization
+
+TODO
 
 ## References
 1. [artillery.io](https://artillery.io) for documentation about how to define your load shape, volume, targets, inputs, et cetera

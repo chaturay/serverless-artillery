@@ -30,7 +30,7 @@ const packageJson = require('../package.json'),
             }
         })
         .command('cleanup', 'Remove the function and the associated resources created for or by it.', {})
-        .command('script', 'Create a local Artillery script so that you can customize it for your specific load.  See https://artillery.io for documentation.', {
+        .command('script', 'Create a local Artillery script so that you can customize it for your specific load requirements.  See https://artillery.io for documentation.', {
             endpoint: {
                 alias: 'e',
                 description: 'The endpoint to load with traffic.',
