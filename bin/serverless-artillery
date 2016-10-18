@@ -64,6 +64,7 @@ const packageJson = require('../package.json'),
 
 if (yargs.debug) {
     console.log(`options were:\n${JSON.stringify(yargs, null, 2)}`);
+    console.log(`command that will be run: slsArt[${command}](${yargs})`);
 }
 
-console.log(`slsArt[${command}](${yargs})`);
+slsArt[command](yargs);
