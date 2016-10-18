@@ -10,39 +10,39 @@ We assume you have node.js (v4 or better) installed.  Likewise you should have t
 npm install -g serverless-artillery
 ```
 
-### Quick Start & Finish
+## Quick Start & Finish
 
 ```
-slsart deploy   // and then
-slsart run      // repeat as desired, before...
-slsart cleanup
+$ slsart deploy   // and then
+$ slsart run      // repeat as desired, before...
+$ slsart cleanup
 ```
 
 ### Deeper Dive
 ```
-slsart deploy   // and then
-slsart script   // adds script.yml to your current working directory
-nano script.yml // specify your endpoint and the desired load
-slsart run      // iterate on editting and running as desired, before...
-slsart cleanup
+$ slsart deploy   // and then
+$ slsart script   // adds script.yml to your current working directory
+$ nano script.yml // specify your endpoint and the desired load (i.e. customize your script)
+$ slsart run      // iterate on editting and running as desired, before...
+$ slsart cleanup
 ```
 
 ### More advanced use cases
 
 Use arbitrary script files
 
-`slsart -s my.other.script.yml`
+`$ slsart -s my.other.script.yml`
 
-Configure a generated script on the CLI
+Configure a generated script on the CLI (hit your.endpoint.com with 10 requests per second, scaling up to 25 requests per second over 60 seconds)
 
-`slsart script -e http://your.endpoint.com -d 60 -r 10 -t 25`
+`$ slsart script -e http://your.endpoint.com -d 60 -r 10 -t 25`
 
 Create a local copy of the function that can be editted and redeployed with the new settings.  This enables more advanced configurations of the function to load VPC hosted services or other non-default use cases.  Similarly, you'll want to do this if you need to alter hard-coded limits.  See https://docs.serverless.com for configuration related documentation.
 
 ```
-slsart configure
-nano serverless.yml
-nano handler.js
+$ slsart configure
+$ nano serverless.yml
+$ nano handler.js
 ```
 
 ## Detailed Usage
@@ -109,7 +109,7 @@ Options:
 $ slsart configure
 ```
 
-### Script Customization
+## Script Customization
 
 ```
 $ mkdir myCustomLoadTest    // Make your own test directory
@@ -159,7 +159,7 @@ Update the test spec...  Then run it!
 $ slsart run -f trafficSpike.yml
 ```
 
-### Function Customization
+## Function Customization
 
 TODO
 
