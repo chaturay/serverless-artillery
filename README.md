@@ -70,7 +70,7 @@ Options:
   --verbose, -v  Run the command in verbose mode.
 ```
 
-### Options
+### Commands
 
 #### deploy
 ```
