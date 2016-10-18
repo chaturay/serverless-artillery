@@ -45,15 +45,17 @@ slsart cleanup
 
 ### Options
 
-#### deploy
+#### global options (available for all commands)
 ```
-slsart deploy --help
-bin/serverless-artillery deploy
-
 Options:
   --help       Show help                                               [boolean]
   --version    Show version number                                     [boolean]
   --debug, -D  Run the command in debug mode.
+```
+
+#### deploy
+```
+slsart deploy --help
 ```
 
 #### run
@@ -61,20 +63,12 @@ Options:
 slsart run --help
 
 Options:
-  --help        Show help                                              [boolean]
-  --version     Show version number                                    [boolean]
-  --debug, -D   Run the command in debug mode.
   --script, -s  The Artillery script to execute.                        [string]
 ```
 
 #### cleanup
 ```
 slsart cleanup --help
-
-Options:
-  --help       Show help                                               [boolean]
-  --version    Show version number                                     [boolean]
-  --debug, -D  Run the command in debug mode.
 ```
 
 #### script
@@ -82,9 +76,6 @@ Options:
 slsart script --help
 
 Options:
-  --help          Show help                                            [boolean]
-  --version       Show version number                                  [boolean]
-  --debug, -D     Run the command in debug mode.
   --endpoint, -e  The endpoint to load with traffic.                    [string]
   --duration, -d  The duration, in seconds, to load the given endpoint. [number]
   --rate, -r      The rate, in requests per second, at which to load the given
@@ -97,11 +88,6 @@ Options:
 #### configure
 ```
 slsart configure
-
-Options:
-  --help       Show help                                               [boolean]
-  --version    Show version number                                     [boolean]
-  --debug, -D  Run the command in debug mode.
 ```
 
 ### Script Customization
