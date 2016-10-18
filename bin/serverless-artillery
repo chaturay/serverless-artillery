@@ -2,33 +2,68 @@
 
 'use strict';
 
-const packageJson = require('../package.json');
-const program = require('commander');
-const slsArt = require('../lib/');
+const packageJson = require('../package.json'),
+    slsArt = require('../lib/'),
+    yargs = require('yargs')
+        .help()
+        .version(packageJson.version)
+        .options({
+            debug: {
+                alias: 'D',
+                description: 'Run the command in debug mode.',
+                requiresArg: false
+            },
+            verbose: {
+                alias: 'v',
+                description: 'Run the command in verbose mode.',
+                requiresArg: false
+            }
+        })
+        .global('debug')
+        .command('deploy', 'Deploy a default version of the function that will execute your Artillery scripts.', {})
+        .command('run', 'Run your Artillery script.  Will prefer a script given by `-s` over a `script.[yml|json]` in the current directory over the default script.', {
+            script: {
+                alias: 's',
+                description: 'The Artillery script to execute.',
+                requiresArg: true,
+                type: 'string'
+            }
+        })
+        .command('cleanup', 'Remove the function and the associated resources created for or by it.', {})
+        .command('script', 'Create a local Artillery script so that you can customize it for your specific load.  See https://artillery.io for documentation.', {
+            endpoint: {
+                alias: 'e',
+                description: 'The endpoint to load with traffic.',
+                requiresArg: true,
+                type: 'string'
+            },
+            duration: {
+                alias: 'd',
+                description: 'The duration, in seconds, to load the given endpoint.',
+                requiresArg: true,
+                type: 'number'
+            },
+            rate: {
+                alias: 'r',
+                description: 'The rate, in requests per second, at which to load the given endpoint.',
+                requiresArg: true,
+                type: 'number'
+            },
+            rampTo: {
+                alias: 't',
+                description: 'The rate to adjust towards away from the given rate, in requests per second at which to load the given endpoint.',
+                requiresArg: true,
+                type: 'number'
+            }
+        })
+        .command('configure', 'Create a local copy of the deployment assets for modification and deployment.  See https://docs.serverless.com for documentation.', {})
+        .demand(1)
+        .strict()
+        .argv,
+    command = yargs._[0];
 
-program
-    .version(packageJson.version)
-    .usage('<action>')
-    .description(
-`Load testing using Serverless and Artillery.
+if (yargs.debug) {
+    console.log(`options were:\n${JSON.stringify(yargs, null, 2)}`);
+}
 
-  Actions:
-  
-    deploy  - Upload testing Lambda to AWS
-    run     - Use Lambda to perform test
-    cleanup - Remove the testing Lambda from AWS 
-    copy    - Copy Lambda service files to current directory`
-    )
-    .option('-s, --script <testScript>', 'Path to Artillery test script (for "run" action)', 'event.json')
-    .option('-f, --func <functionName>', 'Name of Lambda function', 'loadGenerator')
-    .action((action, options) => {
-        if (slsArt[action] === undefined) {
-            console.error(`ERROR: Action '${action}' is not valid.`);
-            process.exit(1);
-        }
-
-        slsArt[action](options);
-    })
-    .parse(process.argv);
-
-if (!program.args.length) program.help();
+console.log(`slsArt[${command}](${yargs})`);
