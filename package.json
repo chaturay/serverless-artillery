@@ -8,7 +8,7 @@
     "slsart": "./bin/serverless-artillery"
   },
   "scripts": {
-    "jscs": "jscs .",
+    "jscs": "jscs . bin/*",
     "jshint": "jshint .",
     "test": "mocha -r aws-sdk -r artillery-core --recursive -R min tests",
     "postinstall": "cd lib/lambda && npm install && cd ../.."
@@ -35,9 +35,11 @@
   "dependencies": {
     "artillery-core": "^2.0.0-0",
     "aws-sdk": "^2.5.0",
+    "commander": "^2.9.0",
     "ncp": "^2.0.0",
     "ntp-client": "^0.5.3",
-    "yargs": "^6.2.0"
+    "yargs": "^6.2.0",
+    "yaml": "^0.3.0"
   },
   "devDependencies": {
     "bluebird": "^3.4.6",
