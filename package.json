@@ -36,7 +36,6 @@
     "artillery-core": "^2.0.0-0",
     "aws-sdk": "^2.5.0",
     "commander": "^2.9.0",
-    "ncp": "^2.0.0",
     "ntp-client": "^0.5.3",
     "yargs": "^6.2.0",
     "yaml": "^0.3.0"
