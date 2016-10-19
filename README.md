@@ -19,11 +19,15 @@ $ slsart cleanup
 ```
 
 ### Deeper Dive
+
 ```
-$ slsart deploy   // and then
-$ slsart script   // adds script.yml to your current working directory
-$ nano script.yml // specify your endpoint and the desired load (i.e. customize your script)
-$ slsart run      // iterate on editting and running as desired, before...
+$ slsart deploy                  // If not already deployed.
+
+// create a custom test against your service with a 10 second duration and 3 RPS, save to myScript.yml:
+$ slsart script -e http://your.endpoint.com -d 10 -r 3 > myScript.yml
+
+$ slsart run -s myScript.yml     // iterate on editting and running as desired, before...
+
 $ slsart cleanup
 ```
 
@@ -75,33 +79,68 @@ Options:
 #### deploy
 ```
 $ slsart deploy --help
+
+slsart deploy
+
+Options:
+  --help       Show help  [boolean]
+  --version    Show version number  [boolean]
+  --debug, -D  Run the command in debug mode.
+  --func, -f   Lambda function name to execute.  [string] [default: "loadGenerator"]
+
 ```
 
 #### run
 ```
 $ slsart run --help
 
+slsart run
+
 Options:
-  --script, -s  The Artillery script to execute.                        [string]
+  --help        Show help  [boolean]
+  --version     Show version number  [boolean]
+  --debug, -D   Run the command in debug mode.
+  --script, -s  The Artillery script to execute.  [string] [default: "script.yml"]
+  --func, -f    Lambda function name to execute.  [string] [default: "loadGenerator"]
+
+
 ```
 
 #### cleanup
 ```
 $ slsart cleanup --help
+
+slsart cleanup
+
+Options:
+  --help       Show help  [boolean]
+  --version    Show version number  [boolean]
+  --debug, -D  Run the command in debug mode.
+  --func, -f   Lambda function name to execute.  [string] [default: "loadGenerator"]
+
 ```
 
 #### script
 ```
 $ slsart script --help
 
+Commands:
+  deploy     Deploy a default version of the function that will execute your Artillery scripts.
+  run        Run your Artillery script.  Will prefer a script given by `-s` over a `script.[yml|json]`
+             in the current directory over the default script.
+  cleanup    Remove the function and the associated resources created for or by it.
+  script     Create a local Artillery script so that you can customize it for your specific load requirements.
+             See https://artillery.io for documentation.
+  configure  Create a local copy of the deployment assets for modification and deployment.
+             See https://docs.serverless.com for documentation.
+
 Options:
-  --endpoint, -e  The endpoint to load with traffic.                    [string]
-  --duration, -d  The duration, in seconds, to load the given endpoint. [number]
-  --rate, -r      The rate, in requests per second, at which to load the given
-                  endpoint.                                             [number]
-  --rampTo, -t    The rate to adjust towards away from the given rate, in
-                  requests per second at which to load the given endpoint.
-                                                                        [number]
+  --help         Show help  [boolean]
+  --version      Show version number  [boolean]
+  --debug, -D    Run the command in debug mode.
+  --verbose, -v  Run the command in verbose mode.
+
+
 ```
 
 #### configure
@@ -123,21 +162,23 @@ Modify the script.yml file to point at your own endpoint with the load profile t
 For example, change the "flow" to hit your application:
 
 ```
-                   "get": {
-                        "url": "http://my-super-app.com"
-                    }
+ scenarios:
+    -
+      flow:
+        -
+          get:
+            url: "http://your.endpoint.com"    # URL of service to test
+
 ```
 
 and up the duration of the test to one minute and provide more load:
 
 ```
-       "phases": [
-            {
-                "duration": 60,
-                "arrivalRate": 10,
-                "rampTo": 20
-            }
-        ]
+    phases:
+      -
+        duration: 60      # Duration of test in seconds
+        arrivalRate: 100  # Starting rate (requests per second)
+        rampTo: 200       # Ending rate (RPS at end of test duration)
 ```
 
 Then run the test again using:
