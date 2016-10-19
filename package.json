@@ -11,7 +11,7 @@
     "jscs": "jscs . bin/*",
     "jshint": "jshint .",
     "test": "mocha -r aws-sdk -r artillery-core --recursive -R min tests",
-    "postinstall": "cd lib/lambda && npm install && cd ../.."
+    "postinstall": "cd ./lib/lambda && npm install && cd ../.."
   },
   "repository": {
     "type": "git",
