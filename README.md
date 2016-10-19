@@ -10,62 +10,115 @@ We assume you have node.js (v4 or better) installed.  Likewise you should have t
 npm install -g serverless-artillery
 ```
 
-## Usage
+## Quick Start & Finish
+
+```
+$ slsart deploy   // and then
+$ slsart run      // repeat as desired, before...
+$ slsart cleanup
+```
+
+### Deeper Dive
+```
+$ slsart deploy   // and then
+$ slsart script   // adds script.yml to your current working directory
+$ nano script.yml // specify your endpoint and the desired load (i.e. customize your script)
+$ slsart run      // iterate on editting and running as desired, before...
+$ slsart cleanup
+```
+
+### More advanced use cases
+
+Use arbitrary script files
+
+`$ slsart -s my.other.script.yml`
+
+Configure a generated script on the CLI (hit your.endpoint.com with 10 requests per second, scaling up to 25 requests per second over 60 seconds)
+
+`$ slsart script -e http://your.endpoint.com -d 60 -r 10 -t 25`
+
+Create a local copy of the function that can be editted and redeployed with the new settings.  This enables more advanced configurations of the function to load VPC hosted services or other non-default use cases.  Similarly, you'll want to do this if you need to alter hard-coded limits.  See https://docs.serverless.com for configuration related documentation.
+
+```
+$ slsart configure
+$ nano serverless.yml
+$ nano handler.js
+```
+
+## Detailed Usage
 
 ```
 $ slsart --help
+Commands:
+  deploy     Deploy a default version of the function that will execute your
+             Artillery scripts.
+  run        Run your Artillery script.  Will prefer a script given by `-s` over
+             a `script.[yml|json]` in the current directory over the default
+             script.
+  cleanup    Remove the function and the associated resources created for or by
+             it.
+  script     Create a local Artillery script so that you can customize it for
+             your specific load requirements.  See https://artillery.io for
+             documentation.
+  configure  Create a local copy of the deployment assets for modification and
+             deployment.  See https://docs.serverless.com for documentation.
 
-  Usage: serverless-artillery <action>
-
-  Load testing using Serverless and Artillery.
-
-  Actions:
-
-    deploy  - Upload testing Lambda to AWS
-    run     - Use Lambda to perform test
-    cleanup - Remove the testing Lambda from AWS
-    copy    - Copy Lambda service files to current directory
-
-  Options:
-
-    -h, --help                 output usage information
-    -V, --version              output the version number
-    -s, --script <testScript>  Path to Artillery test script (for "run" action)
-    -f, --func <functionName>  Name of Lambda function
-
-
+Options:
+  --help         Show help                                             [boolean]
+  --version      Show version number                                   [boolean]
+  --debug, -D    Run the command in debug mode.
+  --verbose, -v  Run the command in verbose mode.
 ```
 
-### Example
+### Commands
 
+#### deploy
 ```
-slsart deploy   // and then
-slsart run      // repeat as desired, before
-slsart cleanup
-```
-
-### Options
-
-long | short | description | example
----- | ----- | ----------- | -------
-`--script` | `-s` | specify the artilery script to use | `-s yourfile.json` or `-s yourfile.yaml` or `-s yourfile.yml`
-`--func` | `-f` | specify the function name to use | `-f gnarlySuperLoadTestLambda`
-
-### Customization
-
-**WARNING!**
-
-In order to avoid naming collisions with the global serverless-artillery deployment or other copies of it, edit the `service` attribute in `./serverless.yml` with a unique name.  If you do not edit the service name you will overwrite the lambda deployed by the global deployment or other copies which can create confusing results.
-
-```
-mkdir myCustomLoadTest    // Make your own test directory
-cd myCustomLoadTest
-slsart copy               // Use slsart to get basic files
-nano event.json           // Edit event.json to change test endpoint
-
+$ slsart deploy --help
 ```
 
-Modify the event.json file to test your application.
+#### run
+```
+$ slsart run --help
+
+Options:
+  --script, -s  The Artillery script to execute.                        [string]
+```
+
+#### cleanup
+```
+$ slsart cleanup --help
+```
+
+#### script
+```
+$ slsart script --help
+
+Options:
+  --endpoint, -e  The endpoint to load with traffic.                    [string]
+  --duration, -d  The duration, in seconds, to load the given endpoint. [number]
+  --rate, -r      The rate, in requests per second, at which to load the given
+                  endpoint.                                             [number]
+  --rampTo, -t    The rate to adjust towards away from the given rate, in
+                  requests per second at which to load the given endpoint.
+                                                                        [number]
+```
+
+#### configure
+```
+$ slsart configure
+```
+
+## Script Customization
+
+```
+$ mkdir myCustomLoadTest    // Make your own test directory
+$ cd myCustomLoadTest
+$ slsart script             // Use slsart to get basic files
+$ nano script.yml           // Edit event.json to change test endpoint
+```
+
+Modify the script.yml file to point at your own endpoint with the load profile that you want to test your application with.  See https://artillery.io for documentation on scripts.
 
 For example, change the "flow" to hit your application:
 
@@ -90,21 +143,26 @@ and up the duration of the test to one minute and provide more load:
 Then run the test again using:
 
 ```
-slsart run
+$ slsart run
 ```
 
 Now you can create a copy of the test and run a different test.
 
 ```
-cp event.json trafficSpike.json
-nano trafficSpike.json
+$ cp script.yml trafficSpike.yml
+$ nano trafficSpike.yml
 ```
 
-Update the test spec ...
+Update the test spec...  Then run it!
 
 ```
-slsart run -f trafficSpike.json
+$ slsart run -f trafficSpike.yml
 ```
+
+## Function Customization
+
+TODO
 
 ## References
 1. [artillery.io](https://artillery.io) for documentation about how to define your load shape, volume, targets, inputs, et cetera
+2. [serverless.com](https://docs.serverless.com) for documentation about how to create a custom function configuration
