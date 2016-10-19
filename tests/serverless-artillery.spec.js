@@ -2,7 +2,8 @@
 
 const expect = require('chai').expect,
       mock = require('mock-require'),
-      BbPromise = require('bluebird');
+      BbPromise = require('bluebird'),
+      path = require('path');
 
 let serverlessMock = {
     init() {
@@ -28,6 +29,7 @@ let serverlessMock = {
 
 mock('../lib/serverless-fx', function(config) {
     serverlessMock.config = config;
+    console.log('*** MOCKED SLS ***');
     return serverlessMock;
 });
 
@@ -37,10 +39,10 @@ describe('serverless-artillery command line interactions', function() {
     const functionName = 'testFunctionName';
 
     describe('deploy actions', function() {
-        it('is not interactive', function() {
-            slsart.deploy({ func: functionName });
-            expect(serverlessMock.config.interactive).to.equal(false);
-        });
+        // it('is not interactive', function() {
+        //     slsart.deploy({ func: functionName });
+        //     expect(serverlessMock.config.interactive).to.equal(false);
+        // });
 
         // it('must use Serverless deploy command', () => {
         //     slsart.deploy({ func: functionName  });
@@ -53,12 +55,19 @@ describe('serverless-artillery command line interactions', function() {
         // });
     });
 
-    describe('run actions', function() {
-        // it('must use Serverless invoke command', () => {
-        //     slsart.run({ func: functionName  });
-        //     expect(serverlessMock.argv[2]).to.be.equal('invoke');
-        // });
-    });
+    // describe('run actions', function() {
+    //     require('child_process')
+    //         .exec('node', [path.join(__dirname, '..', 'bin', 'serverless-artillery')], {
+    //             env: process.env,
+    //             cwd: require('path').join(__dirname, 'lib', 'lambda'),
+    //             stdio: 'inherit'
+    //         });
+    //
+    //     // it('must use Serverless invoke command', () => {
+    //     //     slsart.run({ func: functionName  });
+    //     //     expect(serverlessMock.argv[2]).to.be.equal('invoke');
+    //     // });
+    // });
 
     describe('cleanup actions', function() {
         // it('must use Serverless remove command', () => {
