@@ -1,9 +1,15 @@
 // Spawn `npm -install` to populate our Lmabda's dependencies.
+'use strict';
 const cp = require('child_process');
-const path = require('path');
+const join = require('path').join;
+const dependencies = require(__dirname + '/lib/lambda/dependencies.json').dependencies;
 
-cp.spawn('npm', ['i'], {
-  env: process.env,
-  cwd: path.join(__dirname, 'lib', 'lambda'),
-  stdio: 'inherit',
-});
+for (let name in dependencies) {
+  let version = dependencies[name];
+  console.log(`Installing Lambda dependency: ${name}@${version}`);
+  cp.exec('npm', ['install', `${name}@${version}`], {
+    env: process.env,
+    cwd: join(__dirname, 'lib', 'lambda'),
+    stdio: 'inherit'
+  });
+}

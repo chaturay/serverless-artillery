@@ -3,45 +3,32 @@
 const expect = require('chai').expect;
 const mock = require('mock-require');
 const BbPromise = require('bluebird');
+const path = require('path');
 
 class serverlessMock {
   constructor(config) {
     serverlessMock.config = config; // this is fugly, transfering instance data into the static context
-    this.config = config;
-    this.config.interactive = false;
   }
   init() {
-    if (!this.config) {
-      throw new Error('must have config');
-    } else {
-      return BbPromise.resolve();
-    }
+    return BbPromise.resolve();
   }
   run() {
     serverlessMock.argv = process.argv;
-    if (!this.config) {
-      throw new Error('must have config');
-    } else {
-      return BbPromise.resolve();
-    }
+    return BbPromise.resolve();
   }
   _findParameterValue(param) {
-    if (!this.config) {
-      throw new Error('must have config');
-    } else {
-      let result = null;
+    let result = null;
 
-      if (serverlessMock.argv) {
-        const paramIndex = serverlessMock.argv.indexOf(`-${param}`);
-        if (paramIndex !== -1 && paramIndex < (serverlessMock.argv.length - 1)) {
-          result = serverlessMock.argv[paramIndex + 1];
-        }
+    if (serverlessMock.argv) {
+      const paramIndex = serverlessMock.argv.indexOf(`-${param}`);
+      if (paramIndex !== -1 && paramIndex < (serverlessMock.argv.length - 1)) {
+        result = serverlessMock.argv[paramIndex + 1];
       }
-
-      return result;
     }
+
+    return result;
   }
-}
+};
 
 mock('../lib/serverless-fx', serverlessMock);
 
@@ -68,6 +55,12 @@ describe('serverless-artillery command line interactions', () => {
   });
 
   describe('run actions', () => {
+    // require('child_process')
+    //   .exec('node', [path.join(__dirname, '..', 'bin', 'serverless-artillery')], {
+    //     env: process.env,
+    //     cwd: require('path').join(__dirname, 'lib', 'lambda'),
+    //     stdio: 'inherit'
+    //   });
     // it('must use Serverless invoke command', () => {
     //     slsart.run({ func: functionName  });
     //     expect(serverlessMock.argv[2]).to.be.equal('invoke');
