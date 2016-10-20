@@ -2,7 +2,7 @@
 
 'use strict';
 
-const cp = require('child_process');
+const execSync = require('child_process').execSync;
 const join = require('path').join;
 
 // eslint-disable-next-line import/no-dynamic-require
@@ -11,13 +11,9 @@ const dependencies = require(`${__dirname}/lib/lambda/package.json`).dependencie
 Object.keys(dependencies).forEach((dependency) => {
   const version = dependencies[dependency];
   console.log(`Installing Lambda dependency: ${dependency}@${version}`);
-  cp.exec('npm', ['install', `${dependency}@${version}`], {
+  execSync(`npm install ${dependency}@${version}`, {
     env: process.env,
     cwd: join(__dirname, 'lib', 'lambda'),
     stdio: 'inherit',
   });
 });
-
-cp.exec('ls', ['..']);
-cp.exec('ls', ['node_modules']);
-cp.exec('ls', ['lib/lambda/node_modules']);
