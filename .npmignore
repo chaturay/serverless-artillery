@@ -1,10 +1,11 @@
 # project files
 .editorconfig
+.eslintignore
+.eslintrc.yml
 .gitignore
-.jscsrc
-.jshintrc
-tests
+.travis.yml
 docs
+tests
 
 # OS files
 .DS_Store

@@ -1,7 +1,9 @@
 // Spawn `npm -install` to populate our Lmabda's dependencies.
-require('child_process')
-    .spawn('npm', ['i'], {
-        env: process.env,
-        cwd: require('path').join(__dirname, 'lib', 'lambda'),
-        stdio: 'inherit'
-    });
+const cp = require('child_process');
+const path = require('path');
+
+cp.spawn('npm', ['i'], {
+  env: process.env,
+  cwd: path.join(__dirname, 'lib', 'lambda'),
+  stdio: 'inherit',
+});
