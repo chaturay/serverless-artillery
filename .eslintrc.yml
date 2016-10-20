@@ -11,6 +11,10 @@ rules:
     - allowForLoopAfterthoughts: true
   no-else-return: off
   strict: off # doesn't work in node v4
+plugins:
+  - react
+  - jsx-a11y
+  - import
 env:
   es6: true
   node: true
