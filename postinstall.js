@@ -8,7 +8,7 @@ const join = require('path').join;
 // eslint-disable-next-line import/no-dynamic-require
 const dependencies = require(`${__dirname}/lib/lambda/package.json`).dependencies;
 
-dependencies.forEach((dependency) => {
+Object.keys(dependencies).forEach((dependency) => {
   const version = dependencies[dependency];
   console.log(`Installing Lambda dependency: ${dependency}@${version}`);
   cp.exec('npm', ['install', `${dependency}@${version}`], {
