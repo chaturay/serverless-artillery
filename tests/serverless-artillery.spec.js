@@ -1,73 +1,82 @@
+/* eslint-disable class-methods-use-this */
+
 'use strict';
 
-const expect = require('chai').expect,
-      mock = require('mock-require'),
-      BbPromise = require('bluebird');
+const expect = require('chai').expect;
+const mock = require('mock-require');
+const BbPromise = require('bluebird');
+// const path = require('path');
 
-let serverlessMock = {
-    init() {
-        return BbPromise.resolve();
-    },
-    run() {
-        serverlessMock.argv = process.argv;
-        return BbPromise.resolve();
-    },
-    _findParameterValue(param) {
-        let result = null;
+class serverlessMock {
+  constructor(config) {
+    serverlessMock.config = config; // this is fugly, transfering instance data into the static context
+  }
+  init() {
+    return BbPromise.resolve();
+  }
+  run() {
+    serverlessMock.argv = process.argv;
+    return BbPromise.resolve();
+  }
+  _findParameterValue(param) {
+    let result = null;
 
-        if (serverlessMock.argv) {
-            let paramIndex = serverlessMock.argv.indexOf('-' + param);
-            if (paramIndex !== -1 && paramIndex < (serverlessMock.argv.length - 1)) {
-                result = serverlessMock.argv[paramIndex + 1];
-            }
-        }
-
-        return result;
+    if (serverlessMock.argv) {
+      const paramIndex = serverlessMock.argv.indexOf(`-${param}`);
+      if (paramIndex !== -1 && paramIndex < (serverlessMock.argv.length - 1)) {
+        result = serverlessMock.argv[paramIndex + 1];
+      }
     }
-};
 
-mock('../lib/serverless-fx', function(config) {
-    serverlessMock.config = config;
-    return serverlessMock;
-});
+    return result;
+  }
+}
 
-let slsart = require('../lib');
+mock('../lib/serverless-fx', serverlessMock);
 
-describe('serverless-artillery command line interactions', function() {
-    const functionName = 'testFunctionName';
+const slsart = require('../lib');
 
-    describe('deploy actions', function() {
-        it('is not interactive', function() {
-            slsart.deploy({ func: functionName });
-            expect(serverlessMock.config.interactive).to.equal(false);
-        });
+describe('serverless-artillery command line interactions', () => {
+  const functionName = 'testFunctionName';
 
-        // it('must use Serverless deploy command', () => {
-        //     slsart.deploy({ func: functionName  });
-        //     expect(serverlessMock.argv[2]).to.be.equal('deploy');
-        // });
-        //
-        // it('must provide a function name argument (-f)', () => {
-        //     slsart.deploy({ func: functionName  });
-        //     expect(serverlessMock._findParameterValue('f')).to.not.be.null;
-        // });
+  describe('deploy actions', () => {
+    it('is not interactive', () => {
+      slsart.deploy({ func: functionName });
+      expect(serverlessMock.config.interactive).to.equal(false);
     });
 
-    describe('run actions', function() {
-        // it('must use Serverless invoke command', () => {
-        //     slsart.run({ func: functionName  });
-        //     expect(serverlessMock.argv[2]).to.be.equal('invoke');
-        // });
-    });
+    // it('must use Serverless deploy command', () => {
+    //     slsart.deploy({ func: functionName  });
+    //     expect(serverlessMock.argv[2]).to.be.equal('deploy');
+    // });
+    //
+    // it('must provide a function name argument (-f)', () => {
+    //     slsart.deploy({ func: functionName  });
+    //     expect(serverlessMock._findParameterValue('f')).to.not.be.null;
+    // });
+  });
 
-    describe('cleanup actions', function() {
-        // it('must use Serverless remove command', () => {
-        //     slsart.cleanup({ func: functionName  });
-        //     expect(serverlessMock.argv[2]).to.be.equal('remove');
-        // });
-    });
+  describe('run actions', () => {
+    // require('child_process')
+    //   .exec('node', [path.join(__dirname, '..', 'bin', 'serverless-artillery')], {
+    //     env: process.env,
+    //     cwd: require('path').join(__dirname, 'lib', 'lambda'),
+    //     stdio: 'inherit'
+    //   });
+    // it('must use Serverless invoke command', () => {
+    //     slsart.run({ func: functionName  });
+    //     expect(serverlessMock.argv[2]).to.be.equal('invoke');
+    // });
+  });
 
-    describe('copy actions', function() {
-    });
+  describe('cleanup actions', () => {
+    // it('must use Serverless remove command', () => {
+    //     slsart.cleanup({ func: functionName  });
+    //     expect(serverlessMock.argv[2]).to.be.equal('remove');
+    // });
+  });
+
+  describe('copy actions', () => {
+  });
 });
 
