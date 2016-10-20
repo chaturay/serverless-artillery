@@ -1,9 +1,11 @@
+/* eslint-disable class-methods-use-this */
+
 'use strict';
 
 const expect = require('chai').expect;
 const mock = require('mock-require');
 const BbPromise = require('bluebird');
-const path = require('path');
+// const path = require('path');
 
 class serverlessMock {
   constructor(config) {
@@ -28,7 +30,7 @@ class serverlessMock {
 
     return result;
   }
-};
+}
 
 mock('../lib/serverless-fx', serverlessMock);
 

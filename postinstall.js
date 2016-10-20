@@ -1,15 +1,19 @@
-// Spawn `npm -install` to populate our Lmabda's dependencies.
+// Spawn `npm -install` to populate our Lambda's dependencies.
+
 'use strict';
+
 const cp = require('child_process');
 const join = require('path').join;
-const dependencies = require(__dirname + '/lib/lambda/dependencies.json').dependencies;
 
-for (let name in dependencies) {
-  let version = dependencies[name];
-  console.log(`Installing Lambda dependency: ${name}@${version}`);
-  cp.exec('npm', ['install', `${name}@${version}`], {
+// eslint-disable-next-line import/no-dynamic-require
+const dependencies = require(`${__dirname}/lib/lambda/package.json`).dependencies;
+
+dependencies.forEach((dependency) => {
+  const version = dependencies[dependency];
+  console.log(`Installing Lambda dependency: ${dependency}@${version}`);
+  cp.exec('npm', ['install', `${dependency}@${version}`], {
     env: process.env,
     cwd: join(__dirname, 'lib', 'lambda'),
-    stdio: 'inherit'
+    stdio: 'inherit',
   });
-}
+});
