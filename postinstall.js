@@ -5,15 +5,13 @@
 const execSync = require('child_process').execSync;
 const join = require('path').join;
 
-// eslint-disable-next-line import/no-dynamic-require
-const dependencies = require(`${__dirname}/lib/lambda/package.json`).dependencies;
+// copy and clear the "global" aspect of the process environment (this way, pass proxy settings and whatnot through)
+const env = JSON.parse(JSON.stringify(process.env));
+delete env.npm_config_argv;
+delete env.npm_config_global;
 
-Object.keys(dependencies).forEach((dependency) => {
-  const version = dependencies[dependency];
-  console.log(`Installing Lambda dependency: ${dependency}@${version}`);
-  execSync(`npm install ${dependency}@${version}`, {
-    env: process.env,
-    cwd: join(__dirname, 'lib', 'lambda'),
-    stdio: 'inherit',
-  });
+execSync('npm install', {
+  env,
+  cwd: join(__dirname, 'lib', 'lambda'),
+  stdio: 'inherit',
 });

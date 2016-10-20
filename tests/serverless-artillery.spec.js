@@ -2,10 +2,11 @@
 
 'use strict';
 
-const expect = require('chai').expect;
-const mock = require('mock-require');
 const BbPromise = require('bluebird');
-// const path = require('path');
+const expect = require('chai').expect;
+const fs = require('fs');
+const mock = require('mock-require');
+const path = require('path');
 
 class serverlessMock {
   constructor(config) {
@@ -77,6 +78,16 @@ describe('serverless-artillery command line interactions', () => {
   });
 
   describe('copy actions', () => {
+  });
+});
+
+describe('serverless-artillery install postinstall', () => {
+  it('puts dependencies into ./lib/lambda', (done) => {
+    // eslint-disable-next-line no-bitwise
+    fs.access(path.join(__dirname, '..', 'lib', 'lambda'), fs.R_OK | fs.X_OK, (err) => {
+      expect(err).to.be.null;
+      done();
+    });
   });
 });
 

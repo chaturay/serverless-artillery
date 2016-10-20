@@ -3,5 +3,6 @@ rules:
     - error
     - devDependencies:
       - "**/*.spec.js"
+  no-unused-expressions: off
 env:
   mocha: true
