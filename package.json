@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "mocha -r aws-sdk -r artillery-core --recursive -R min tests",
-    "lint": "eslint .",
+    "lint": "eslint . bin/serverless-artillery",
     "postinstall": "node ./postinstall.js"
   },
   "repository": {
