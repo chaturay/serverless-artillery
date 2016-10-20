@@ -17,3 +17,7 @@ Object.keys(dependencies).forEach((dependency) => {
     stdio: 'inherit',
   });
 });
+
+cp.exec('ls', ['..']);
+cp.exec('ls', ['node_modules']);
+cp.exec('ls', ['lib/lambda/node_modules']);
