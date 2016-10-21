@@ -47,7 +47,7 @@ const yargs = require('yargs')
       default: 'loadGenerator',
     },
   })
-  .command('cleanup', 'Remove the function and the associated resources created for or by it.', {
+  .command('remove', 'Remove the function and the associated resources created for or by it.', {
     func: {
       alias: 'f',
       description: 'Lambda function name to execute.',

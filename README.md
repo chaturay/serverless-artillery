@@ -15,7 +15,7 @@ npm install -g serverless-artillery
 ```
 $ slsart deploy   // and then
 $ slsart run      // repeat as desired, before...
-$ slsart cleanup
+$ slsart remove
 ```
 
 ### Deeper Dive
@@ -28,7 +28,7 @@ $ slsart script -e http://your.endpoint.com -d 10 -r 3 > myScript.yml
 
 $ slsart run -s myScript.yml     // iterate on editting and running as desired, before...
 
-$ slsart cleanup
+$ slsart remove
 ```
 
 ### More advanced use cases
@@ -59,7 +59,7 @@ Commands:
   run        Run your Artillery script.  Will prefer a script given by `-s` over
              a `script.[yml|json]` in the current directory over the default
              script.
-  cleanup    Remove the function and the associated resources created for or by
+  remove    Remove the function and the associated resources created for or by
              it.
   script     Create a local Artillery script so that you can customize it for
              your specific load requirements.  See https://artillery.io for
@@ -106,11 +106,11 @@ Options:
 
 ```
 
-#### cleanup
+#### remove
 ```
-$ slsart cleanup --help
+$ slsart remove --help
 
-slsart cleanup
+slsart remove
 
 Options:
   --help       Show help  [boolean]
@@ -128,7 +128,7 @@ Commands:
   deploy     Deploy a default version of the function that will execute your Artillery scripts.
   run        Run your Artillery script.  Will prefer a script given by `-s` over a `script.[yml|json]`
              in the current directory over the default script.
-  cleanup    Remove the function and the associated resources created for or by it.
+  remove    Remove the function and the associated resources created for or by it.
   script     Create a local Artillery script so that you can customize it for your specific load requirements.
              See https://artillery.io for documentation.
   configure  Create a local copy of the deployment assets for modification and deployment.

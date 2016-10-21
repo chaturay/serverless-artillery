@@ -81,9 +81,9 @@ describe('serverless-artillery command line interactions', () => {
     });
   });
 
-  describe('cleanup actions', () => {
+  describe('remove actions', () => {
     it('must use Serverless remove command', (done) => {
-      slsart.cleanup({
+      slsart.remove({
         func: functionName,
       })
         .then(() => {
