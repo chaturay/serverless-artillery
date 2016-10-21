@@ -18,9 +18,14 @@ provider:                       # Using Node JS v4.3 on AWS
       Action:
        - "lambda:InvokeFunction"
       Resource:
-        "Fn::GetAtt":
-          - "LoadGeneratorLambdaFunction"
-          - "Arn"
+        "Fn::Join":
+          - ':'
+          -
+            - "arn:aws:lambda"
+            - Ref: "AWS::Region"
+            - Ref: "AWS::AccountId"
+            - "function"
+            - "${self:service}-${opt:stage, self:provider.stage}-loadGenerator*" # must match function name
 
 # you can overwrite defaults here
 #  region: us-east-1
