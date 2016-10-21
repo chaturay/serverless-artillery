@@ -7,5 +7,5 @@
 docs
 tests
 
-# OS files
-.DS_Store
+# Serverless files
+**/.serverless
