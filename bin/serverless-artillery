@@ -20,15 +20,7 @@ const yargs = require('yargs')
     },
   })
   .global('debug')
-  .command('deploy', 'Deploy a default version of the function that will execute your Artillery scripts.', {
-    func: {
-      alias: 'f',
-      description: 'Lambda function name to execute.',
-      requiresArg: true,
-      type: 'string',
-      default: 'loadGenerator',
-    },
-  })
+  .command('deploy', 'Deploy a default version of the function that will execute your Artillery scripts.', {})
   .command('run', 'Run your Artillery script.  Will prefer a script given by `-s` over a `script.[yml|json]` in ' +
     'the current directory over the default script.',
   {
@@ -39,23 +31,8 @@ const yargs = require('yargs')
       type: 'string',
       default: 'script.yml',
     },
-    func: {
-      alias: 'f',
-      description: 'Lambda function name to execute.',
-      requiresArg: true,
-      type: 'string',
-      default: 'loadGenerator',
-    },
   })
-  .command('remove', 'Remove the function and the associated resources created for or by it.', {
-    func: {
-      alias: 'f',
-      description: 'Lambda function name to execute.',
-      requiresArg: true,
-      type: 'string',
-      default: 'loadGenerator',
-    },
-  })
+  .command('remove', 'Remove the function and the associated resources created for or by it.', {})
   .command('script', 'Create a local Artillery script so that you can customize it for your specific load ' +
     'requirements.  See https://artillery.io for documentation.',
   {

@@ -45,7 +45,7 @@ mock('../lib/serverless-fx', serverlessMock);
 const slsart = require('../lib');
 
 describe('serverless-artillery command line interactions', () => {
-  const functionName = 'testFunctionName';
+  const functionName = 'loadGenerator';
   const scriptPath = 'script.yml';
 
   beforeEach(() => {
@@ -54,9 +54,7 @@ describe('serverless-artillery command line interactions', () => {
 
   describe('deploy actions', () => {
     it('must use Serverless deploy command', (done) => {
-      slsart.deploy({
-        func: functionName,
-      })
+      slsart.deploy()
       .then(() => {
         expect(serverlessMocks.length).to.equal(1);
         expect(serverlessMocks[0].initCalled).to.be.true;
@@ -69,13 +67,12 @@ describe('serverless-artillery command line interactions', () => {
   describe('run actions', () => {
     it('must use Serverless invoke command', (done) => {
       slsart.run({
-        func: functionName,
         script: scriptPath,
       })
       .then(() => {
         expect(serverlessMocks.length).to.equal(1);
         expect(serverlessMocks[0].initCalled).to.be.true;
-        expect(serverlessMocks[0].argv).to.eql([null, null, 'invoke', '-f', functionName, '-d', '-p', scriptPath]);
+        expect(serverlessMocks[0].argv).to.eql([null, null, 'invoke', '-d', '-f', functionName, '-p', scriptPath]);
         done();
       });
     });
@@ -83,9 +80,7 @@ describe('serverless-artillery command line interactions', () => {
 
   describe('remove actions', () => {
     it('must use Serverless remove command', (done) => {
-      slsart.remove({
-        func: functionName,
-      })
+      slsart.remove()
         .then(() => {
           expect(serverlessMocks.length).to.equal(1);
           expect(serverlessMocks[0].initCalled).to.be.true;
