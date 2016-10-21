@@ -64,21 +64,18 @@ const yargs = require('yargs')
       description: 'The endpoint to load with traffic.',
       requiresArg: true,
       type: 'string',
-      default: 'http://aws.amazon.com',
     },
     duration: {
       alias: 'd',
       description: 'The duration, in seconds, to load the given endpoint.',
       requiresArg: true,
       type: 'number',
-      default: 10,
     },
     rate: {
       alias: 'r',
       description: 'The rate, in requests per second, at which to load the given endpoint.',
       requiresArg: true,
       type: 'number',
-      default: 2,
     },
     rampTo: {
       alias: 't',
