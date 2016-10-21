@@ -1,5 +1,8 @@
 /* eslint-disable class-methods-use-this */
 
+// The Ultimate Unit Testing Cheat-sheet
+// https://gist.github.com/yoavniran/1e3b0162e1545055429e
+
 'use strict';
 
 const BbPromise = require('bluebird');
@@ -8,24 +11,28 @@ const fs = require('fs');
 const mock = require('mock-require');
 const path = require('path');
 
+let serverlessMocks = [];
+
 class serverlessMock {
   constructor(config) {
-    serverlessMock.config = config; // this is fugly, transfering instance data into the static context
+    this.config = config;
+    serverlessMocks.push(this);
   }
   init() {
+    this.initCalled = true;
     return BbPromise.resolve();
   }
   run() {
-    serverlessMock.argv = process.argv;
+    this.argv = process.argv;
     return BbPromise.resolve();
   }
   _findParameterValue(param) {
     let result = null;
 
-    if (serverlessMock.argv) {
-      const paramIndex = serverlessMock.argv.indexOf(`-${param}`);
-      if (paramIndex !== -1 && paramIndex < (serverlessMock.argv.length - 1)) {
-        result = serverlessMock.argv[paramIndex + 1];
+    if (this.argv) {
+      const paramIndex = this.argv.indexOf(`-${param}`);
+      if (paramIndex !== -1 && paramIndex < (this.argv.length - 1)) {
+        result = this.argv[paramIndex + 1];
       }
     }
 
@@ -39,45 +46,53 @@ const slsart = require('../lib');
 
 describe('serverless-artillery command line interactions', () => {
   const functionName = 'testFunctionName';
+  const scriptPath = 'script.yml';
+
+  beforeEach(() => {
+    serverlessMocks = [];
+  });
 
   describe('deploy actions', () => {
-    it('is not interactive', () => {
-      slsart.deploy({ func: functionName });
-      expect(serverlessMock.config.interactive).to.equal(false);
+    it('must use Serverless deploy command', (done) => {
+      slsart.deploy({
+        func: functionName,
+      })
+      .then(() => {
+        expect(serverlessMocks.length).to.equal(1);
+        expect(serverlessMocks[0].initCalled).to.be.true;
+        expect(serverlessMocks[0].argv).to.eql([null, null, 'deploy', '-f', functionName]);
+        done();
+      });
     });
-
-    // it('must use Serverless deploy command', () => {
-    //     slsart.deploy({ func: functionName  });
-    //     expect(serverlessMock.argv[2]).to.be.equal('deploy');
-    // });
-    //
-    // it('must provide a function name argument (-f)', () => {
-    //     slsart.deploy({ func: functionName  });
-    //     expect(serverlessMock._findParameterValue('f')).to.not.be.null;
-    // });
   });
 
   describe('run actions', () => {
-    // require('child_process')
-    //   .exec('node', [path.join(__dirname, '..', 'bin', 'serverless-artillery')], {
-    //     env: process.env,
-    //     cwd: require('path').join(__dirname, 'lib', 'lambda'),
-    //     stdio: 'inherit'
-    //   });
-    // it('must use Serverless invoke command', () => {
-    //     slsart.run({ func: functionName  });
-    //     expect(serverlessMock.argv[2]).to.be.equal('invoke');
-    // });
+    it('must use Serverless invoke command', (done) => {
+      slsart.run({
+        func: functionName,
+        script: scriptPath,
+      })
+      .then(() => {
+        expect(serverlessMocks.length).to.equal(1);
+        expect(serverlessMocks[0].initCalled).to.be.true;
+        expect(serverlessMocks[0].argv).to.eql([null, null, 'invoke', '-f', functionName, '-d', '-p', scriptPath]);
+        done();
+      });
+    });
   });
 
   describe('cleanup actions', () => {
-    // it('must use Serverless remove command', () => {
-    //     slsart.cleanup({ func: functionName  });
-    //     expect(serverlessMock.argv[2]).to.be.equal('remove');
-    // });
-  });
-
-  describe('copy actions', () => {
+    it('must use Serverless remove command', (done) => {
+      slsart.cleanup({
+        func: functionName,
+      })
+        .then(() => {
+          expect(serverlessMocks.length).to.equal(1);
+          expect(serverlessMocks[0].initCalled).to.be.true;
+          expect(serverlessMocks[0].argv).to.eql([null, null, 'remove', '-f', functionName]);
+          done();
+        });
+    });
   });
 });
 
