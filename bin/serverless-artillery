@@ -22,14 +22,13 @@ const yargs = require('yargs')
   .global('D', 'V')
   .command('deploy', 'Deploy a default version of the function that will execute your Artillery scripts.', {})
   .command('invoke', 'Invoke your function with your Artillery script.  Will prefer a script given by `-s` over a ' +
-    '`script.[yml|json]` in the current directory over the default script.',
+    '`script.[yml|json]` in the current directory over the preexisting default script.',
   {
     s: {
       alias: 'script',
       description: 'The Artillery script to execute.',
       requiresArg: true,
       type: 'string',
-      default: 'script.yml',
     },
   })
   .command('remove', 'Remove the function and the associated resources created for or by it.', {})
@@ -61,6 +60,12 @@ const yargs = require('yargs')
       requiresArg: true,
       type: 'number',
     },
+    o: {
+      alias: 'out',
+      description: 'The file to output the generated script in to.',
+      requiresArg: true,
+      type: 'string',
+    },
   })
   .command('configure', 'Create a local copy of the deployment assets for modification and deployment.  See ' +
     'https://docs.serverless.com for documentation.', {})
@@ -75,4 +80,10 @@ if (yargs.debug) {
   console.log(`command that will be executed: slsArt[${command}](${yargs})`);
 }
 
-slsArt[command](yargs);
+slsArt[command](yargs)
+  .catch((ex) => {
+    console.log(ex.message);
+    if (yargs.verbose) {
+      console.log(ex.stack);
+    }
+  });
