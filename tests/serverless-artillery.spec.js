@@ -54,7 +54,7 @@ describe('serverless-artillery command line interactions', () => {
 
   describe('deploy actions', () => {
     it('must use Serverless deploy command', (done) => {
-      slsart.deploy()
+      slsart.deploy({})
       .then(() => {
         expect(serverlessMocks.length).to.equal(1);
         expect(serverlessMocks[0].initCalled).to.be.true;
@@ -81,7 +81,7 @@ describe('serverless-artillery command line interactions', () => {
 
   describe('remove actions', () => {
     it('must use Serverless remove command', (done) => {
-      slsart.remove()
+      slsart.remove({})
         .then(() => {
           expect(serverlessMocks.length).to.equal(1);
           expect(serverlessMocks[0].initCalled).to.be.true;
