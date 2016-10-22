@@ -14,7 +14,7 @@ npm install -g serverless-artillery
 
 ```
 $ slsart deploy   // and then
-$ slsart run      // repeat as desired, before...
+$ slsart invoke   // repeat as desired, before...
 $ slsart remove
 ```
 
@@ -23,10 +23,9 @@ $ slsart remove
 ```
 $ slsart deploy                  // If not already deployed.
 
-// create a custom test against your service with a 10 second duration and 3 RPS, save to myScript.yml:
-$ slsart script -e http://your.endpoint.com -d 10 -r 3 > myScript.yml
-
-$ slsart run -s myScript.yml     // iterate on editting and running as desired, before...
+// create a custom test against your service with a 10 second duration and 3 RPS:
+$ slsart script -e https://your.endpoint.com -d 10 -r 3
+$ slsart invoke     // iterate on editting `./script.yml` and invoking as desired, before...
 
 $ slsart remove
 ```
@@ -35,13 +34,13 @@ $ slsart remove
 
 Use arbitrary script files
 
-`$ slsart -s my.other.script.yml`
+`$ slsart -s /my/path/to/my.other.script.yml`
 
-Configure a generated script on the CLI (hit your.endpoint.com with 10 requests per second, scaling up to 25 requests per second over 60 seconds)
+Generate a customizable script on the CLI (hit `https://your.endpoint.com` with `10` requests per second, scaling up to `25` requests per second over `60` seconds)
 
-`$ slsart script -e http://your.endpoint.com -d 60 -r 10 -t 25`
+`$ slsart script -e https://your.endpoint.com -d 60 -r 10 -t 25`
 
-Create a local copy of the function that can be editted and redeployed with the new settings.  This enables more advanced configurations of the function to load VPC hosted services or other non-default use cases.  Similarly, you'll want to do this if you need to alter hard-coded limits.  See https://docs.serverless.com for configuration related documentation.
+Generate a local copy of the function that can be edited and redeployed with your changed settings.  This enables more advanced configurations of the function to send [load against VPC hosted services](https://serverless.com/framework/docs/providers/aws/vpc/), [use CSV files to specify variables in your URLs](https://artillery.io/docs/script-reference.html#Payloads) (hint: put your `csv` in the same directory as your `serverless.yml` and redeploy), or other non-default use cases.  Similarly, you'll want to do this if you need to alter hard-coded limits.  See https://docs.serverless.com for function configuration related documentation.  See https://artillery.io/docs for script configuration related documentation.
 
 ```
 $ slsart configure
@@ -56,10 +55,10 @@ $ slsart --help
 Commands:
   deploy     Deploy a default version of the function that will execute your
              Artillery scripts.
-  run        Run your Artillery script.  Will prefer a script given by `-s` over
-             a `script.[yml|json]` in the current directory over the default
-             script.
-  remove    Remove the function and the associated resources created for or by
+  invoke     Invoke your function with your Artillery script.  Will prefer a
+             script given by `-s` over a `script.[yml|json]` in the current
+             directory over the default script.
+  remove     Remove the function and the associated resources created for or by
              it.
   script     Create a local Artillery script so that you can customize it for
              your specific load requirements.  See https://artillery.io for
@@ -70,8 +69,10 @@ Commands:
 Options:
   --help         Show help                                             [boolean]
   --version      Show version number                                   [boolean]
-  --debug, -D    Run the command in debug mode.
-  --verbose, -v  Run the command in verbose mode.
+  -D, --debug    Execute the command in debug mode.  It will be chatty about
+                 what it is happening in the code.
+  -V, --verbose  Execute the command in verbose mode.  It will be chatty about
+                 what it is attempting to accomplish.
 ```
 
 ### Commands
@@ -81,29 +82,16 @@ Options:
 $ slsart deploy --help
 
 slsart deploy
-
-Options:
-  --help       Show help  [boolean]
-  --version    Show version number  [boolean]
-  --debug, -D  Run the command in debug mode.
-  --func, -f   Lambda function name to execute.  [string] [default: "loadGenerator"]
-
 ```
 
-#### run
+#### invoke
 ```
-$ slsart run --help
+$ slsart invoke --help
 
-slsart run
+slsart invoke
 
 Options:
-  --help        Show help  [boolean]
-  --version     Show version number  [boolean]
-  --debug, -D   Run the command in debug mode.
-  --script, -s  The Artillery script to execute.  [string] [default: "script.yml"]
-  --func, -f    Lambda function name to execute.  [string] [default: "loadGenerator"]
-
-
+  -s, --script  The Artillery script to execute.                        [string]
 ```
 
 #### remove
@@ -112,40 +100,30 @@ $ slsart remove --help
 
 slsart remove
 
-Options:
-  --help       Show help  [boolean]
-  --version    Show version number  [boolean]
-  --debug, -D  Run the command in debug mode.
-  --func, -f   Lambda function name to execute.  [string] [default: "loadGenerator"]
-
 ```
 
 #### script
 ```
 $ slsart script --help
 
-Commands:
-  deploy     Deploy a default version of the function that will execute your Artillery scripts.
-  run        Run your Artillery script.  Will prefer a script given by `-s` over a `script.[yml|json]`
-             in the current directory over the default script.
-  remove    Remove the function and the associated resources created for or by it.
-  script     Create a local Artillery script so that you can customize it for your specific load requirements.
-             See https://artillery.io for documentation.
-  configure  Create a local copy of the deployment assets for modification and deployment.
-             See https://docs.serverless.com for documentation.
+slsart script
 
 Options:
-  --help         Show help  [boolean]
-  --version      Show version number  [boolean]
-  --debug, -D    Run the command in debug mode.
-  --verbose, -v  Run the command in verbose mode.
-
-
+  -e, --endpoint  The endpoint to load with traffic.                    [string]
+  -d, --duration  The duration, in seconds, to load the given endpoint. [number]
+  -r, --rate      The rate, in requests per second, at which to load the given
+                  endpoint.                                             [number]
+  -t, --rampTo    The rate to adjust towards away from the given rate, in
+                  requests per second at which to load the given endpoint.
+                                                                        [number]
+  -o, --out       The file to output the generated script in to.        [string]
 ```
 
 #### configure
 ```
 $ slsart configure
+
+slsart configure
 ```
 
 ## Script Customization
@@ -159,21 +137,25 @@ $ nano script.yml           // Edit event.json to change test endpoint
 
 Modify the script.yml file to point at your own endpoint with the load profile that you want to test your application with.  See https://artillery.io for documentation on scripts.
 
-For example, change the "flow" to hit your application:
+For example, change the script to target your service:
 
 ```
- scenarios:
+---
+  config:
+    target: "https://your.endpoint.com"
+  scenarios:
     -
       flow:
         -
           get:
-            url: "http://your.endpoint.com"    # URL of service to test
+            url: "/your/path"
 
 ```
 
 and up the duration of the test to one minute and provide more load:
 
 ```
+  config:
     phases:
       -
         duration: 60      # Duration of test in seconds
@@ -181,23 +163,23 @@ and up the duration of the test to one minute and provide more load:
         rampTo: 200       # Ending rate (RPS at end of test duration)
 ```
 
-Then run the test again using:
+Then invoke the function with your script again using:
 
 ```
-$ slsart run
+$ slsart invoke
 ```
 
-Now you can create a copy of the test and run a different test.
+Now you can create a copy of the test, edit that copy, and invoke the function with it.
 
 ```
 $ cp script.yml trafficSpike.yml
 $ nano trafficSpike.yml
 ```
 
-Update the test spec...  Then run it!
+Update the load spec...  Then invoke it!
 
 ```
-$ slsart run -f trafficSpike.yml
+$ slsart invoke -s trafficSpike.yml
 ```
 
 ## Function Customization

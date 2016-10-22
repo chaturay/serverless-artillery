@@ -8,24 +8,24 @@ const yargs = require('yargs')
   .help()
   .version(packageJson.version)
   .options({
-    debug: {
-      alias: 'D',
-      description: 'Run the command in debug mode.',
+    D: {
+      alias: 'debug',
+      description: 'Execute the command in debug mode.  It will be chatty about what it is happening in the code.',
       requiresArg: false,
     },
-    verbose: {
-      alias: 'v',
-      description: 'Run the command in verbose mode.',
+    V: {
+      alias: 'verbose',
+      description: 'Execute the command in verbose mode.  It will be chatty about what it is attempting to accomplish.',
       requiresArg: false,
     },
   })
-  .global('debug')
+  .global('D', 'V')
   .command('deploy', 'Deploy a default version of the function that will execute your Artillery scripts.', {})
-  .command('run', 'Run your Artillery script.  Will prefer a script given by `-s` over a `script.[yml|json]` in ' +
-    'the current directory over the default script.',
+  .command('invoke', 'Invoke your function with your Artillery script.  Will prefer a script given by `-s` over a ' +
+    '`script.[yml|json]` in the current directory over the default script.',
   {
-    script: {
-      alias: 's',
+    s: {
+      alias: 'script',
       description: 'The Artillery script to execute.',
       requiresArg: true,
       type: 'string',
@@ -36,26 +36,26 @@ const yargs = require('yargs')
   .command('script', 'Create a local Artillery script so that you can customize it for your specific load ' +
     'requirements.  See https://artillery.io for documentation.',
   {
-    endpoint: {
-      alias: 'e',
+    e: {
+      alias: 'endpoint',
       description: 'The endpoint to load with traffic.',
       requiresArg: true,
       type: 'string',
     },
-    duration: {
-      alias: 'd',
+    d: {
+      alias: 'duration',
       description: 'The duration, in seconds, to load the given endpoint.',
       requiresArg: true,
       type: 'number',
     },
-    rate: {
-      alias: 'r',
+    r: {
+      alias: 'rate',
       description: 'The rate, in requests per second, at which to load the given endpoint.',
       requiresArg: true,
       type: 'number',
     },
-    rampTo: {
-      alias: 't',
+    t: {
+      alias: 'rampTo',
       description: 'The rate to adjust towards away from the given rate, in requests per second at which to load ' +
         'the given endpoint.',
       requiresArg: true,
@@ -72,7 +72,7 @@ const command = yargs._[0];
 
 if (yargs.debug) {
   console.log(`options were:\n${JSON.stringify(yargs, null, 2)}`);
-  console.log(`command that will be run: slsArt[${command}](${yargs})`);
+  console.log(`command that will be executed: slsArt[${command}](${yargs})`);
 }
 
 slsArt[command](yargs);
