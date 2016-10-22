@@ -25,7 +25,7 @@ $ slsart deploy                  // If not already deployed.
 
 // create a custom test against your service with a 10 second duration and 3 RPS:
 $ slsart script -e https://your.endpoint.com -d 10 -r 3
-$ slsart invoke     // iterate on editting `./script.yml` and invoking as desired, before...
+$ slsart invoke     // iterate on editing `./script.yml` and invoking as desired, before...
 
 $ slsart remove
 ```
