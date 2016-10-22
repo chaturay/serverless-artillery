@@ -54,7 +54,7 @@ describe('serverless-artillery command line interactions', () => {
 
   describe('deploy actions', () => {
     it('must use Serverless deploy command', (done) => {
-      slsart.deploy()
+      slsart.deploy({})
       .then(() => {
         expect(serverlessMocks.length).to.equal(1);
         expect(serverlessMocks[0].initCalled).to.be.true;
@@ -66,13 +66,14 @@ describe('serverless-artillery command line interactions', () => {
 
   describe('run actions', () => {
     it('must use Serverless invoke command', (done) => {
+      const newScriptPath = path.join(process.cwd(), 'lib', 'lambda', scriptPath);
       slsart.run({
-        script: scriptPath,
+        script: newScriptPath,
       })
       .then(() => {
         expect(serverlessMocks.length).to.equal(1);
         expect(serverlessMocks[0].initCalled).to.be.true;
-        expect(serverlessMocks[0].argv).to.eql([null, null, 'invoke', '-d', '-f', functionName, '-p', scriptPath]);
+        expect(serverlessMocks[0].argv).to.eql([null, null, 'invoke', '-d', '-f', functionName, '-p', newScriptPath]);
         done();
       });
     });
@@ -80,7 +81,7 @@ describe('serverless-artillery command line interactions', () => {
 
   describe('remove actions', () => {
     it('must use Serverless remove command', (done) => {
-      slsart.remove()
+      slsart.remove({})
         .then(() => {
           expect(serverlessMocks.length).to.equal(1);
           expect(serverlessMocks[0].initCalled).to.be.true;
