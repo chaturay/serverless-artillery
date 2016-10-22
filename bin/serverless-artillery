@@ -80,9 +80,10 @@ if (yargs.debug) {
   console.log(`command that will be run: slsArt[${command}](${yargs})`);
 }
 
-slsArt[command](yargs).catch((ex) => {
-  console.log(ex.message);
-  if (yargs.verbose) {
-    console.log(ex.stack);
-  }
-});
+slsArt[command](yargs)
+  .catch((ex) => {
+    console.log(ex.message);
+    if (yargs.verbose) {
+      console.log(ex.stack);
+    }
+  });
