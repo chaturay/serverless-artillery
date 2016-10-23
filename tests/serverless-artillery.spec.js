@@ -15,6 +15,7 @@ let serverlessMocks = [];
 
 class serverlessMock {
   constructor(config) {
+    this.version = config.version || '1.0.3';
     this.config = config;
     serverlessMocks.push(this);
   }
