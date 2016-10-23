@@ -67,7 +67,7 @@ describe('serverless-artillery command line interactions', () => {
   describe('run actions', () => {
     it('must use Serverless invoke command', (done) => {
       const newScriptPath = path.join(process.cwd(), 'lib', 'lambda', scriptPath);
-      slsart.run({
+      slsart.invoke({
         script: newScriptPath,
       })
       .then(() => {
