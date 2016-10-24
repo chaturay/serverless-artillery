@@ -35,9 +35,9 @@
     "artillery-core": "^2.0.0-0",
     "aws-sdk": "^2.5.0",
     "bluebird": "^3.4.6",
+    "js-yaml": "^3.6.1",
     "semver": "^5.3.0",
     "shortid": "^2.2.6",
-    "yaml": "^0.3.0",
     "yargs": "^6.2.0"
   },
   "devDependencies": {

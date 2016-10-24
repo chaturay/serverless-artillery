@@ -140,15 +140,14 @@ Modify the script.yml file to point at your own endpoint with the load profile t
 For example, change the script to target your service:
 
 ```
----
-  config:
-    target: "https://your.endpoint.com"
-  scenarios:
-    -
-      flow:
-        -
-          get:
-            url: "/your/path"
+config:
+  target: "https://your.endpoint.com"
+scenarios:
+  -
+    flow:
+      -
+        get:
+          url: "/your/path"
 
 ```
 
