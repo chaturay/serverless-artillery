@@ -1,5 +1,3 @@
-# *** UNDER ACTIVE DEVELOPMENT - EXPECT LOTS OF CHURN THRU Friday October 21, 2016 ***
-
 # serverless-artillery [![Build Status](https://travis-ci.org/Nordstrom/serverless-artillery.svg)](https://travis-ci.org/Nordstrom/serverless-artillery)
 Combine [`serverless`](https://serverless.com) with [`artillery`](https://artillery.io) and you get `serverless-artillery` (a.k.a. `serverless-artillery`) for instant, cheap, and easy performance testing at scale
 
