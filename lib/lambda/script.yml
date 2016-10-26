@@ -5,7 +5,7 @@
   # You can find great documentation of the possibilities at:
   # https://artillery.io/docs/
   config:
-    target: "http://aws.amazon.com" # this hostname will be used for each part of the flow
+    target: "https://aws.amazon.com" # this hostname will be used for each part of the flow
     phases:
       -
         duration: 5
