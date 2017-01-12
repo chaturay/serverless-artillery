@@ -13,4 +13,4 @@ trim_trailing_whitespace = true
 
 ; Custom for Markdown
 [*.md]
-trim_trailing_whitespace = false  ; these are semantically significant
+trim_trailing_whitespace = false
