@@ -181,8 +181,86 @@ $ slsart invoke -s trafficSpike.yml
 
 ## Function Customization
 
-TODO
+Sometimes you need to customize your load testing function.  Sometimes occassionally becomes all the times.  The endpoints you need to slam are in the VPC or you need to separate out various versions of the load testing function in order to maintain least privilege.  We welcome you to:
+
+`slsart configure`
+
+This command gives you a copy of the <a href='https://www.serverless.com/'>Serverless</a> service artifacts used to create and deploy your load testing function.  As such, you have free reign!
+
+!!! Note that any time you make modifications you must execute `slsart deploy` to have them applied !!!
+
+### Deployment and Settings Customization
+
+Open up the `serverless.yml` you just created.  It will contain the default Serverless Framework service definition.  The Serverless Framework helps coalesce the specification of Lambda and various other serverless technologies in an easy to manage and maintain format.  Add a `vpc` attribute (<a href='https://serverless.com/framework/docs/providers/aws/guide/functions#vpc-configuration'>docs</a>) with `subnetIds` and `securityGroupIds` sub-attributes to target your VPC protected endpoints.  Add custom IAM rights (<a href='https://serverless.com/framework/docs/providers/aws/guide/iam/'>docs</a>) to the service to maintain least privilege.
+
+Full documentation of what is in the serverless.yml and the options you have available can be found at https://docs.serverless.com/framework/docs/.
+
+### Load Test Execution Customization (artillery.io)
+
+The script allows you to add plugins for various capabilities.  Load testing an ApiGateway endpoint?  You may want to use the <a href='https://github.com/Nordstrom/artillery-plugin-aws-sigv4'>artillery-plugin-aws-sigv4</a>.  Want to record your results in InfluxDb?  You may want to use <a href='https://github.com/Nordstrom/artillery-plugin-influxdb'>artillery-plugin-influxdb</a>.  Docs for plugin use and configuration are available from those projects and from <a href='https://artillery.io/docs/'>artillery.io's docs</a>.
+
+### Script Splitting Customization
+
+The following controls are available in the default deployed function.  That said, the defaults are good and you generally won't need them until you have gotten deeper into implementation which is why we've put off mentioning until now.  If you define a `_split` attribute within the script, the values of that object will be used to alter the splitting of your script.
+```
+{
+  _split: {
+    maxScriptDurationInSeconds: 86400,  # Default listed.  Hard-coded max is 518400
+    maxChunkDurationInSeconds: 240,     # Default listed.  Hard-coded max is 285
+    maxScriptRequestsPerSecond: 5000,   # Default listed.  Hard-coded max is 50000
+    maxChunkRequestsPerSecond: 25,      # Default listed.  Hard-coded max is 500
+    timeBufferInMilliseconds: 15000,    # Default listed.  Hard-coded max is 30000
+  }
+  ...
+}
+```
+See the comments in <a href='lib/lambda/handler.js'>`~/lambda/handler.js`</a> for detailed documentation of what these mean (search for '`const constants`').  You now have the source code to change those hard-coded limits and can change them at will.
+
+### Debugging and Tracing Behavior Customization
+
+There are two primary tools for debugging and tracing the function and how it splits and executes the task it has been given.  Define the following in your script:
+
+```
+{
+  _trace: true,
+  _simulation: true,
+  ...
+}
+```
+
+#### _trace
+The first causes the code to report the actions it is taking with your script and the chunks that it breaks your script into.  Expect statements such as this:
+
+```
+scheduling self invocation for 1234567890123 in 2345678901234 with a 3456789012345 ms delay
+```
+
+This would be produced by the following:
+
+```
+console.log(`scheduling self invocation for ${event._genesis} in ${event._start} with a ${timeDelay} ms delay`);
+```
+
+There are definitions that will help you understand these statements.  In the code you will see `_genesis`, `_start`, `now`, and `timeDelay`:
+
+`_genesis`:   the datetime stamp immediately taken by the function that received the original script.  `_genesis` is added to the original script so that all child function executions of the original handler have a datetime stamp of when the original "load execution request" was received.  If you are not running many load tests simultaneously then this can serve as a unique ID for the current load execution.  This can be useful for correlation.  An improvement could include adding a unique factor to avoid collisions in such usage.
+`_start`:     the datetime stamp immediately taken by the current function that is executing on either the original script or a chunk of that original script.  This allows relative time reporting and evaluation with a function execution.
+`now`:        the datetime stamp taken when the log entry was produced.
+`timeDelay`:  a time delta (in milliseconds) between the current time of the current function and when it has scheduled to take the action reported in the current log entry.
+
+This mode is very useful in identifying what the system is doing or where something is going wrong.  #bugs-happen
+
+#### _simulation
+
+Setting the `_simulation` attribute to a truthy value will cause the function to split the script without taking action on the script.  Functionally, this comprises splitting the given script into pieces without invoking functions to handle the split chunks and/or execute the load described by those chunks.  Concretely, when it comes time to invoke new function instances for distributing the load, it simply invokes (or schedules an invokation of) itself.  Likewise, when it comes time to invoke the `artillery-core` entry point for generating load from the chunk, it instead invokes the simulation shim that reports what would have been executed and immediately completes.
+
+This mode, in combination with `_trace` related behavior is very helpful in debugging script splitting behavior and identifying what the logic declares should occur.
+
+### Splitting and Distribution Logic Customization
+
+You've got the code.  Have at!  Have fun and consider contributing improvements back into the tool.  Thank you!
 
 ## References
 1. [artillery.io](https://artillery.io) for documentation about how to define your load shape, volume, targets, inputs, et cetera
-2. [serverless.com](https://docs.serverless.com) for documentation about how to create a custom function configuration
+2. [serverless.com](https://docs.serverless.com/framework/docs/) for documentation about how to create a custom function configuration
+3. [serverless-artillery](https://github.com/Nordstrom/serverless-artillery) README for documentation on the use of this tool
