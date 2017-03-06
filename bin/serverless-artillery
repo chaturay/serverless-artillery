@@ -20,7 +20,14 @@ const yargs = require('yargs')
     },
   })
   .global('D', 'V')
-  .command('deploy', 'Deploy a default version of the function that will execute your Artillery scripts.', {})
+  .command('deploy', 'Deploy a default version of the function that will execute your Artillery scripts.', {
+    r: {
+      alias: 'region',
+      description: 'The region where the function will be deployed',
+      requiresArg: true,
+      type: 'string',
+    },
+  })
   .command('invoke', 'Invoke your function with your Artillery script.  Will prefer a script given by `-s` over a ' +
     '`script.[yml|json]` in the current directory over the preexisting default script.',
   {
@@ -30,8 +37,21 @@ const yargs = require('yargs')
       requiresArg: true,
       type: 'string',
     },
+    r: {
+      alias: 'region',
+      description: 'The region in which the function will be executed',
+      requiresArg: true,
+      type: 'string',
+    },
   })
-  .command('remove', 'Remove the function and the associated resources created for or by it.', {})
+  .command('remove', 'Remove the function and the associated resources created for or by it.', {
+    r: {
+      alias: 'region',
+      description: 'The region from which the function will be removed',
+      requiresArg: true,
+      type: 'string',
+    },
+  })
   .command('script', 'Create a local Artillery script so that you can customize it for your specific load ' +
     'requirements.  See https://artillery.io for documentation.',
   {
