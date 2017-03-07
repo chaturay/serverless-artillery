@@ -86,6 +86,9 @@ Options:
 $ slsart deploy --help
 
 slsart deploy
+
+Options:
+  -r, --region  The region to deploy the function into.                 [string]
 ```
 
 #### invoke
@@ -95,6 +98,7 @@ $ slsart invoke --help
 slsart invoke
 
 Options:
+  -r, --region  The region to invoke the function in.                   [string]
   -s, --script  The Artillery script to execute.                        [string]
 ```
 
@@ -104,6 +108,8 @@ $ slsart remove --help
 
 slsart remove
 
+Options:
+  -r, --region  The region to remove the function from.                 [string]
 ```
 
 #### script
