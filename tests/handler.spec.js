@@ -582,6 +582,18 @@ describe('serverless-artillery Handler Tests', () => {
       expect(result).to.deep.equal(expected);
     });
   });
+  describe('#loadProcessor', () => {
+    it('loads custom processor code based on script configuration', () => {
+      const newScript = {
+        config: {
+          processor: `${__dirname}/customprocessor.js`,
+        },
+      };
+      handler.impl.loadProcessor(newScript);
+      expect(newScript.config.processor).to.have.property('testMethod');
+      expect(newScript.config.processor.testMethod()).to.equal('testValue');
+    });
+  });
   describe('#readPayload', () => {
     it('reads a single payload file.', () => {
       const newScript = {
