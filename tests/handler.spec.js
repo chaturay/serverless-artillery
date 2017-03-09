@@ -590,8 +590,18 @@ describe('serverless-artillery Handler Tests', () => {
         },
       };
       handler.impl.loadProcessor(newScript);
-      expect(newScript.config.processor).to.have.property('testMethod');
       expect(newScript.config.processor.testMethod()).to.equal('testValue');
+    });
+    it('does not attempt to reload a previously loaded processor', () => {
+      const newScript = {
+        config: {
+          processor: {
+            f: () => 'testValue',
+          },
+        },
+      };
+      handler.impl.loadProcessor(newScript);
+      expect(newScript.config.processor.f()).to.equal('testValue');
     });
   });
   describe('#readPayload', () => {
