@@ -17,3 +17,5 @@
         -
           get:
             url: "/"
+            log: "first flow"
+

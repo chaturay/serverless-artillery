@@ -43,6 +43,11 @@ const yargs = require('yargs')
       requiresArg: true,
       type: 'string',
     },
+    a: {
+      alias: 'acceptance',
+      description: 'Specifying that the Artillery script should be run in acceptance mode',
+      requiresArg: false,
+    },
   })
   .command('remove', 'Remove the function and the associated resources created for or by it.', {
     r: {
