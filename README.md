@@ -100,6 +100,7 @@ slsart invoke
 Options:
   -r, --region  The region to invoke the function in.                   [string]
   -s, --script  The Artillery script to execute.                        [string]
+  -a, --acceptance Run script in acceptance mode.                       [none]
 ```
 
 #### remove
@@ -300,6 +301,29 @@ The result is a script chunk that can be executed within the length limited peri
 Next, we take chunks from the script by width.  This is driven by the maximum requests per second that a single execution of the underlying function as a service (FaaS) provider is capable of pushing with high fidelity.  For AWS Lambda, we found 25 RPS to be a good level.  This is lower than the absolute ceiling that Lambda is capable of pushing for a reason.  First, each connection will be a separate opened and closed socket.  Second, if we are producing to many connections, we can be in the middle of making a request when we receive the response of a separate request.  Given that this is implemented in nodejs, we have one thread and that means the timestamping of the receipt of that response is artificially and incorrectly delayed.  We found that at RPS above 25 we observed an increase in the volatility of observed latencies.  That written, if you do not intend to record your latencies, then you could bump this up to the limit of the FaaS service (i.e. `_split.maxChunkRequestsPerSecond = 300` or so).  If you don't care about having separate sockets per request, you can alter that with artillery configuration as well.
 
 Anyway...  The result is a script chunk that is less than the limited period and also executable by a single function instance.  Therefore, we invoke a single function with the chunk to execute it.
+
+### Acceptance Mode
+To ensure that your load test script is running properly, serverless-artillery allows you to invoke your script in Acceptance mode.
+
+To use from command line:
+```
+slsart invoke -a
+```
+
+To specify inside script so that script will run in acceptance mode always:
+```
+{
+  mode: acceptance
+  ...
+}
+```
+*note: 'acceptance' may be abbreviated to 'acc'*
+
+Acceptance mode alters the script you invoke serverless-artillery with in the following ways:
+
+1. Acceptance mode ensures that each flow in the script is run by generating a new script for each flow.
+2. Each new script created is given an arrivalRate and duration of 1. If rampTo is defined, that is set to 1 as well.
+3. Each single-flow script is executed in its own lambda. Information about each scripts success or failure is printed to stdout.  
 
 ## Generalization
 
