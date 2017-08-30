@@ -18,4 +18,8 @@
           get:
             url: "/"
             log: "first flow"
+    -
+      flow:
+        -
+          log: 'flow2'
 
