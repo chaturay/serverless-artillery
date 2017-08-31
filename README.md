@@ -233,7 +233,7 @@ Alternatively, you may specify acceptance mode in the script, causing the script
       flow:
         -
           post:
-            url: "/your/path"
+            url: "/your/path"        
     - 
       name: "get flow" 
       flow:
