@@ -27,7 +27,12 @@ $ slsart deploy                  // If not already deployed.
 
 // create a custom test against your service with a 10 second duration and 3 RPS:
 $ slsart script -e https://your.endpoint.com -d 10 -r 3
-$ slsart invoke     // iterate on editing `./script.yml` and invoking as desired, before...
+
+// run acceptance tests
+$ slsart invoke -a               // iterate on editing `./script.yml` and invoking as desired, before...
+
+// run performance tests
+$ slsart invoke
 
 $ slsart remove
 ```
@@ -61,7 +66,8 @@ Commands:
              Artillery scripts.
   invoke     Invoke your function with your Artillery script.  Will prefer a
              script given by `-s` over a `script.[yml|json]` in the current
-             directory over the default script.
+             directory over the preexisting default script.  Defaults to running
+             in performance mode but can be run in acceptance mode (-a).
   remove     Remove the function and the associated resources created for or by
              it.
   script     Create a local Artillery script so that you can customize it for
@@ -100,7 +106,9 @@ slsart invoke
 Options:
   -r, --region  The region to invoke the function in.                   [string]
   -s, --script  The Artillery script to execute.                        [string]
-  -a, --acceptance Run script in acceptance mode.                       [none]
+  -a, --acceptance  Execute the script in acceptance mode.  It will execute each
+                    flow once, reporting failures.
+
 ```
 
 #### remove
@@ -191,6 +199,51 @@ Update the load spec...  Then invoke it!
 ```
 $ slsart invoke -s trafficSpike.yml
 ```
+### Acceptance Mode 
+
+artillery does not guarantee each flow in a script will be run (see [documentation](https://artillery.io/docs/script-reference/)). Acceptance mode ensures each flow will be run with a minimal load so you know if there are any errors being generated before you invoke your performance test with a high load.
+
+How it works:
+
+1. Acceptance mode ensures that each flow in the script is run by generating a new script for each flow.
+2. Each new script created is given a single phase with an `arrivalRate` and `duration` of 1. `rampTo` is deleted if it exists.
+3. Each single-flow script is executed in its own lambda and the report for each script is printed to stdout.
+
+To use:
+ 
+Add -a to `invoke` command:
+```
+$ slsart invoke -a
+```
+
+Alternatively, you may specify acceptance mode in the script, causing the script to run in acceptance mode every invocation:
+```
+{
+  mode: acceptance
+  config:
+    target: "https://aws.amazon.com"
+    phases:
+      -
+        duration: 60      # Set to 1 in acceptance mode
+        arrivalRate: 100  # Set to 1 in acceptance mode
+        rampTo: 200       # deleted in acceptance mode
+  scenarios:
+    -
+      name: "post flow"
+      flow:
+        -
+          post:
+            url: "/your/path"
+    - 
+      name: "get flow" 
+      flow:
+        -
+          get:
+            url: "/your/path"
+}
+```
+*note: 'acceptance' may be abbreviated to 'acc' in the script*
+
 
 ## Function Customization
 
@@ -302,31 +355,6 @@ Next, we take chunks from the script by width.  This is driven by the maximum re
 
 Anyway...  The result is a script chunk that is less than the limited period and also executable by a single function instance.  Therefore, we invoke a single function with the chunk to execute it.
 
-### Acceptance Mode
-To ensure that your load test script is running properly, serverless-artillery allows you to invoke your script in Acceptance mode.
-
-To use from command line:
-```
-slsart invoke -a
-```
-
-To specify inside script so that script will run in acceptance mode always:
-```
-{
-  mode: acceptance
-  ...
-}
-```
-*note: 'acceptance' may be abbreviated to 'acc'*
-
-Acceptance mode alters the script you invoke serverless-artillery with in the following ways:
-
-1. Acceptance mode ensures that each flow in the script is run by generating a new script for each flow.
-2. Each new script created is given an arrivalRate and duration of 1. rampTo is deleted if it exists.
-3. Each single-flow script is executed in its own lambda and the report for each script is printed to stdout.
-
-Because each flow from the original script will have its own report, naming each flow is a good idea to ensure you know which flow is causing problems. The name of the flow can be found in the `scenarioCounts` section of the report that is printed to stdout. A helpful example of naming can be found [here](https://github.com/hassy/socketio-load-test-artillery-example/blob/master/socketio-chat-load-test.yaml). 
- 
 
 ## Generalization
 
