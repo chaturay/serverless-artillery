@@ -12,13 +12,16 @@
         arrivalRate: 1
         rampTo: 5
   scenarios:
-    -
-      name: 'john'
+    - weight: 1
+      name: 'larry'
       flow:
         -
           get:
-            url: "/"
+            url: "/daf.dfdsafdjjada"
             log: "first flow"
+            match:
+              json: '$'
+              value: "fail"
     -
       name: 'dave'
       flow:

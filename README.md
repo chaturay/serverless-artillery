@@ -322,8 +322,11 @@ To specify inside script so that script will run in acceptance mode always:
 Acceptance mode alters the script you invoke serverless-artillery with in the following ways:
 
 1. Acceptance mode ensures that each flow in the script is run by generating a new script for each flow.
-2. Each new script created is given an arrivalRate and duration of 1. If rampTo is defined, that is set to 1 as well.
-3. Each single-flow script is executed in its own lambda. Information about each scripts success or failure is printed to stdout.  
+2. Each new script created is given an arrivalRate and duration of 1. rampTo is deleted if it exists.
+3. Each single-flow script is executed in its own lambda and the report for each script is printed to stdout.
+
+Because each flow from the original script will have its own report, naming each flow is a good idea to ensure you know which flow is causing problems. The name of the flow can be found in the `scenarioCounts` section of the report that is printed to stdout. A helpful example of naming can be found [here](https://github.com/hassy/socketio-load-test-artillery-example/blob/master/socketio-chat-load-test.yaml). 
+ 
 
 ## Generalization
 
