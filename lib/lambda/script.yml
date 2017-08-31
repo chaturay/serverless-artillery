@@ -13,12 +13,14 @@
         rampTo: 5
   scenarios:
     -
+      name: 'john'
       flow:
         -
           get:
             url: "/"
             log: "first flow"
     -
+      name: 'dave'
       flow:
         -
           log: 'flow2'
