@@ -207,7 +207,7 @@ How it works:
 
 1. Acceptance mode ensures that each flow in the script is run by generating a new script for each flow.
 2. Each new script created is given a single phase with an `arrivalRate` and `duration` of 1. `rampTo` is deleted if it exists.
-3. Each single-flow script is executed in its own lambda and the report for each script is printed to stdout.
+3. Each single-flow script is executed in its own lambda and the report for each script is logged to the console.
 
 To use:
  
