@@ -201,7 +201,7 @@ $ slsart invoke -s trafficSpike.yml
 ```
 ### Acceptance Mode 
 
-artillery does not guarantee each flow in a script will be run (see [documentation](https://artillery.io/docs/script-reference/)). Acceptance mode ensures each flow will be run with a minimal load so any non-load related errors will be detected before you invoke your performance test with a high load.
+artillery does not guarantee each flow in a script will be run (see [documentation](https://artillery.io/docs/script-reference/)). Acceptance mode ensures each flow will be run with a minimal load so any non-load related errors will be detected before the performance test is invoked with a high load.
 
 How it works:
 
@@ -233,7 +233,8 @@ Alternatively, you may specify acceptance mode in the script, causing the script
       flow:
         -
           post:
-            url: "/your/path"        
+            url: "/your/path"
+# The flow below will be cut from this script and pasted into a new script with the above config 
     - 
       name: "get flow" 
       flow:
