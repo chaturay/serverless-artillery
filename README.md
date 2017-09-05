@@ -201,13 +201,7 @@ $ slsart invoke -s trafficSpike.yml
 ```
 ### Acceptance Mode 
 
-artillery does not guarantee each flow in a script will be run (see [documentation](https://artillery.io/docs/script-reference/)). Acceptance mode ensures each flow will be run with a minimal load so any non-load related errors will be detected before the performance test is invoked with a high load.
-
-How it works:
-
-1. Acceptance mode ensures that each flow in the script is run by generating a new script for each flow.
-2. Each new script created is given a single phase with an `arrivalRate` and `duration` of 1. `rampTo` is deleted if it exists.
-3. Each single-flow script is executed in its own lambda and the report for each script is logged to the console.
+Find defects before performance testing! Acceptance mode runs each flow in your script exactly once and reports the results.
 
 To use:
  
@@ -216,7 +210,7 @@ Add -a to `invoke` command:
 $ slsart invoke -a
 ```
 
-Alternatively, you may specify acceptance mode in the script, causing the script to run in acceptance mode every invocation:
+To run exclusively in acceptance mode, hard code the mode into your script:
 ```
 {
   mode: acceptance
