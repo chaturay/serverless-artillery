@@ -29,8 +29,8 @@ const yargs = require('yargs')
     },
   })
   .command('invoke', 'Invoke your function with your Artillery script.  Will prefer a script given by `-s` over a ' +
-    '`script.[yml|json]` in the current directory over the preexisting default script.  Defaults to running in ' +
-    'performance mode but can be run in acceptance mode (-a).',
+    '`script.[yml|json]` in the current directory over the default script.  Invocation mode will default to ' +
+    'performance but adding the `-a` flag will run the script in acceptance mode.',
   {
     s: {
       alias: 'script',

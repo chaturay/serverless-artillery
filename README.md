@@ -66,7 +66,7 @@ Commands:
              Artillery scripts.
   invoke     Invoke your function with your Artillery script.  Will prefer a
              script given by `-s` over a `script.[yml|json]` in the current
-             directory over the preexisting default script.  Defaults to running
+             directory over the default script.  Defaults to running
              in performance mode but can be run in acceptance mode (-a).
   remove     Remove the function and the associated resources created for or by
              it.
@@ -220,27 +220,7 @@ Alternatively, you may specify acceptance mode in the script, causing the script
 ```
 {
   mode: acceptance
-  config:
-    target: "https://aws.amazon.com"
-    phases:
-      -
-        duration: 60      # Set to 1 in acceptance mode
-        arrivalRate: 100  # Set to 1 in acceptance mode
-        rampTo: 200       # deleted in acceptance mode
-  scenarios:
-    -
-      name: "post flow"
-      flow:
-        -
-          post:
-            url: "/your/path"
-# The flow below will be cut from this script and pasted into a new script with the above config 
-    - 
-      name: "get flow" 
-      flow:
-        -
-          get:
-            url: "/your/path"
+  ...
 }
 ```
 *note: 'acceptance' may be abbreviated to 'acc' in the script*
@@ -355,7 +335,6 @@ The result is a script chunk that can be executed within the length limited peri
 Next, we take chunks from the script by width.  This is driven by the maximum requests per second that a single execution of the underlying function as a service (FaaS) provider is capable of pushing with high fidelity.  For AWS Lambda, we found 25 RPS to be a good level.  This is lower than the absolute ceiling that Lambda is capable of pushing for a reason.  First, each connection will be a separate opened and closed socket.  Second, if we are producing to many connections, we can be in the middle of making a request when we receive the response of a separate request.  Given that this is implemented in nodejs, we have one thread and that means the timestamping of the receipt of that response is artificially and incorrectly delayed.  We found that at RPS above 25 we observed an increase in the volatility of observed latencies.  That written, if you do not intend to record your latencies, then you could bump this up to the limit of the FaaS service (i.e. `_split.maxChunkRequestsPerSecond = 300` or so).  If you don't care about having separate sockets per request, you can alter that with artillery configuration as well.
 
 Anyway...  The result is a script chunk that is less than the limited period and also executable by a single function instance.  Therefore, we invoke a single function with the chunk to execute it.
-
 
 ## Generalization
 
