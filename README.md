@@ -219,6 +219,7 @@ To run exclusively in acceptance mode, hard code the mode into your script:
 ```
 *note: 'acceptance' may be abbreviated to 'acc' in the script*
 
+Scripts running in acceptance mode do not require a `phases` array in the `config` section of the script.
 
 ## Function Customization
 

@@ -95,7 +95,7 @@ describe('serverless-artillery command line interactions', () => {
           expect(serverlessMocks.length).to.equal(1);
           expect(serverlessMocks[0].initCalled).to.be.true;
           expect(serverlessMocks[0].argv).to.eql([null, null, 'invoke', '-f', functionName, '-p', tmpScriptPath, '-a']);
-          done;
+          done; // getting typeError: done is not a function with done();
         });
     });
   });
