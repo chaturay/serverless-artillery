@@ -654,4 +654,88 @@ describe('serverless-artillery Handler Tests', () => {
       ]);
     });
   });
+  describe('#splitScriptByFlow', () => {
+    it('split a script with 2 flows into two scripts with one flow, each with duration = 1 and arrivalRate = 1', () => {
+      const newScript = {
+        config: {
+          target: 'https://aws.amazon.com',
+          phases: [
+            {
+              duration: 5,
+              arrivalRate: 1,
+              rampTo: 5,
+            },
+          ],
+        },
+        scenarios: [
+          {
+            flow: [
+              {
+                get: {
+                  url: '/',
+                },
+              },
+            ],
+          },
+          {
+            flow: [
+              {
+                get: {
+                  url: '/',
+                },
+              },
+            ],
+          },
+        ],
+      };
+      const scripts = handler.impl.splitScriptByFlow(newScript);
+      expect(scripts).to.deep.equal([
+        {
+          config: {
+            target: 'https://aws.amazon.com',
+            phases: [
+              {
+                duration: 1,
+                arrivalRate: 1,
+              },
+            ],
+          },
+          scenarios: [
+            {
+              flow: [
+                {
+                  get: {
+                    url: '/',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          config: {
+            target: 'https://aws.amazon.com',
+            phases: [
+              {
+                duration: 1,
+                arrivalRate: 1,
+              },
+            ],
+          },
+          scenarios: [
+            {
+              flow: [
+                {
+                  get: {
+                    url: '/',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ]
+      );
+    });
+  });
 });
