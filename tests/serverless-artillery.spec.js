@@ -10,6 +10,7 @@ const expect = require('chai').expect;
 const fs = require('fs');
 const mock = require('mock-require');
 const path = require('path');
+const os = require('os');
 
 let serverlessMocks = [];
 
@@ -89,9 +90,11 @@ describe('serverless-artillery command line interactions', () => {
         acceptance: true,
       })
         .then(() => {
+          const tmpScriptPath = serverlessMocks[0].argv[6];
+          expect(path.dirname(tmpScriptPath).to.equal(os.tmpdir()));
           expect(serverlessMocks.length).to.equal(1);
           expect(serverlessMocks[0].initCalled).to.be.true;
-          expect(serverlessMocks[0].argv).to.eql([null, null, 'invoke', '-f', functionName, '-p', newScriptPath, '-a']);
+          expect(serverlessMocks[0].argv).to.eql([null, null, 'invoke', '-f', functionName, '-p', tmpScriptPath, '-a']);
           done();
         });
     });
