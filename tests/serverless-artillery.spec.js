@@ -48,6 +48,7 @@ const slsart = require('../lib');
 describe('serverless-artillery command line interactions', () => {
   const functionName = 'loadGenerator';
   const scriptPath = 'script.yml';
+  const phaselessScriptPath = 'phaseless-script.yml';
 
   beforeEach(() => {
     serverlessMocks = [];
@@ -77,6 +78,22 @@ describe('serverless-artillery command line interactions', () => {
         expect(serverlessMocks[0].argv).to.eql([null, null, 'invoke', '-f', functionName, '-p', newScriptPath]);
         done();
       });
+    });
+  });
+
+  describe('acceptance mode invoke actions', (done) => {
+    it('must create new file in tmp directory with mode attribute specified and phases array', () => {
+      const newScriptPath = path.join(process.cwd(), 'tests', phaselessScriptPath);
+      slsart.invoke({
+        script: newScriptPath,
+        acceptance: true,
+      })
+        .then(() => {
+          expect(serverlessMocks.length).to.equal(1);
+          expect(serverlessMocks[0].initCalled).to.be.true;
+          expect(serverlessMocks[0].argv).to.eql([null, null, 'invoke', '-f', functionName, '-p', newScriptPath, '-a']);
+          done();
+        });
     });
   });
 
