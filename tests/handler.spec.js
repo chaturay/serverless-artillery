@@ -654,6 +654,9 @@ describe('serverless-artillery Handler Tests', () => {
       ]);
     });
   });
+  /**
+   * SPLIT SCRIPT BY FLOW
+   */
   describe('#splitScriptByFlow', () => {
     it('split a script with 2 flows into two scripts with one flow, each with duration = 1 and arrivalRate = 1', () => {
       const newScript = {
@@ -735,6 +738,86 @@ describe('serverless-artillery Handler Tests', () => {
         },
       ]
       );
+    });
+  });
+  /**
+   * SCRIPT LENGTH
+   */
+  describe('#scriptLength', () => {
+    it('return the the total duration of an Artillery script', () => {
+      const newScript = {
+        config: {
+          target: 'https://aws.amazon.com',
+          phases: [
+            {
+              duration: 1,
+            },
+            {
+              duration: 5,
+            },
+          ],
+        },
+      };
+      const length = handler.impl.scriptLength(newScript);
+      expect(length).to.deep.equal(6);
+    });
+    it('return a negative number upon detection of negative duration value', () => {
+      const newScript = {
+        config: {
+          target: 'https://aws.amazon.com',
+          phases: [
+            {
+              duration: 1,
+            },
+            {
+              duration: -1,
+            },
+          ],
+        },
+      };
+      const length = handler.impl.scriptLength(newScript);
+      expect(length).to.deep.equal(-1);
+    });
+  });
+  /**
+   * SCRIPT WIDTH
+   */
+  describe('#scriptWidth', () => {
+    it('calculate the maximum width of a script in RPS', () => {
+      const newScript = {
+        config: {
+          target: 'https://aws.amazon.com',
+          phases: [
+            {
+              arrivalRate: 1,
+              rampTo: 5,
+            },
+            {
+              arrivalRate: 6,
+            },
+          ],
+        },
+      };
+      const width = handler.impl.scriptWidth(newScript);
+      expect(width).to.deep.equal(6);
+    });
+    it('returns a negative value upon finding a negative arrival rate', () => {
+      const newScript = {
+        config: {
+          target: 'https://aws.amazon.com',
+          phases: [
+            {
+              arrivalRate: 1,
+              rampTo: 5,
+            },
+            {
+              arrivalRate: -6,
+            },
+          ],
+        },
+      };
+      const width = handler.impl.scriptWidth(newScript);
+      expect(width).to.deep.equal(-1);
     });
   });
 });
