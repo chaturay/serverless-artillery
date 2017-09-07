@@ -8,7 +8,7 @@
     "slsart": "./bin/serverless-artillery"
   },
   "scripts": {
-    "test": "mocha -r aws-sdk -r artillery-core --recursive -R min tests",
+    "test": "nyc ./node_modules/.bin/mocha -r aws-sdk -r artillery-core --recursive -R min tests",
     "lint": "eslint . bin/serverless-artillery",
     "postinstall": "node ./postinstall.js"
   },
@@ -54,16 +54,18 @@
   },
   "nyc": {
     "check-coverage": true,
-    "lines": 60,
-    "statements": 60,
-    "functions": 60,
-    "branches": 60,
+    "lines": 20,
+    "statements": 20,
+    "functions": 20,
+    "branches": 20,
     "include": [
       "**/*.js"
     ],
     "exclude": [
-      "npm.js",
-      "serverless-fx.js"
+      "**/lib/npm.js",
+      "**/lib/serverless-fx.js",
+      "postinstall.js",
+      "tests"
     ],
     "extension": [
       ".jsx"
