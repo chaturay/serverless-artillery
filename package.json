@@ -62,19 +62,15 @@
       "**/*.js"
     ],
     "exclude": [
-      "bootstrap",
-      "build",
-      "impersonate.js",
-      "snapshot",
-      "dbReader",
-      "test"
+      "npm.js",
+      "serverless-fx.js"
     ],
     "extension": [
       ".jsx"
     ],
     "cache": true,
     "all": true
-  }
+  },
   "pre-commit": [
     "test",
     "lint"
