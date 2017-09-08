@@ -82,21 +82,21 @@ describe('serverless-artillery command line interactions', () => {
     });
   });
 
-  describe('acceptance mode invoke actions', (done) => {
-    it('must create new file in tmp directory with mode attribute specified and phases array', () => {
+  describe('acceptance mode invoke actions', () => {
+    it('must create new file in tmp directory with mode attribute specified and phases array', (done) => {
       const newScriptPath = path.join(process.cwd(), 'tests', phaselessScriptPath);
       slsart.invoke({
         script: newScriptPath,
         acceptance: true,
       })
-        .then(() => {
-          const tmpScriptPath = serverlessMocks[0].argv[6];
-          expect(path.dirname(tmpScriptPath)).to.equal(os.tmpdir());
-          expect(serverlessMocks.length).to.equal(1);
-          expect(serverlessMocks[0].initCalled).to.be.true;
-          expect(serverlessMocks[0].argv).to.eql([null, null, 'invoke', '-f', functionName, '-p', tmpScriptPath, '-a']);
-          done; // getting typeError: done is not a function with done();
-        });
+      .then(() => {
+        const tmpScriptPath = serverlessMocks[0].argv[6];
+        expect(path.dirname(tmpScriptPath)).to.equal(os.tmpdir());
+        expect(serverlessMocks.length).to.equal(1);
+        expect(serverlessMocks[0].initCalled).to.be.true;
+        expect(serverlessMocks[0].argv).to.eql([null, null, 'invoke', '-f', functionName, '-p', tmpScriptPath, '-a']);
+        done();
+      });
     });
   });
 

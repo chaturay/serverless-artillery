@@ -664,8 +664,9 @@ describe('serverless-artillery Handler Tests', () => {
           target: 'https://aws.amazon.com',
           phases: [
             {
-              duration: 1,
-              arrivalRate: 1,
+              duration: 1000,
+              arrivalRate: 1000,
+              rampTo: 1000,
             },
           ],
         },
