@@ -26,6 +26,10 @@ class serverlessMock {
   }
   run() {
     this.argv = process.argv;
+    const filePath = this.argv[6];
+    if (fs.existsSync(filePath)) {
+      this.script = JSON.parse(fs.readFileSync(filePath));
+    }
     return BbPromise.resolve();
   }
   _findParameterValue(param) {
@@ -49,7 +53,7 @@ const slsart = require('../lib');
 describe('serverless-artillery command line interactions', () => {
   const functionName = 'loadGenerator';
   const scriptPath = 'script.yml';
-  const phaselessScriptPath = 'phaseless-script.yml';
+  const phaselessScriptPath = path.join(__dirname, 'phaseless-script.yml');
 
   beforeEach(() => {
     serverlessMocks = [];
@@ -83,18 +87,18 @@ describe('serverless-artillery command line interactions', () => {
   });
 
   describe('acceptance mode invoke actions', () => {
-    it('must create new file in tmp directory with mode attribute specified and phases array', (done) => {
-      const newScriptPath = path.join(process.cwd(), 'tests', phaselessScriptPath);
+    it('creates a new file in the OS\'s `tmp` directory with the mode attribute set to "acc"', (done) => {
       slsart.invoke({
-        script: newScriptPath,
+        script: phaselessScriptPath,
         acceptance: true,
       })
       .then(() => {
-        const tmpScriptPath = serverlessMocks[0].argv[6];
-        expect(path.dirname(tmpScriptPath)).to.equal(os.tmpdir());
         expect(serverlessMocks.length).to.equal(1);
+        const tmpScriptPath = serverlessMocks[0].argv[6];
         expect(serverlessMocks[0].initCalled).to.be.true;
-        expect(serverlessMocks[0].argv).to.eql([null, null, 'invoke', '-f', functionName, '-p', tmpScriptPath, '-a']);
+        expect(serverlessMocks[0].argv).to.eql([null, null, 'invoke', '-f', functionName, '-p', tmpScriptPath]);
+        expect(path.dirname(tmpScriptPath)).to.equal(os.tmpdir());
+        expect(serverlessMocks[0].script.mode).to.equal('acc');
         done();
       });
     });
