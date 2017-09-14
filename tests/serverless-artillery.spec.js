@@ -11,6 +11,7 @@ const fs = require('fs');
 const mock = require('mock-require');
 const path = require('path');
 const os = require('os');
+const yaml = require('js-yaml');
 
 let serverlessMocks = [];
 
@@ -26,9 +27,16 @@ class serverlessMock {
   }
   run() {
     this.argv = process.argv;
-    const filePath = this.argv[6];
-    if (fs.existsSync(filePath)) {
-      this.script = JSON.parse(fs.readFileSync(filePath));
+    const scriptPath = this.argv[6];
+    if (fs.existsSync(scriptPath)) {
+      const scriptPathLower = scriptPath.toLowerCase();
+      const isYamlFile = scriptPathLower.endsWith('.yml') || scriptPathLower.endsWith('.yaml');
+      const fileContents = fs.readFileSync(scriptPath, { encoding: 'utf8' });
+      if (isYamlFile) {
+        this.script = yaml.safeLoad(fileContents);
+      } else {
+        this.script = JSON.parse(fileContents);
+      }
     }
     return BbPromise.resolve();
   }
@@ -71,7 +79,7 @@ describe('serverless-artillery command line interactions', () => {
     });
   });
 
-  describe('invoke actions', () => {
+  describe('performance mode invoke actions', () => {
     it('must use Serverless invoke command', (done) => {
       const newScriptPath = path.join(process.cwd(), 'lib', 'lambda', scriptPath);
       slsart.invoke({

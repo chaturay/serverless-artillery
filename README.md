@@ -162,23 +162,20 @@ For example, change the script to target your service:
 config:
   target: "https://your.endpoint.com"
 scenarios:
-  -
-    flow:
-      -
-        get:
-          url: "/your/path"
+  - flow:
+    - get:
+        url: "/your/path"
 
 ```
 
 and up the duration of the test to one minute and provide more load:
 
 ```
-  config:
-    phases:
-      -
-        duration: 60      # Duration of test in seconds
-        arrivalRate: 100  # Starting rate (requests per second)
-        rampTo: 200       # Ending rate (RPS at end of test duration)
+config:
+  phases:
+    - duration: 60      # Duration of test in seconds
+      arrivalRate: 100  # Starting rate (requests per second)
+      rampTo: 200       # Ending rate (RPS at end of test duration)
 ```
 
 Then invoke the function with your script again using:
@@ -212,15 +209,15 @@ $ slsart invoke -a
 
 To run exclusively in acceptance mode, hard code the mode into your script:
 ```
-{
   mode: acceptance
   ...
-}
 ```
 *note: 'acceptance' may be abbreviated to 'acc' in the script*
 
-Scripts running in acceptance mode do not require a `phases` array in the `config` section of the script.
+Scripts running in acceptance mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via the `-a` flag) and have them anyway.
 
+[comment]: # (For the purposes of facilitating the use of this tool in a CI/CD pipeline, if any of the acceptance tests fail to successfully complete, the process will exit with a non-zero exit code.)
+[comment]: # ()
 ## Function Customization
 
 Sometimes you need to customize your load testing function.  Sometimes occassionally becomes all the times.  The endpoints you need to slam are in the VPC or you need to separate out various versions of the load testing function in order to maintain least privilege.  Perhaps you really want to draw from a data payload to feed IDs into the endpoints you will be hitting.  We welcome you to:

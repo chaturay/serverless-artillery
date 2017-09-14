@@ -749,4 +749,74 @@ describe('serverless-artillery Handler Tests', () => {
       ]);
     });
   });
+  /**
+   * ANALYZE ACCEPTANCE TEST REPORTS
+   */
+  describe('#analyzeAcceptance', () => {
+    it('handles a report set of zero reports', () => {
+      const reports = [];
+      expected = {
+        errors: 0,
+        reports,
+      };
+      result = handler.impl.analyzeAcceptance(reports);
+      expect(result).to.eql(expected);
+    });
+    it('handles a report set with no errors', () => {
+      const reports = [
+        {
+          errors: {},
+        },
+        {
+          errors: {},
+        },
+      ];
+      expected = {
+        errors: 0,
+        reports,
+      };
+      result = handler.impl.analyzeAcceptance(reports);
+      expect(result).to.eql(expected);
+    });
+    it('handles a report set with some errors', () => {
+      const reports = [
+        {
+          errors: {
+            foo: 'bar',
+          },
+        },
+        {
+          errors: {},
+        },
+      ];
+      expected = {
+        errors: 1,
+        errorMessage: '1 acceptance test failure',
+        reports,
+      };
+      result = handler.impl.analyzeAcceptance(reports);
+      expect(result).to.eql(expected);
+    });
+    it('handles a report set with all errors', () => {
+      const reports = [
+        {
+          errors: {
+            foo: 'bar',
+          },
+        },
+        {
+          errors: {
+            foo: 'baz',
+          },
+        },
+      ];
+      expected = {
+        errors: 2,
+        errorMessage: '2 acceptance test failures',
+        reports,
+      };
+      result = handler.impl.analyzeAcceptance(reports);
+      expect(result).to.eql(expected);
+    });
+  });
 });
