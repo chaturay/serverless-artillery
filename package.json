@@ -1,6 +1,6 @@
 {
   "name": "serverless-artillery",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "A serverless performance testing tool. `serverless` + `artillery` = crush.  a.k.a. Orbital Laziers",
   "main": "index.js",
   "bin": {
@@ -10,7 +10,8 @@
   "scripts": {
     "test": "nyc ./node_modules/.bin/mocha -r aws-sdk -r artillery-core --recursive -R min tests",
     "lint": "eslint . bin/serverless-artillery",
-    "postinstall": "node ./postinstall.js"
+    "postinstall": "node ./postinstall.js",
+    "publish": "./node_modules/.bin/np"
   },
   "repository": {
     "type": "git",
@@ -49,6 +50,7 @@
     "eslint-plugin-react": "^6.4.1",
     "mocha": "^3.0.2",
     "mock-require": "^1.3.0",
+    "np": "^2.16.0",
     "pre-commit": "^1.1.3",
     "nyc": "^11.0.3"
   },

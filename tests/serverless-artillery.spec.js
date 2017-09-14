@@ -73,7 +73,7 @@ describe('serverless-artillery command line interactions', () => {
       .then(() => {
         expect(serverlessMocks.length).to.equal(1);
         expect(serverlessMocks[0].initCalled).to.be.true;
-        expect(serverlessMocks[0].argv).to.eql([null, null, 'deploy', '-f', functionName]);
+        expect(serverlessMocks[0].argv).to.eql([null, null, 'deploy']);
         done();
       });
     });
@@ -118,7 +118,7 @@ describe('serverless-artillery command line interactions', () => {
         .then(() => {
           expect(serverlessMocks.length).to.equal(1);
           expect(serverlessMocks[0].initCalled).to.be.true;
-          expect(serverlessMocks[0].argv).to.eql([null, null, 'remove', '-f', functionName]);
+          expect(serverlessMocks[0].argv).to.eql([null, null, 'remove']);
           done();
         });
     });
