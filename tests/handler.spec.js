@@ -660,6 +660,7 @@ describe('serverless-artillery Handler Tests', () => {
   describe('#splitScriptByFlow', () => {
     it('splits a script with 1 flow correctly, changing duration and arrivalRate to 1', () => {
       const newScript = {
+        mode: 'acc',
         config: {
           target: 'https://aws.amazon.com',
           phases: [
@@ -677,6 +678,7 @@ describe('serverless-artillery Handler Tests', () => {
       const scripts = handler.impl.splitScriptByFlow(newScript);
       expect(scripts).to.deep.equal([
         {
+          mode: 'perf',
           config: {
             target: 'https://aws.amazon.com',
             phases: [
@@ -695,6 +697,7 @@ describe('serverless-artillery Handler Tests', () => {
     });
     it('split a script with 2 flows into two scripts with one flow, each with duration = 1 and arrivalRate = 1', () => {
       const newScript = {
+        mode: 'acc',
         config: {
           target: 'https://aws.amazon.com',
           phases: [
@@ -717,6 +720,7 @@ describe('serverless-artillery Handler Tests', () => {
       const scripts = handler.impl.splitScriptByFlow(newScript);
       expect(scripts).to.deep.equal([
         {
+          mode: 'perf',
           config: {
             target: 'https://aws.amazon.com',
             phases: [
@@ -732,6 +736,7 @@ describe('serverless-artillery Handler Tests', () => {
           ],
         },
         {
+          mode: 'perf',
           config: {
             target: 'https://aws.amazon.com',
             phases: [
