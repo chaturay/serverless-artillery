@@ -9,6 +9,7 @@ node_js:
 before_script:
   - 'if [ "$NPM_VERSION" ]; then npm install -g npm@^$NPM_VERSION; fi'
   - 'npm --version'
+  - 'npm i -g serverless'
 
 env:
   - NPM_VERSION=2
