@@ -89,31 +89,31 @@ describe('serverless-artillery implementation', () => {
       'reads from command line arguments via `-d` flag',
       () => slsart.impl.getInput({ d: testJsonScriptStringified })
         .then((script) => { expect(script).to.eql(testJsonScriptStringified); })
-        .catch(() => expect(false))
+        .catch(() => expect(false)) // eslint-disable-line comma-dangle
     );
     it(
       'reads from command line arguments via `--data` flag',
       () => slsart.impl.getInput({ data: testJsonScriptStringified })
         .then((script) => { expect(script).to.eql(testJsonScriptStringified); })
-        .catch(() => expect(false))
+        .catch(() => expect(false)) // eslint-disable-line comma-dangle
     );
     it(
       'reads from a file via `-p` flag',
       () => slsart.impl.getInput({ p: testJsonScriptPath })
         .then((script) => { expect(script).to.eql(`${JSON.stringify(testJsonScript, null, 2)}\n`); })
-        .catch(() => expect(false))
+        .catch(() => expect(false)) // eslint-disable-line comma-dangle
     );
     it(
       'reads from a file via `--path` flag',
       () => slsart.impl.getInput({ path: testJsonScriptPath })
         .then((script) => { expect(script).to.eql(`${JSON.stringify(testJsonScript, null, 2)}\n`); })
-        .catch(() => expect(false))
+        .catch(() => expect(false)) // eslint-disable-line comma-dangle
     );
     it(
       'fails when it cannot find the file given via `-p` flag',
       () => slsart.impl.getInput({ p: 'NOT_A_FILE' })
         .then(() => expect(false))
-        .catch(() => expect(true))
+        .catch(() => expect(true)) // eslint-disable-line comma-dangle
     );
   });
 
@@ -219,7 +219,7 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
         .then(() => {
           process.argv = argv;
           slsart.impl.serverlessRunner = slsRunner;
-        })
+        }) // eslint-disable-line comma-dangle
     );
   });
 
@@ -265,16 +265,16 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
           { width: 1, length: 1, maxLength: 2, maxWidth: 2 },
           {},
           () => slsart.invoke({ d: testJsonScriptStringified })
-            .then(() => expect(logs[1]).to.eql(completeMessage))
-        )
+            .then(() => expect(logs[1]).to.eql(completeMessage)) // eslint-disable-line comma-dangle
+        ) // eslint-disable-line comma-dangle
       );
       it('reports future completion estimate (when script must be distributed across functions)',
         replaceImpl(
           { width: 1, length: 3, maxLength: 2, maxWidth: 2 },
           {},
           () => slsart.invoke({ d: testJsonScriptStringified })
-            .then(() => expect(logs[1]).to.eql(willCompleteMessage(3)))
-        )
+            .then(() => expect(logs[1]).to.eql(willCompleteMessage(3))) // eslint-disable-line comma-dangle
+        ) // eslint-disable-line comma-dangle
       );
     });
     describe('acceptance mode', () => {
@@ -283,8 +283,8 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
           { width: 1, length: 3, maxLength: 2, maxWidth: 2 },
           {},
           () => slsart.invoke({ acceptance: true, d: testJsonScriptStringified })
-            .then(() => expect(logs[1]).to.eql(completeMessage))
-        )
+            .then(() => expect(logs[1]).to.eql(completeMessage)) // eslint-disable-line comma-dangle
+        ) // eslint-disable-line comma-dangle
       );
       it('respects scripts declaring acceptance mode',
         replaceImpl(
@@ -295,8 +295,8 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
             script.mode = 'acc';
             return slsart.invoke({ d: JSON.stringify(script) })
               .then(() => expect(logs[1]).to.eql(completeMessage));
-          }
-        )
+          } // eslint-disable-line comma-dangle
+        ) // eslint-disable-line comma-dangle
       );
       it('reports acceptance test results to the console',
         replaceImpl(
@@ -309,8 +309,8 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
               .then(() => {
                 expect(logs[3]).to.eql(JSON.stringify({ foo: 'bar' }, null, 2));
               });
-          }
-        )
+          } // eslint-disable-line comma-dangle
+        ) // eslint-disable-line comma-dangle
       );
       it('exits the process with a non-zero exit code when an error occurs during the acceptance test',
         replaceImpl(
@@ -333,8 +333,8 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
             }).then(() => {
               process.exit = exit;
             });
-          }
-        )
+          } // eslint-disable-line comma-dangle
+        ) // eslint-disable-line comma-dangle
       );
     });
   });
@@ -353,7 +353,7 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
         .then(() => {
           process.argv = argv;
           slsart.impl.serverlessRunner = slsRunner;
-        })
+        }) // eslint-disable-line comma-dangle
     );
   });
 
@@ -363,7 +363,7 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
     it('refuses to overwrite an existing script',
       () => slsart.script({ out: 'README.md' })
         .then(() => expect(false))
-        .catch(() => expect(true))
+        .catch(() => expect(true)) // eslint-disable-line comma-dangle
     );
     it('write default values to a new file',
       () => BbPromise.resolve()
@@ -374,7 +374,7 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
         .then(() => {
           slsart.impl.generateScript = generateScript;
           fs.unlink(notAFile);
-        })
+        }) // eslint-disable-line comma-dangle
     );
   });
 
@@ -404,7 +404,7 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
         .then(() => slsart.configure({ debug: true, trace: true }))
         .then(() => expect(false))
         .catch(() => expect(true))
-        .then(() => restoreCwd())
+        .then(() => restoreCwd()) // eslint-disable-line comma-dangle
     );
     it('creates unique project artifacts and installs it\'s dependencies',
       function createUniqueArtifacts() { // eslint-ignore-line prefer-arrow-callback
@@ -418,28 +418,33 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
               slsart.constants.ServerlessFiles.map(
                 file => fs.accessAsync(path.join(tmpdir, file))
                   .then(() => expect(true))
-                  .catch(() => expect(false))
-              )
+                  .catch(() => expect(false)) // eslint-disable-line comma-dangle
+              ) // eslint-disable-line comma-dangle
             )
+            // For the record, not mocking the npm install and validating here is a little inappropriate.
+            // The reason for doing it here is that it doesn't appropriate fit a test of ~/lib/npm.js since
+            // this code combines that code with the project artifacts.
+            // Further, given that this test does the set up, it is more efficient to test our expectations around
+            // project dependency installation (especially since everything installed will be deployed to the lambda).
             .concat(
               Object.keys(packageJson.dependencies).map(
                 dependency => fs.accessAsync(path.join(tmpdir, 'node_modules', dependency))
                   .then(() => expect(true))
-                  .catch(() => expect(false))
-              )
+                  .catch(() => expect(false)) // eslint-disable-line comma-dangle
+              ) // eslint-disable-line comma-dangle
             )
             .concat(
               Object.keys(packageJson.devDependencies).map(
                 devDependency => fs.accessAsync(path.join(tmpdir, 'node_modules', devDependency))
                   .then(() => expect(false))
-                  .catch(() => expect(true))
-              )
-            )
+                  .catch(() => expect(true)) // eslint-disable-line comma-dangle
+              ) // eslint-disable-line comma-dangle
+            ) // eslint-disable-line comma-dangle
           )
           .catch(() => expect(false))
           .then(() => restoreCwd())
           .then(() => rmdir(tmpdir));
-      }
+      } // eslint-disable-line comma-dangle
     );
     it('rejects the promise if npm install fails', () => {
       // TOOD implement test
