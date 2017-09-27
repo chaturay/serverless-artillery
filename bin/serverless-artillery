@@ -34,8 +34,8 @@ const yargs = require('yargs')
     'https://serverless.com/framework/docs/providers/aws/cli-reference/deploy/ for reference.', {})
   .command(
     'invoke',
-    'Invoke your function with your Artillery script.  Will prefer a script given by `-d`, `--data`, `--raw`, `-p`, ' +
-    'or `--path` over a `script.[yml|json]` file in the current directory over the default script.  Invocation mode ' +
+    'Invoke your function with your Artillery script.  Will prefer a script given by `-d`, `--data`, `-p`, or ' +
+    '`--path` over a `script.[yml|json]` file in the current directory over the default script.  Invocation mode ' +
     'will default to "performance" but adding the `-a` flag will run the script in "acceptance" mode.  ' +
     'See https://serverless.com/framework/docs/providers/aws/cli-reference/invoke/ for reference.',
     {
@@ -44,8 +44,18 @@ const yargs = require('yargs')
         description: 'Execute the script in acceptance mode.  It will execute each flow once, reporting failures.',
         requiresArg: false,
       },
+      d: {
+        alias: 'data',
+        description: 'A stringified script to execute',
+        requiresArg: true,
+      },
+      p: {
+        alias: 'path',
+        description: 'A path to the file containing the script to execute',
+        requiresArg: true,
+      },
       si: {
-        alias: 'stdin',
+        alias: 'stdIn',
         description: 'Have serverless read the event to invoke the remote function with from the "standard in" stream.',
         requiresArg: false,
       },

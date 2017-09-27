@@ -43,7 +43,7 @@ Note that you may need to define `AWS_PROFILE` to declare the AWS credentials to
 
 Use arbitrary script files
 
-`$ slsart -s /my/path/to/my.other.script.yml`
+`$ slsart -p /my/path/to/my.other.script.yml`
 
 Generate a customizable script on the CLI (hit `https://your.endpoint.com` with `10` requests per second, scaling up to `25` requests per second over `60` seconds)
 
@@ -63,13 +63,20 @@ $ nano handler.js
 $ slsart --help
 Commands:
   deploy     Deploy a default version of the function that will execute your
-             Artillery scripts.
+             Artillery scripts.  See
+             https://serverless.com/framework/docs/providers/aws/cli-reference/deploy/
+             for reference.
   invoke     Invoke your function with your Artillery script.  Will prefer a
-             script given by `-s` over a `script.[yml|json]` in the current
-             directory over the default script.  Defaults to running
-             in performance mode but can be run in acceptance mode (-a).
+             script given by `-d`, `--data`, `-p`, or `--path` over a
+             `script.[yml|json]` file in the current directory over the default
+             script.  Invocation mode will default to "performance" but adding
+             the `-a` flag will run the script in "acceptance" mode.  See
+             https://serverless.com/framework/docs/providers/aws/cli-reference/invoke/
+             for reference.
   remove     Remove the function and the associated resources created for or by
-             it.
+             it.  See
+             https://serverless.com/framework/docs/providers/aws/cli-reference/remove/
+             for reference.
   script     Create a local Artillery script so that you can customize it for
              your specific load requirements.  See https://artillery.io for
              documentation.
@@ -93,8 +100,7 @@ $ slsart deploy --help
 
 slsart deploy
 
-Options:
-  -r, --region  The region to deploy the function into.                 [string]
+See https://serverless.com/framework/docs/providers/aws/cli-reference/deploy/ for further supported options.
 ```
 
 #### invoke
@@ -104,11 +110,41 @@ $ slsart invoke --help
 slsart invoke
 
 Options:
-  -r, --region  The region to invoke the function in.                   [string]
-  -s, --script  The Artillery script to execute.                        [string]
   -a, --acceptance  Execute the script in acceptance mode.  It will execute each
                     flow once, reporting failures.
+  -d, --data        A stringified script to execute
+  -p, --path        A path to the file containing the script to execute
+  --si, --stdIn     Have serverless read the event to invoke the remote function
+                    with from the "standard in" stream.
 
+See https://serverless.com/framework/docs/providers/aws/cli-reference/invoke/ for further supported options.
+
+[comment]: # (LEGACY MANAGEMENT BEGIN)
+Removed Flags:
+  -s, --script      In order to support the full CLI experience of the Serverless 
+                    Framework, a collision between this flag and the -s/--stage
+                    flags of those frameworks had to be resovled.  These flags
+                    are thereby invalidated and will be rejected.
+[comment]: # (LEGACY MANAGEMENT END)
+
+Reserved Flags:
+-t, --type          serverless-artillery calculates, based on your HTTP timeout
+                    settings, the expected completion of your script and sets
+                    the invocation type appropriately.  Dropping a 
+                    RequestResponse connection can trigger function retries for
+                    triple the load and you will not receive a report directly
+                    from an Event invocation type.
+-f, --function      serverless-artillery provides the function and its
+                    implementation.  If you want an arbitrary function, please
+                    consider using the Serverless Framework, you'll be much
+                    happier.
+
+Unsupported Flags:
+--raw               serverless-artillery, having provided the function implementation
+                    knows that it only supports JSON, stending raw strings is
+                    unsupported.  If you have altered the function to accept other
+                    data, you probably already know the Serverless Framework and
+                    are using it.  Why are you trying this flag in that case?
 ```
 
 #### remove
@@ -117,8 +153,7 @@ $ slsart remove --help
 
 slsart remove
 
-Options:
-  -r, --region  The region to remove the function from.                 [string]
+See https://serverless.com/framework/docs/providers/aws/cli-reference/remove/ for further supported options.
 ```
 
 #### script
@@ -194,7 +229,7 @@ $ nano trafficSpike.yml
 Update the load spec...  Then invoke it!
 
 ```
-$ slsart invoke -s trafficSpike.yml
+$ slsart invoke -p trafficSpike.yml
 ```
 ### Acceptance Mode 
 
