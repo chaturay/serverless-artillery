@@ -14,7 +14,7 @@ service: serverless-artillery
 
 provider: # Using Node JS v4.3 on AWS
   name: aws
-  runtime: nodejs4.3
+  runtime: nodejs6.10
   iamRoleStatements:
     - Effect: "Allow"
       Action:

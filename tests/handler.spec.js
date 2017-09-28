@@ -654,4 +654,174 @@ describe('serverless-artillery Handler Tests', () => {
       ]);
     });
   });
+  /**
+   * SPLIT SCRIPT BY FLOW
+   */
+  describe('#splitScriptByFlow', () => {
+    it('splits a script with 1 flow correctly, changing duration and arrivalRate to 1', () => {
+      const newScript = {
+        mode: 'acc',
+        config: {
+          target: 'https://aws.amazon.com',
+          phases: [
+            { duration: 1000, arrivalRate: 1000, rampTo: 1000 },
+          ],
+        },
+        scenarios: [
+          {
+            flow: [
+              { get: { url: '/1' } },
+            ],
+          },
+        ],
+      };
+      const scripts = handler.impl.splitScriptByFlow(newScript);
+      expect(scripts).to.deep.equal([
+        {
+          mode: 'perf',
+          config: {
+            target: 'https://aws.amazon.com',
+            phases: [
+              { duration: 1, arrivalRate: 1 },
+            ],
+          },
+          scenarios: [
+            {
+              flow: [
+                { get: { url: '/1' } },
+              ],
+            },
+          ],
+        },
+      ]);
+    });
+    it('split a script with 2 flows into two scripts with one flow, each with duration = 1 and arrivalRate = 1', () => {
+      const newScript = {
+        mode: 'acc',
+        config: {
+          target: 'https://aws.amazon.com',
+          phases: [
+            { duration: 1000, arrivalRate: 1000, rampTo: 1000 },
+          ],
+        },
+        scenarios: [
+          {
+            flow: [
+              { get: { url: '/1' } },
+            ],
+          },
+          {
+            flow: [
+              { get: { url: '/2' } },
+            ],
+          },
+        ],
+      };
+      const scripts = handler.impl.splitScriptByFlow(newScript);
+      expect(scripts).to.deep.equal([
+        {
+          mode: 'perf',
+          config: {
+            target: 'https://aws.amazon.com',
+            phases: [
+              { duration: 1, arrivalRate: 1 },
+            ],
+          },
+          scenarios: [
+            {
+              flow: [
+                { get: { url: '/1' } },
+              ],
+            },
+          ],
+        },
+        {
+          mode: 'perf',
+          config: {
+            target: 'https://aws.amazon.com',
+            phases: [
+              { duration: 1, arrivalRate: 1 },
+            ],
+          },
+          scenarios: [
+            {
+              flow: [
+                { get: { url: '/2' } },
+              ],
+            },
+          ],
+        },
+      ]);
+    });
+  });
+  /**
+   * ANALYZE ACCEPTANCE TEST REPORTS
+   */
+  describe('#analyzeAcceptance', () => {
+    it('handles a report set of zero reports', () => {
+      const reports = [];
+      expected = {
+        errors: 0,
+        reports,
+      };
+      result = handler.impl.analyzeAcceptance(reports);
+      expect(result).to.eql(expected);
+    });
+    it('handles a report set with no errors', () => {
+      const reports = [
+        {
+          errors: {},
+        },
+        {
+          errors: {},
+        },
+      ];
+      expected = {
+        errors: 0,
+        reports,
+      };
+      result = handler.impl.analyzeAcceptance(reports);
+      expect(result).to.eql(expected);
+    });
+    it('handles a report set with some errors', () => {
+      const reports = [
+        {
+          errors: {
+            foo: 'bar',
+          },
+        },
+        {
+          errors: {},
+        },
+      ];
+      expected = {
+        errors: 1,
+        errorMessage: '1 acceptance test failure',
+        reports,
+      };
+      result = handler.impl.analyzeAcceptance(reports);
+      expect(result).to.eql(expected);
+    });
+    it('handles a report set with all errors', () => {
+      const reports = [
+        {
+          errors: {
+            foo: 'bar',
+          },
+        },
+        {
+          errors: {
+            foo: 'baz',
+          },
+        },
+      ];
+      expected = {
+        errors: 2,
+        errorMessage: '2 acceptance test failures',
+        reports,
+      };
+      result = handler.impl.analyzeAcceptance(reports);
+      expect(result).to.eql(expected);
+    });
+  });
 });

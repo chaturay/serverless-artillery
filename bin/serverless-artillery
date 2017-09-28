@@ -29,7 +29,8 @@ const yargs = require('yargs')
     },
   })
   .command('invoke', 'Invoke your function with your Artillery script.  Will prefer a script given by `-s` over a ' +
-    '`script.[yml|json]` in the current directory over the preexisting default script.',
+    '`script.[yml|json]` in the current directory over the default script.  Invocation mode will default to ' +
+    'performance but adding the `-a` flag will run the script in acceptance mode.',
   {
     s: {
       alias: 'script',
@@ -42,6 +43,11 @@ const yargs = require('yargs')
       description: 'The region in which the function will be executed',
       requiresArg: true,
       type: 'string',
+    },
+    a: {
+      alias: 'acceptance',
+      description: 'Execute the script in acceptance mode.  It will execute each flow once, reporting failures.',
+      requiresArg: false,
     },
   })
   .command('remove', 'Remove the function and the associated resources created for or by it.', {

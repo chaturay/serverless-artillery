@@ -27,7 +27,12 @@ $ slsart deploy                  // If not already deployed.
 
 // create a custom test against your service with a 10 second duration and 3 RPS:
 $ slsart script -e https://your.endpoint.com -d 10 -r 3
-$ slsart invoke     // iterate on editing `./script.yml` and invoking as desired, before...
+
+// run acceptance tests
+$ slsart invoke -a               // iterate on editing `./script.yml` and invoking as desired, before...
+
+// run performance tests
+$ slsart invoke
 
 $ slsart remove
 ```
@@ -61,7 +66,8 @@ Commands:
              Artillery scripts.
   invoke     Invoke your function with your Artillery script.  Will prefer a
              script given by `-s` over a `script.[yml|json]` in the current
-             directory over the default script.
+             directory over the default script.  Defaults to running
+             in performance mode but can be run in acceptance mode (-a).
   remove     Remove the function and the associated resources created for or by
              it.
   script     Create a local Artillery script so that you can customize it for
@@ -100,6 +106,9 @@ slsart invoke
 Options:
   -r, --region  The region to invoke the function in.                   [string]
   -s, --script  The Artillery script to execute.                        [string]
+  -a, --acceptance  Execute the script in acceptance mode.  It will execute each
+                    flow once, reporting failures.
+
 ```
 
 #### remove
@@ -153,23 +162,20 @@ For example, change the script to target your service:
 config:
   target: "https://your.endpoint.com"
 scenarios:
-  -
-    flow:
-      -
-        get:
-          url: "/your/path"
+  - flow:
+    - get:
+        url: "/your/path"
 
 ```
 
 and up the duration of the test to one minute and provide more load:
 
 ```
-  config:
-    phases:
-      -
-        duration: 60      # Duration of test in seconds
-        arrivalRate: 100  # Starting rate (requests per second)
-        rampTo: 200       # Ending rate (RPS at end of test duration)
+config:
+  phases:
+    - duration: 60      # Duration of test in seconds
+      arrivalRate: 100  # Starting rate (requests per second)
+      rampTo: 200       # Ending rate (RPS at end of test duration)
 ```
 
 Then invoke the function with your script again using:
@@ -190,6 +196,27 @@ Update the load spec...  Then invoke it!
 ```
 $ slsart invoke -s trafficSpike.yml
 ```
+### Acceptance Mode 
+
+Find defects before performance testing! Acceptance mode runs each flow in your script exactly once and reports the results.
+
+To use:
+ 
+Add -a to `invoke` command:
+```
+$ slsart invoke -a
+```
+
+To run exclusively in acceptance mode, hard code the mode into your script:
+```
+  mode: acceptance
+  ...
+```
+*note: 'acceptance' may be abbreviated to 'acc' in the script*
+
+Scripts running in acceptance mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via the `-a` flag) and have them anyway.
+
+For the purposes of facilitating the use of this tool in a CI/CD pipeline, if any of the acceptance tests fail to successfully complete, the process will exit with a non-zero exit code.
 
 ## Function Customization
 
