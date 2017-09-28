@@ -1,9 +1,7 @@
-'use strict';
-
 function testMethod() {
-  return 'testValue';
+  return 'testValue'
 }
 
 module.exports = {
   testMethod,
-};
+}

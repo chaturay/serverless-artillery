@@ -1,10 +1,8 @@
 #!/usr/bin/env node
 
-'use strict';
-
-const os = require('os');
-const packageJson = require('../package.json');
-const slsArt = require('../lib/');
+const os = require('os')
+const packageJson = require('../package.json')
+const slsArt = require('../lib/')
 
 /**
  * Determine whether any of the given flags exists in the given argv (object representation)
@@ -12,7 +10,7 @@ const slsArt = require('../lib/');
  * @param argv The object containing the processed CLI arguments
  * @returns boolean Whether one of the given flags was a truthy value within the given argv object.
  */
-const hasFlag = (flags, argv) => flags.some(flag => (f => f in argv && argv[f])(flag.split('-').join('')));
+const hasFlag = (flags, argv) => flags.some(flag => (f => f in argv && argv[f])(flag.split('-').join('')))
 
 const yargs = require('yargs')
   .help()
@@ -68,14 +66,14 @@ const yargs = require('yargs')
     (argv) => {
       const breakingFlags = [
         '-s', '--script',
-      ];
+      ]
       const reservedFlags = [
         '-t', '--type',
         '-f', '--function',
-      ];
+      ]
       const unsupportedFlags = [
         '--raw',
-      ];
+      ]
       // ##!! LEGACY MANAGEMENT BEGIN !!##
       // TODO Delete this block once transition is satisfactory (previously we accepted -s and --script to provide the
       // TODO artillery script.  This conflicts with the -s and --stage flags of the serverless framework.  As such,
@@ -101,8 +99,8 @@ const yargs = require('yargs')
           'NOTE: if you have intended to supply the "STAGE" of the service, please use the long form of that flag ' +
           `(\`--stage\`) to specify that setting.  This constraint will eventually be removed.${os.EOL}${os.EOL}`,
           `DDOS On!${os.EOL}${os.EOL}`,
-        ].join(''));
-        process.exit(1);
+        ].join(''))
+        process.exit(1)
       }
       // ##!! LEGACY MANAGEMENT END   !!##
       if (hasFlag(reservedFlags, argv)) {
@@ -115,8 +113,8 @@ const yargs = require('yargs')
           }".${os.EOL}`,
           'Please see the "reserved flags" documentation in the README ',
           `(https://www.npmjs.com/package/serverless-artillery#reserved-flags).${os.EOL}`,
-        ].join(''));
-        process.exit(1);
+        ].join(''))
+        process.exit(1)
       } else if (hasFlag(unsupportedFlags, argv)) {
         console.log([
           os.EOL,
@@ -125,8 +123,8 @@ const yargs = require('yargs')
             Object.keys(unsupportedFlags).map(key => unsupportedFlags[key]).join('", "')}"${os.EOL}`,
           'Please see the "unsupported flags" documentation in the README ',
           `(https://www.npmjs.com/package/serverless-artillery#unsupported-flags).${os.EOL}`,
-        ].join(''));
-        process.exit(1);
+        ].join(''))
+        process.exit(1)
       }
     } // eslint-disable-line comma-dangle
   )
@@ -174,19 +172,19 @@ const yargs = require('yargs')
     'https://docs.serverless.com for documentation.', {})
   .demand(1)
   .strict()
-  .argv;
+  .argv
 
-const command = yargs._[0];
+const command = yargs._[0]
 
 if (yargs.debug) {
-  console.log(`options were:${os.EOL}${JSON.stringify(yargs, null, 2)}`);
-  console.log(`command that will be executed: slsArt[${command}](${yargs})`);
+  console.log(`options were:${os.EOL}${JSON.stringify(yargs, null, 2)}`)
+  console.log(`command that will be executed: slsArt[${command}](${yargs})`)
 }
 
 slsArt[command](yargs)
   .catch((ex) => {
-    console.log(ex.message);
+    console.log(ex.message)
     if (yargs.verbose) {
-      console.log(ex.stack);
+      console.log(ex.stack)
     }
-  });
+  })
