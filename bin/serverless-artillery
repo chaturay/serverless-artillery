@@ -15,7 +15,7 @@ const hasFlag = (flags, argv) => flags.some(
     const f = flag.split('-').join('') // remove '-' or '--'
     return f in argv && argv[f] // flag is defined in argv object (argv name is misleading) and has a truthy value
   } // eslint-disable-line comma-dangle
-);
+)
 
 const yargs = require('yargs')
   .help()
