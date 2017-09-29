@@ -10,7 +10,12 @@ const slsArt = require('../lib/')
  * @param argv The object containing the processed CLI arguments
  * @returns boolean Whether one of the given flags was a truthy value within the given argv object.
  */
-const hasFlag = (flags, argv) => flags.some(flag => (f => f in argv && argv[f])(flag.split('-').join('')))
+const hasFlag = (flags, argv) => flags.some(
+  (flag) => {
+    const f = flag.split('-').join('') // remove '-' or '--'
+    return f in argv && argv[f] // flag is defined in argv object (argv name is misleading) and has a truthy value
+  } // eslint-disable-line comma-dangle
+);
 
 const yargs = require('yargs')
   .help()
