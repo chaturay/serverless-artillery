@@ -3,7 +3,9 @@
 .eslintignore
 .eslintrc.yml
 .gitignore
+.nyc_output
 .travis.yml
+coverage
 docs
 tests
 

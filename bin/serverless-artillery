@@ -2,8 +2,23 @@
 
 'use strict';
 
+const os = require('os');
 const packageJson = require('../package.json');
 const slsArt = require('../lib/');
+
+/**
+ * Determine whether any of the given flags exists in the given argv (object representation)
+ * @param flags The set flags to look for
+ * @param argv The object containing the processed CLI arguments
+ * @returns boolean Whether one of the given flags was a truthy value within the given argv object.
+ */
+const hasFlag = (flags, argv) => flags.some(
+  (flag) => {
+    const f = flag.split('-').join(''); // remove '-' or '--'
+    return f in argv && argv[f]; // flag is defined in argv object (argv name is misleading) and has a truthy value
+  } // eslint-disable-line comma-dangle
+);
+
 const yargs = require('yargs')
   .help()
   .version(packageJson.version)
@@ -20,79 +35,146 @@ const yargs = require('yargs')
     },
   })
   .global('D', 'V')
-  .command('deploy', 'Deploy a default version of the function that will execute your Artillery scripts.', {
-    r: {
-      alias: 'region',
-      description: 'The region where the function will be deployed',
-      requiresArg: true,
-      type: 'string',
+  .command('deploy', 'Deploy a default version of the function that will execute your Artillery scripts.  See ' +
+    'https://serverless.com/framework/docs/providers/aws/cli-reference/deploy/ for reference.', {})
+  .command(
+    'invoke',
+    'Invoke your function with your Artillery script.  Will prefer a script given by `-d`, `--data`, `-p`, or ' +
+    '`--path` over a `script.[yml|json]` file in the current directory over the default script.  Invocation mode ' +
+    'will default to "performance" but adding the `-a` flag will run the script in "acceptance" mode.  ' +
+    'See https://serverless.com/framework/docs/providers/aws/cli-reference/invoke/ for reference.',
+    {
+      a: {
+        alias: 'acceptance',
+        description: 'Execute the script in acceptance mode.  It will execute each flow once, reporting failures.',
+        requiresArg: false,
+      },
+      d: {
+        alias: 'data',
+        description: 'A stringified script to execute',
+        requiresArg: true,
+      },
+      p: {
+        alias: 'path',
+        description: 'A path to the file containing the script to execute',
+        requiresArg: true,
+      },
+      si: {
+        alias: 'stdIn',
+        description: 'Have serverless read the event to invoke the remote function with from the "standard in" stream.',
+        requiresArg: false,
+      },
     },
-  })
-  .command('invoke', 'Invoke your function with your Artillery script.  Will prefer a script given by `-s` over a ' +
-    '`script.[yml|json]` in the current directory over the default script.  Invocation mode will default to ' +
-    'performance but adding the `-a` flag will run the script in acceptance mode.',
-  {
-    s: {
-      alias: 'script',
-      description: 'The Artillery script to execute.',
-      requiresArg: true,
-      type: 'string',
-    },
-    r: {
-      alias: 'region',
-      description: 'The region in which the function will be executed',
-      requiresArg: true,
-      type: 'string',
-    },
-    a: {
-      alias: 'acceptance',
-      description: 'Execute the script in acceptance mode.  It will execute each flow once, reporting failures.',
-      requiresArg: false,
-    },
-  })
-  .command('remove', 'Remove the function and the associated resources created for or by it.', {
-    r: {
-      alias: 'region',
-      description: 'The region from which the function will be removed',
-      requiresArg: true,
-      type: 'string',
-    },
-  })
-  .command('script', 'Create a local Artillery script so that you can customize it for your specific load ' +
-    'requirements.  See https://artillery.io for documentation.',
-  {
-    e: {
-      alias: 'endpoint',
-      description: 'The endpoint to load with traffic.',
-      requiresArg: true,
-      type: 'string',
-    },
-    d: {
-      alias: 'duration',
-      description: 'The duration, in seconds, to load the given endpoint.',
-      requiresArg: true,
-      type: 'number',
-    },
-    r: {
-      alias: 'rate',
-      description: 'The rate, in requests per second, at which to load the given endpoint.',
-      requiresArg: true,
-      type: 'number',
-    },
-    t: {
-      alias: 'rampTo',
-      description: 'The rate to adjust towards away from the given rate, in requests per second at which to load ' +
-        'the given endpoint.',
-      requiresArg: true,
-      type: 'number',
-    },
-    o: {
-      alias: 'out',
-      description: 'The file to output the generated script in to.',
-      requiresArg: true,
-      type: 'string',
-    },
-  })
+    /**
+     * Custom argument rejection logic, to deal with legacy, argument conflicts (between slsart and sls), and
+     * unsupported flags.
+     * @param argv The array of arguments that were provided to the CLI
+     */
+    (argv) => {
+      const breakingFlags = [
+        '-s', '--script',
+      ];
+      const reservedFlags = [
+        '-t', '--type',
+        '-f', '--function',
+      ];
+      const unsupportedFlags = [
+        '--raw',
+      ];
+      // ##!! LEGACY MANAGEMENT BEGIN !!##
+      // TODO Delete this block once transition is satisfactory (previously we accepted -s and --script to provide the
+      // TODO artillery script.  This conflicts with the -s and --stage flags of the serverless framework.  As such,
+      // TODO while we transition our users away from providing the script via -s/--script, we reject those flags and
+      // TODO redirect them.
+      if (hasFlag(breakingFlags, argv)) {
+        console.log([
+          os.EOL,
+          `DDOS Off!${os.EOL}${os.EOL}`,
+          `TL;DR: use -p/--path to supply a script, use --stage to supply a stage.${os.EOL}${os.EOL}`,
+          `**BREAKING CHANGE**${os.EOL}`,
+          'In order to facilitate the richer and more sustainable use of `serverless-artillery`, we have made a ',
+          `'breaking change during this 0.x.x formation period.${os.EOL}`,
+          'The `-s` flag you provided is no longer supported.  Instead, use the `-p` flag (still supplying the path ',
+          'to your script.  The `-p` flag is the standard Serverless Framework flag for supplying a "path" to the ',
+          `"event" file that is to be used to invoke the function.${os.EOL}`,
+          'We apologize for not forseeing the consequence of our previous choice.  On the positive side, the feature ',
+          'enabled by this change allows you to use any valid command line flag of the serverless framework with ',
+          `\`slsart\` in order to facilitate your workflow, whatever is involved.${os.EOL}`,
+          `Notable exceptions include: "${reservedFlags.join('", "')}" `,
+          `flags which are reserved due to assumptions of \`serverless-artillery\`${os.EOL}`,
+          `**BREAKING CHANGE**${os.EOL}${os.EOL}`,
+          'NOTE: if you have intended to supply the "STAGE" of the service, please use the long form of that flag ' +
+          `(\`--stage\`) to specify that setting.  This constraint will eventually be removed.${os.EOL}${os.EOL}`,
+          `DDOS On!${os.EOL}${os.EOL}`,
+        ].join(''));
+        process.exit(1);
+      }
+      // ##!! LEGACY MANAGEMENT END   !!##
+      if (hasFlag(reservedFlags, argv)) {
+        console.log([
+          os.EOL,
+          `!ERROR!${os.EOL}`,
+          'One of the `serverless` flags you provided is reserved for exclusive `serverless-artillery` use, ',
+          `reserved flags include: "${
+            Object.keys(reservedFlags).map(key => reservedFlags[key]).join('", "')
+          }".${os.EOL}`,
+          'Please see the "reserved flags" documentation in the README ',
+          `(https://www.npmjs.com/package/serverless-artillery#reserved-flags).${os.EOL}`,
+        ].join(''));
+        process.exit(1);
+      } else if (hasFlag(unsupportedFlags, argv)) {
+        console.log([
+          os.EOL,
+          `!ERROR!${os.EOL}`,
+          `One of the flags you provided is unsupported by \`serverless-artillery\`.  Unsupported flags include: "${
+            Object.keys(unsupportedFlags).map(key => unsupportedFlags[key]).join('", "')}"${os.EOL}`,
+          'Please see the "unsupported flags" documentation in the README ',
+          `(https://www.npmjs.com/package/serverless-artillery#unsupported-flags).${os.EOL}`,
+        ].join(''));
+        process.exit(1);
+      }
+    } // eslint-disable-line comma-dangle
+  )
+  .command('remove', 'Remove the function and the associated resources created for or by it.  See ' +
+    'https://serverless.com/framework/docs/providers/aws/cli-reference/remove/ for reference.', {})
+  .command(
+    'script',
+    'Create a local Artillery script so that you can customize it for your specific load requirements.  ' +
+    'See https://artillery.io for documentation.',
+    {
+      e: {
+        alias: 'endpoint',
+        description: 'The endpoint to load with traffic.',
+        requiresArg: true,
+        type: 'string',
+      },
+      d: {
+        alias: 'duration',
+        description: 'The duration, in seconds, to load the given endpoint.',
+        requiresArg: true,
+        type: 'number',
+      },
+      r: {
+        alias: 'rate',
+        description: 'The rate, in requests per second, at which to load the given endpoint.',
+        requiresArg: true,
+        type: 'number',
+      },
+      t: {
+        alias: 'rampTo',
+        description: 'The rate to adjust towards away from the given rate, in requests per second at which to load ' +
+          'the given endpoint.',
+        requiresArg: true,
+        type: 'number',
+      },
+      o: {
+        alias: 'out',
+        description: 'The file to output the generated script in to.',
+        requiresArg: true,
+        type: 'string',
+      },
+    } // eslint-disable-line comma-dangle
+  )
   .command('configure', 'Create a local copy of the deployment assets for modification and deployment.  See ' +
     'https://docs.serverless.com for documentation.', {})
   .demand(1)
@@ -102,7 +184,7 @@ const yargs = require('yargs')
 const command = yargs._[0];
 
 if (yargs.debug) {
-  console.log(`options were:\n${JSON.stringify(yargs, null, 2)}`);
+  console.log(`options were:${os.EOL}${JSON.stringify(yargs, null, 2)}`);
   console.log(`command that will be executed: slsArt[${command}](${yargs})`);
 }
 
