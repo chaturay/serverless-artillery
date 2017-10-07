@@ -1,15 +1,13 @@
-'use strict';
-
-const expect = require('chai').expect;
-const path = require('path');
+const expect = require('chai').expect
+const path = require('path')
 
 // eslint-disable-next-line import/no-dynamic-require
-const handler = require(path.join('..', '..', '..', 'lib', 'lambda', 'handler.js'));
+const handler = require(path.join('..', '..', '..', 'lib', 'lambda', 'handler.js'))
 
-let script;
-let phase;
-let result;
-let expected;
+let script
+let phase
+let result
+let expected
 
 describe('serverless-artillery Handler Tests', () => {
   describe('#impl.getSettings', () => {
@@ -22,10 +20,10 @@ describe('serverless-artillery Handler Tests', () => {
           maxChunkRequestsPerSecond: 1,
           timeBufferInMilliseconds: 1,
         },
-      };
-      expect(handler.impl.getSettings(script)).to.eql(script._split); // eslint-disable-line no-underscore-dangle
-    });
-  });
+      }
+      expect(handler.impl.getSettings(script)).to.eql(script._split) // eslint-disable-line no-underscore-dangle
+    })
+  })
   describe('#impl.phaseLength', () => {
     // /**
     //  * Obtain the duration of a phase in seconds.
@@ -44,8 +42,8 @@ describe('serverless-artillery Handler Tests', () => {
     // }
     it('extracts the length of a duration phase', () => {
       // TODO implement tests
-    });
-  });
+    })
+  })
   describe('#impl.scriptLength', () => {
     // /**
     //  * Calculate the total duration of the Artillery script in seconds.  If a phase does not have a valid duration,
@@ -72,8 +70,8 @@ describe('serverless-artillery Handler Tests', () => {
     // },
     it('', () => {
       // TODO implement tests
-    });
-  });
+    })
+  })
   describe('#impl.phaseWidth', () => {
     // /**
     //  * Obtain the specified requests per second of a phase.
@@ -96,8 +94,8 @@ describe('serverless-artillery Handler Tests', () => {
     // },
     it('', () => {
       // TODO implement tests
-    });
-  });
+    })
+  })
   describe('#impl.scriptWidth', () => {
     // /**
     //  * Calculate the maximum width of a script in RPS.  If a phase does not have a valid width, the index of that
@@ -134,8 +132,8 @@ describe('serverless-artillery Handler Tests', () => {
     // },
     it('', () => {
       // TODO implement tests
-    });
-  });
+    })
+  })
   describe('#impl.', () => {
     it('', () => {
       // /**
@@ -239,8 +237,8 @@ describe('serverless-artillery Handler Tests', () => {
       //   return ret;
       // },
       // TODO implement tests
-    });
-  });
+    })
+  })
   /**
    * SPLIT PHASE BY LENGTH
    */
@@ -249,7 +247,7 @@ describe('serverless-artillery Handler Tests', () => {
       phase = {
         duration: 3 * handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
         arrivalRate: 1,
-      };
+      }
       expected = {
         chunk: {
           duration: handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
@@ -259,16 +257,16 @@ describe('serverless-artillery Handler Tests', () => {
           duration: 2 * handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
           arrivalRate: 1,
         },
-      };
-      result = handler.impl.splitPhaseByLength(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS);
-      expect(result).to.deep.equal(expected);
-    });
+      }
+      result = handler.impl.splitPhaseByLength(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
+      expect(result).to.deep.equal(expected)
+    })
     it('splitting a ramping phase of two chunk\'s length into two parts.', () => {
       phase = {
         duration: 3 * handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
         arrivalRate: 1,
         rampTo: 4,
-      };
+      }
       expected = {
         chunk: {
           duration: handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
@@ -280,16 +278,16 @@ describe('serverless-artillery Handler Tests', () => {
           arrivalRate: 2,
           rampTo: 4,
         },
-      };
-      result = handler.impl.splitPhaseByLength(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS);
-      expect(result).to.deep.equal(expected);
-    });
+      }
+      result = handler.impl.splitPhaseByLength(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
+      expect(result).to.deep.equal(expected)
+    })
     it('splits ramp of two chunk\'s length into two parts, rounding to the nearest integer rate per second.', () => {
       phase = {
         duration: 2 * handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
         arrivalRate: 1,
         rampTo: 2,
-      };
+      }
       expected = {
         chunk: {
           duration: handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
@@ -301,15 +299,15 @@ describe('serverless-artillery Handler Tests', () => {
           arrivalRate: 2,
           rampTo: 2,
         },
-      };
-      result = handler.impl.splitPhaseByLength(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS);
-      expect(result).to.deep.equal(expected);
-    });
+      }
+      result = handler.impl.splitPhaseByLength(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
+      expect(result).to.deep.equal(expected)
+    })
     it('splitting an arrival count phase of two chunk\'s length into two parts.', () => {
       phase = {
         duration: 2 * handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
         arrivalCount: 2 * handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
-      };
+      }
       expected = {
         chunk: {
           duration: handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
@@ -319,14 +317,14 @@ describe('serverless-artillery Handler Tests', () => {
           duration: handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
           arrivalCount: handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
         },
-      };
-      result = handler.impl.splitPhaseByLength(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS);
-      expect(result).to.deep.equal(expected);
-    });
+      }
+      result = handler.impl.splitPhaseByLength(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
+      expect(result).to.deep.equal(expected)
+    })
     it('splitting a pause phase of two chunk\'s length into two parts.', () => {
       phase = {
         pause: 2 * handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
-      };
+      }
       expected = {
         chunk: {
           pause: handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
@@ -334,11 +332,11 @@ describe('serverless-artillery Handler Tests', () => {
         remainder: {
           pause: handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
         },
-      };
-      result = handler.impl.splitPhaseByLength(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS);
-      expect(result).to.deep.equal(expected);
-    });
-  });
+      }
+      result = handler.impl.splitPhaseByLength(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
+      expect(result).to.deep.equal(expected)
+    })
+  })
   /**
    * SPLIT SCRIPT BY LENGTH
    */
@@ -357,7 +355,7 @@ describe('serverless-artillery Handler Tests', () => {
             },
           ],
         },
-      };
+      }
       expected = {
         chunk: {
           config: {
@@ -379,10 +377,10 @@ describe('serverless-artillery Handler Tests', () => {
             ],
           },
         },
-      };
-      result = handler.impl.splitScriptByLength(script, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS);
-      expect(result).to.deep.equal(expected);
-    });
+      }
+      result = handler.impl.splitScriptByLength(script, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
+      expect(result).to.deep.equal(expected)
+    })
     it('splitting a script where there is a natural phase split at MAX_CHUNK_DURATION between many phases.', () => {
       script = {
         config: {
@@ -409,7 +407,7 @@ describe('serverless-artillery Handler Tests', () => {
             },
           ],
         },
-      };
+      }
       expected = {
         chunk: {
           config: {
@@ -443,10 +441,10 @@ describe('serverless-artillery Handler Tests', () => {
             ],
           },
         },
-      };
-      result = handler.impl.splitScriptByLength(script, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS);
-      expect(result).to.deep.equal(expected);
-    });
+      }
+      result = handler.impl.splitScriptByLength(script, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
+      expect(result).to.deep.equal(expected)
+    })
     it('splitting a script where a phase must be split at MAX_CHUNK_DURATION.', () => {
       script = {
         config: {
@@ -465,7 +463,7 @@ describe('serverless-artillery Handler Tests', () => {
             },
           ],
         },
-      };
+      }
       expected = {
         chunk: {
           config: {
@@ -495,11 +493,11 @@ describe('serverless-artillery Handler Tests', () => {
             ],
           },
         },
-      };
-      result = handler.impl.splitScriptByLength(script, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS);
-      expect(result).to.deep.equal(expected);
-    });
-  });
+      }
+      result = handler.impl.splitScriptByLength(script, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
+      expect(result).to.deep.equal(expected)
+    })
+  })
   /**
    * SPLIT PHASE BY WIDTH
    */
@@ -511,7 +509,7 @@ describe('serverless-artillery Handler Tests', () => {
         arrivalRate: handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND * 2,
         rampTo: handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND * 3,
         duration: 1,
-      };
+      }
       expected = {
         chunk: [
           {
@@ -526,10 +524,10 @@ describe('serverless-artillery Handler Tests', () => {
             duration: 1,
           },
         ],
-      };
-      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND);
-      expect(result).to.deep.equal(expected);
-    });
+      }
+      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      expect(result).to.deep.equal(expected)
+    })
     // max <= chunkSize
     it('splitting ramp that at all times is less than DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND into a chunk of the ramp' +
       ' phase and a remainder of a pause phase.', () => {
@@ -537,7 +535,7 @@ describe('serverless-artillery Handler Tests', () => {
         arrivalRate: Math.floor(handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND * 0.5),
         rampTo: Math.floor(handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND * 0.75),
         duration: 1,
-      };
+      }
       expected = {
         chunk: [
           {
@@ -551,10 +549,10 @@ describe('serverless-artillery Handler Tests', () => {
             pause: 1,
           },
         ],
-      };
-      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND);
-      expect(result).to.deep.equal(expected);
-    });
+      }
+      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      expect(result).to.deep.equal(expected)
+    })
     it('splitting an ascending ramp phase that starts lower than and ends higher than' +
       ' DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND into a chunk of a ramp phase followed by a constant rate phase and a' +
       ' remainder of a pause phase followed by a ramp phase.', () => {
@@ -562,7 +560,7 @@ describe('serverless-artillery Handler Tests', () => {
         arrivalRate: handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND * 0.5,
         rampTo: handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND * 1.5,
         duration: 2,
-      };
+      }
       expected = {
         chunk: [
           {
@@ -585,10 +583,10 @@ describe('serverless-artillery Handler Tests', () => {
             duration: 1,
           },
         ],
-      };
-      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND);
-      expect(result).to.deep.equal(expected);
-    });
+      }
+      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      expect(result).to.deep.equal(expected)
+    })
     it('splitting a descending ramp phase that starts lower than and ends higher than' +
       ' DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND into a chunk of a constant rate phase followed by a ramp phase and a' +
       ' remainder of a ramp phase followed by a pause phase.', () => {
@@ -596,7 +594,7 @@ describe('serverless-artillery Handler Tests', () => {
         arrivalRate: handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND * 1.5,
         rampTo: handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND * 0.5,
         duration: 2,
-      };
+      }
       expected = {
         chunk: [
           {
@@ -619,15 +617,15 @@ describe('serverless-artillery Handler Tests', () => {
             pause: 1,
           },
         ],
-      };
-      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND);
-      expect(result).to.deep.equal(expected);
-    });
+      }
+      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      expect(result).to.deep.equal(expected)
+    })
     it('splits an arrivalRate of less than a chunk\'s width into a chunk of that width and remainder of pause', () => {
       phase = {
         arrivalRate: handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND * 0.75,
         duration: 1,
-      };
+      }
       expected = {
         chunk: [
           {
@@ -640,15 +638,15 @@ describe('serverless-artillery Handler Tests', () => {
             pause: 1,
           },
         ],
-      };
-      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND);
-      expect(result).to.deep.equal(expected);
-    });
+      }
+      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      expect(result).to.deep.equal(expected)
+    })
     it('splitting an arrivalRate phase of two chunk\'s width into two parts.', () => {
       phase = {
         arrivalRate: handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND * 2,
         duration: 1,
-      };
+      }
       expected = {
         chunk: [
           {
@@ -662,15 +660,15 @@ describe('serverless-artillery Handler Tests', () => {
             duration: 1,
           },
         ],
-      };
-      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND);
-      expect(result).to.deep.equal(expected);
-    });
+      }
+      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      expect(result).to.deep.equal(expected)
+    })
     it('splitting an arrivalCount phase of two chunk\'s width into two parts.', () => {
       phase = {
         arrivalCount: handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND * 2,
         duration: 1,
-      };
+      }
       expected = {
         chunk: [
           {
@@ -684,15 +682,15 @@ describe('serverless-artillery Handler Tests', () => {
             duration: 1,
           },
         ],
-      };
-      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND);
-      expect(result).to.deep.equal(expected);
-    });
+      }
+      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      expect(result).to.deep.equal(expected)
+    })
     it('splitting an arrivalCount phase of less than chunkSize\'s width into an arrival count and pause phase.', () => {
       phase = {
         arrivalCount: handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND * 0.75,
         duration: 1,
-      };
+      }
       expected = {
         chunk: [
           {
@@ -705,14 +703,14 @@ describe('serverless-artillery Handler Tests', () => {
             pause: 1,
           },
         ],
-      };
-      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND);
-      expect(result).to.deep.equal(expected);
-    });
+      }
+      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      expect(result).to.deep.equal(expected)
+    })
     it('splitting a pause phase into two pause phases.', () => {
       phase = {
         pause: handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
-      };
+      }
       expected = {
         chunk: [
           { pause: handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS },
@@ -720,11 +718,11 @@ describe('serverless-artillery Handler Tests', () => {
         remainder: [
           { pause: handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS },
         ],
-      };
-      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND);
-      expect(result).to.deep.equal(expected);
-    });
-  });
+      }
+      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      expect(result).to.deep.equal(expected)
+    })
+  })
   /**
    * SPLIT SCRIPT BY WIDTH
    */
@@ -739,7 +737,7 @@ describe('serverless-artillery Handler Tests', () => {
             },
           ],
         },
-      };
+      }
       expected = {
         chunk: {
           config: {
@@ -761,10 +759,10 @@ describe('serverless-artillery Handler Tests', () => {
             ],
           },
         },
-      };
-      result = handler.impl.splitScriptByWidth(script, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND);
-      expect(result).to.deep.equal(expected);
-    });
+      }
+      result = handler.impl.splitScriptByWidth(script, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      expect(result).to.deep.equal(expected)
+    })
     it('splits a script of two phases that specify twice DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND load to split.', () => {
       script = {
         config: {
@@ -779,7 +777,7 @@ describe('serverless-artillery Handler Tests', () => {
             },
           ],
         },
-      };
+      }
       expected = {
         chunk: {
           config: {
@@ -809,11 +807,11 @@ describe('serverless-artillery Handler Tests', () => {
             ],
           },
         },
-      };
-      result = handler.impl.splitScriptByWidth(script, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND);
-      expect(result).to.deep.equal(expected);
-    });
-  });
+      }
+      result = handler.impl.splitScriptByWidth(script, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      expect(result).to.deep.equal(expected)
+    })
+  })
 
   describe('#impl.loadProcessor', () => {
     it('loads custom processor code based on script configuration', () => {
@@ -821,10 +819,10 @@ describe('serverless-artillery Handler Tests', () => {
         config: {
           processor: `${__dirname}/customprocessor.js`,
         },
-      };
-      handler.impl.loadProcessor(newScript);
-      expect(newScript.config.processor.testMethod()).to.equal('testValue');
-    });
+      }
+      handler.impl.loadProcessor(newScript)
+      expect(newScript.config.processor.testMethod()).to.equal('testValue')
+    })
     it('does not attempt to reload a previously loaded processor', () => {
       const newScript = {
         config: {
@@ -832,11 +830,11 @@ describe('serverless-artillery Handler Tests', () => {
             f: () => 'testValue',
           },
         },
-      };
-      handler.impl.loadProcessor(newScript);
-      expect(newScript.config.processor.f()).to.equal('testValue');
-    });
-  });
+      }
+      handler.impl.loadProcessor(newScript)
+      expect(newScript.config.processor.f()).to.equal('testValue')
+    })
+  })
   describe('#readPayload', () => {
     it('reads a single payload file.', () => {
       const newScript = {
@@ -845,14 +843,14 @@ describe('serverless-artillery Handler Tests', () => {
             path: path.join(__dirname, 'example.0.csv'),
           },
         },
-      };
-      const payload = handler.impl.readPayload(newScript);
+      }
+      const payload = handler.impl.readPayload(newScript)
       expect(payload).to.deep.equal([
         ['123456', 'John Doe'],
         ['234567', 'Jane Doe'],
         ['345678', 'Baby Doe'],
-      ]);
-    });
+      ])
+    })
     it('reads a set of payload files.', () => {
       const newScript = {
         config: {
@@ -865,8 +863,8 @@ describe('serverless-artillery Handler Tests', () => {
             },
           ],
         },
-      };
-      const payload = handler.impl.readPayload(newScript);
+      }
+      const payload = handler.impl.readPayload(newScript)
       expect(payload).to.deep.equal([
         {
           path: path.join(__dirname, 'example.0.csv'),
@@ -884,9 +882,9 @@ describe('serverless-artillery Handler Tests', () => {
             ['345679', 'Baby Jones'],
           ],
         },
-      ]);
-    });
-  });
+      ])
+    })
+  })
   /**
    * SPLIT SCRIPT BY FLOW
    */
@@ -907,8 +905,8 @@ describe('serverless-artillery Handler Tests', () => {
             ],
           },
         ],
-      };
-      const scripts = handler.impl.splitScriptByFlow(newScript);
+      }
+      const scripts = handler.impl.splitScriptByFlow(newScript)
       expect(scripts).to.deep.equal([
         {
           mode: 'perf',
@@ -926,8 +924,8 @@ describe('serverless-artillery Handler Tests', () => {
             },
           ],
         },
-      ]);
-    });
+      ])
+    })
     it('split a script with 2 flows into two scripts with one flow, each with duration = 1 and arrivalRate = 1', () => {
       const newScript = {
         mode: 'acc',
@@ -949,8 +947,8 @@ describe('serverless-artillery Handler Tests', () => {
             ],
           },
         ],
-      };
-      const scripts = handler.impl.splitScriptByFlow(newScript);
+      }
+      const scripts = handler.impl.splitScriptByFlow(newScript)
       expect(scripts).to.deep.equal([
         {
           mode: 'perf',
@@ -984,9 +982,9 @@ describe('serverless-artillery Handler Tests', () => {
             },
           ],
         },
-      ]);
-    });
-  });
+      ])
+    })
+  })
 
   describe('#impl.invokeSelf', () => {
     // /**
@@ -1041,8 +1039,8 @@ describe('serverless-artillery Handler Tests', () => {
     // },
     it('', () => {
       // TODO implement tests
-    });
-  });
+    })
+  })
 
   describe('#impl.runLoad', () => {
     // // event is bare Artillery script
@@ -1101,8 +1099,8 @@ describe('serverless-artillery Handler Tests', () => {
     // },
     it('', () => {
       // TODO implement tests
-    });
-  });
+    })
+  })
 
   describe('#impl.runPerformance', () => {
     // /**
@@ -1131,22 +1129,22 @@ describe('serverless-artillery Handler Tests', () => {
     // }
     it('', () => {
       // TODO implement tests
-    });
-  });
+    })
+  })
 
   /**
    * ANALYZE ACCEPTANCE TEST REPORTS
    */
   describe('#analyzeAcceptance', () => {
     it('handles a report set of zero reports', () => {
-      const reports = [];
+      const reports = []
       expected = {
         errors: 0,
         reports,
-      };
-      result = handler.impl.analyzeAcceptance(reports);
-      expect(result).to.eql(expected);
-    });
+      }
+      result = handler.impl.analyzeAcceptance(reports)
+      expect(result).to.eql(expected)
+    })
     it('handles a report set with no errors', () => {
       const reports = [
         {
@@ -1155,14 +1153,14 @@ describe('serverless-artillery Handler Tests', () => {
         {
           errors: {},
         },
-      ];
+      ]
       expected = {
         errors: 0,
         reports,
-      };
-      result = handler.impl.analyzeAcceptance(reports);
-      expect(result).to.eql(expected);
-    });
+      }
+      result = handler.impl.analyzeAcceptance(reports)
+      expect(result).to.eql(expected)
+    })
     it('handles a report set with some errors', () => {
       const reports = [
         {
@@ -1173,15 +1171,15 @@ describe('serverless-artillery Handler Tests', () => {
         {
           errors: {},
         },
-      ];
+      ]
       expected = {
         errors: 1,
         errorMessage: '1 acceptance test failure',
         reports,
-      };
-      result = handler.impl.analyzeAcceptance(reports);
-      expect(result).to.eql(expected);
-    });
+      }
+      result = handler.impl.analyzeAcceptance(reports)
+      expect(result).to.eql(expected)
+    })
     it('handles a report set with all errors', () => {
       const reports = [
         {
@@ -1194,16 +1192,16 @@ describe('serverless-artillery Handler Tests', () => {
             foo: 'baz',
           },
         },
-      ];
+      ]
       expected = {
         errors: 2,
         errorMessage: '2 acceptance test failures',
         reports,
-      };
-      result = handler.impl.analyzeAcceptance(reports);
-      expect(result).to.eql(expected);
-    });
-  });
+      }
+      result = handler.impl.analyzeAcceptance(reports)
+      expect(result).to.eql(expected)
+    })
+  })
 
   describe('#impl.runAcceptance', () => {
     // /**
@@ -1220,8 +1218,8 @@ describe('serverless-artillery Handler Tests', () => {
     // }
     it('', () => {
       // TODO implement tests
-    });
-  });
+    })
+  })
 
   describe('#api.run', () => {
     // /**
@@ -1249,6 +1247,6 @@ describe('serverless-artillery Handler Tests', () => {
     // },
     it('', () => {
       // TODO implement tests
-    });
-  });
-});
+    })
+  })
+})
