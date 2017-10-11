@@ -223,8 +223,8 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
 
   describe('#exports.invoke', () => {
     const completeMessage = `${os.EOL}\tYour function invocation has completed.${os.EOL}`
-    const willCompleteMessage = length => `${os.EOL
-    }\tYour function has been invoked. The load is scheduled to be completed in ${length} seconds.${os.EOL}`
+    const willCompleteMessage = durationInSeconds => `${os.EOL
+    }\tYour function has been invoked. The load is scheduled to be completed in ${durationInSeconds} seconds.${os.EOL}`
 
     const replaceImpl = (scriptExtentResult, serverlessRunnerResult, func) => (() => {
       const scriptExtent = slsart.impl.scriptExtent
@@ -260,7 +260,7 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
     describe('performance mode', () => {
       it('indicates function completeness and results (when the script can be excuted by one function)',
         replaceImpl(
-          { width: 1, length: 1, maxLength: 2, maxWidth: 2 },
+          { requestsPerSecond: 1, durationInSeconds: 1, maxRequestsPerSecond: 2, maxDurationInSeconds: 2 },
           {},
           () => slsart.invoke({ d: testJsonScriptStringified })
             .then(() => expect(logs[1]).to.eql(completeMessage)) // eslint-disable-line comma-dangle
@@ -268,7 +268,7 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
       )
       it('reports future completion estimate (when script must be distributed across functions)',
         replaceImpl(
-          { width: 1, length: 3, maxLength: 2, maxWidth: 2 },
+          { requestsPerSecond: 1, durationInSeconds: 3, maxRequestsPerSecond: 2, maxDurationInSeconds: 2 },
           {},
           () => slsart.invoke({ d: testJsonScriptStringified })
             .then(() => expect(logs[1]).to.eql(willCompleteMessage(3))) // eslint-disable-line comma-dangle
@@ -278,7 +278,7 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
     describe('acceptance mode', () => {
       it('adds `mode: \'acc\' to the script',
         replaceImpl(
-          { width: 1, length: 3, maxLength: 2, maxWidth: 2 },
+          { requestsPerSecond: 1, durationInSeconds: 3, maxRequestsPerSecond: 2, maxDurationInSeconds: 2 },
           {},
           () => slsart.invoke({ acceptance: true, d: testJsonScriptStringified })
             .then(() => expect(logs[1]).to.eql(completeMessage)) // eslint-disable-line comma-dangle
@@ -286,7 +286,7 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
       )
       it('respects scripts declaring acceptance mode',
         replaceImpl(
-          { width: 1, length: 3, maxLength: 2, maxWidth: 2 },
+          { requestsPerSecond: 1, durationInSeconds: 3, maxRequestsPerSecond: 2, maxDurationInSeconds: 2 },
           {},
           () => {
             const script = JSON.parse(testJsonScriptStringified)
@@ -298,7 +298,7 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
       )
       it('reports acceptance test results to the console',
         replaceImpl(
-          { width: 1, length: 1, maxLength: 2, maxWidth: 2 },
+          { requestsPerSecond: 1, durationInSeconds: 1, maxRequestsPerSecond: 2, maxDurationInSeconds: 2 },
           { foo: 'bar' },
           () => {
             const script = JSON.parse(testJsonScriptStringified)
@@ -312,7 +312,7 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
       )
       it('exits the process with a non-zero exit code when an error occurs during the acceptance test',
         replaceImpl(
-          { width: 1, length: 1, maxLength: 2, maxWidth: 2 },
+          { requestsPerSecond: 1, durationInSeconds: 1, maxRequestsPerSecond: 2, maxDurationInSeconds: 2 },
           { errors: 1, reports: [{ errors: 1 }] },
           () => {
             // save/replace process.exit
