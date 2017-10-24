@@ -1,7 +1,7 @@
 {
   "name": "serverless-artillery",
-  "version": "0.2.2",
-  "description": "A serverless performance testing tool. `serverless` + `artillery` = crush.  a.k.a. Orbital Laziers",
+  "version": "0.3.0",
+  "description": "A serverless performance testing tool. `serverless` + `artillery` = crush.  a.k.a. Orbital Laziers [sic]",
   "main": "index.js",
   "bin": {
     "serverless-artillery": "./bin/serverless-artillery",
