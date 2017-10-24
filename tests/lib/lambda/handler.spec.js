@@ -24,14 +24,14 @@ describe('serverless-artillery Handler Tests', () => {
       expect(handler.impl.getSettings(script)).to.eql(script._split) // eslint-disable-line no-underscore-dangle
     })
   })
-  describe('#impl.phaseLength', () => {
+  describe('#impl.phaseDurationInSeconds', () => {
     // /**
     //  * Obtain the duration of a phase in seconds.
     //  * @param phase The phase to obtain duration from.
     //  * @returns {number} The duration of the given phase in seconds.  If a duration cannot be obtained -1 is
     //  * returned.
     //  */
-    // phaseLength: (phase) => {
+    // phaseDurationInSeconds: (phase) => {
     //   if ('duration' in phase) {
     //     return phase.duration;
     //   } else if ('pause' in phase) {
@@ -40,11 +40,11 @@ describe('serverless-artillery Handler Tests', () => {
     //     return -1;
     //   }
     // }
-    it('extracts the length of a duration phase', () => {
+    it('extracts the duration of a duration phase', () => {
       // TODO implement tests
     })
   })
-  describe('#impl.scriptLength', () => {
+  describe('#impl.scriptDurationInSeconds', () => {
     // /**
     //  * Calculate the total duration of the Artillery script in seconds.  If a phase does not have a valid duration,
     //  * the index of that phase, multiplied by -1, will be returned.  This way a result less than zero result can
@@ -53,17 +53,17 @@ describe('serverless-artillery Handler Tests', () => {
     //  * @returns {number} The total duration for the given script.  If any phases do not contain a valid duration,
     //  * the index of the first phase without a valid duration will be returned, multiplied by -1.
     //  */
-    // scriptLength: (script) => {
+    // scriptDurationInSeconds: (script) => {
     //   let ret = 0;
     //   let i;
-    //   let phaseLength;
+    //   let phaseDurationInSeconds;
     //   for (i = 0; i < script.config.phases.length; i++) {
-    //     phaseLength = impl.phaseLength(script.config.phases[i]);
-    //     if (phaseLength < 0) {
+    //     phaseDurationInSeconds = impl.phaseDurationInSeconds(script.config.phases[i]);
+    //     if (phaseDurationInSeconds < 0) {
     //       ret = -1 * i;
     //       break;
     //     } else {
-    //       ret += phaseLength;
+    //       ret += phaseDurationInSeconds;
     //     }
     //   }
     //   return ret;
@@ -72,14 +72,14 @@ describe('serverless-artillery Handler Tests', () => {
       // TODO implement tests
     })
   })
-  describe('#impl.phaseWidth', () => {
+  describe('#impl.phaseRequestsPerSecond', () => {
     // /**
     //  * Obtain the specified requests per second of a phase.
     //  * @param phase The phase to obtain specified requests per second from.
     //  * @returns The specified requests per second of a phase.  If a valid specification is not available, -1 is
     //  * returned.
     //  */
-    // phaseWidth: (phase) => {
+    // phaseRequestsPerSecond: (phase) => {
     //   if ('rampTo' in phase && 'arrivalRate' in phase) {
     //     return Math.max(phase.arrivalRate, phase.rampTo);
     //   } else if ('arrivalRate' in phase) {
@@ -96,17 +96,17 @@ describe('serverless-artillery Handler Tests', () => {
       // TODO implement tests
     })
   })
-  describe('#impl.scriptWidth', () => {
+  describe('#impl.scriptRequestsPerSecond', () => {
     // /**
-    //  * Calculate the maximum width of a script in RPS.  If a phase does not have a valid width, the index of that
+    //  * Calculate the maximum requestsPerSecond of a script in RPS.  If a phase does not have a valid requestsPerSecond, the index of that
     //  * phase, multiplied by -1, will be returned.  This way a result less than zero result can easily be
-    //  * differentiated from a valid width and the offending phase can be identified.
+    //  * differentiated from a valid requestsPerSecond and the offending phase can be identified.
     //  *
-    //  * @param script The script to identify a maximum width for.
-    //  * @returns {number} The width of the script in RPS (Requests Per Second) or -1 if an invalid phase is
+    //  * @param script The script to identify a maximum requestsPerSecond for.
+    //  * @returns {number} The requestsPerSecond of the script in RPS (Requests Per Second) or -1 if an invalid phase is
     //  * encountered.
     //  */
-    // scriptWidth: (script) => {
+    // scriptRequestsPerSecond: (script) => {
     //   /*
     //    * See https://artillery.io/docs/script_reference.html#phases for phase types.
     //    *
@@ -118,14 +118,14 @@ describe('serverless-artillery Handler Tests', () => {
     //    */
     //   let ret = 0;
     //   let i;
-    //   let phaseWidth;
+    //   let phaseRequestsPerSecond;
     //   for (i = 0; i < script.config.phases.length; i++) {
-    //     phaseWidth = impl.phaseWidth(script.config.phases[i]);
-    //     if (phaseWidth < 0) {
+    //     phaseRequestsPerSecond = impl.phaseRequestsPerSecond(script.config.phases[i]);
+    //     if (phaseRequestsPerSecond < 0) {
     //       ret = -1 * i;
     //       break;
     //     } else {
-    //       ret = Math.max(ret, phaseWidth);
+    //       ret = Math.max(ret, phaseRequestsPerSecond);
     //     }
     //   }
     //   return ret;
@@ -145,8 +145,8 @@ describe('serverless-artillery Handler Tests', () => {
       //  */
       // validScript: (script, context, callback) => {
       //   let ret = false;
-      //   let scriptLength;
-      //   let scriptWidth;
+      //   let scriptDurationInSeconds;
+      //   let scriptRequestsPerSecond;
       //   const settings = impl.getSettings(script);
       //   // Splitting Settings [Optional]
       //   if (script._split && typeof script._split !== 'object') {
@@ -157,7 +157,7 @@ describe('serverless-artillery Handler Tests', () => {
       //     settings.maxChunkDurationInSeconds > 0 &&
       //     settings.maxChunkDurationInSeconds <= constants.MAX_CHUNK_DURATION_IN_SECONDS)
       //   ) {
-      //     callback('If specified the "_split.maxChunkDuration" attribute must be an integer inclusively between ' +
+      //     callback('If specified the "_split.maxChunkDurationInSeconds" attribute must be an integer inclusively between ' +
       //       `1 and ${constants.MAX_CHUNK_DURATION_IN_SECONDS}.`);
       //   } else if (
       //     settings.maxScriptDurationInSeconds &&
@@ -165,7 +165,7 @@ describe('serverless-artillery Handler Tests', () => {
       //     settings.maxScriptDurationInSeconds > 0 &&
       //     settings.maxScriptDurationInSeconds <= constants.MAX_SCRIPT_DURATION_IN_SECONDS)
       //   ) {
-      //     callback('If specified the "_split.maxScriptDuration" attribute must be an integer inclusively between ' +
+      //     callback('If specified the "_split.maxScriptDurationInSeconds" attribute must be an integer inclusively between ' +
       //       `1 and ${constants.MAX_SCRIPT_DURATION_IN_SECONDS}.`);
       //   } else if (
       //     settings.maxChunkRequestsPerSecond &&
@@ -212,19 +212,19 @@ describe('serverless-artillery Handler Tests', () => {
       //         .join('", "')
       //       }"`);
       //   } else if (!(script.mode === constants.modes.ACC || script.mode === constants.modes.ACCEPTANCE)) {
-      //     scriptLength = impl.scriptLength(script); // determine length and width
-      //     scriptWidth = impl.scriptWidth(script);
-      //     if (scriptLength < 0) {
+      //     scriptDurationInSeconds = impl.scriptDurationInSeconds(script); // determine durationInSeconds and requestsPerSecond
+      //     scriptRequestsPerSecond = impl.scriptRequestsPerSecond(script);
+      //     if (scriptDurationInSeconds < 0) {
       //       callback(`Every phase must have a valid duration.  Observed: ${
-      //         JSON.stringify(script.config.phases[scriptLength * -1])
+      //         JSON.stringify(script.config.phases[scriptDurationInSeconds * -1])
       //         }`);
-      //     } else if (scriptLength > settings.maxScriptDurationInSeconds) {
+      //     } else if (scriptDurationInSeconds > settings.maxScriptDurationInSeconds) {
       //       callback(`The total duration of all script phases cannot exceed ${settings.maxScriptDurationInSeconds}`);
-      //     } else if (scriptWidth < 0) {
+      //     } else if (scriptRequestsPerSecond < 0) {
       //       callback(`Every phase must have a valid means to determine requests per second.  Observed: ${
-      //         JSON.stringify(script.config.phases[scriptWidth * -1])
+      //         JSON.stringify(script.config.phases[scriptRequestsPerSecond * -1])
       //         }`);
-      //     } else if (scriptWidth > settings.maxScriptRequestsPerSecond) {
+      //     } else if (scriptRequestsPerSecond > settings.maxScriptRequestsPerSecond) {
       //       callback(`The maximum requests per second of any script phase cannot exceed ${
       //         settings.maxScriptRequestsPerSecond
       //         }`);
@@ -240,10 +240,10 @@ describe('serverless-artillery Handler Tests', () => {
     })
   })
   /**
-   * SPLIT PHASE BY LENGTH
+   * SPLIT PHASE BY DurationInSeconds
    */
-  describe('#impl.splitPhaseByLength splits PHASES that are TOO LONG', () => {
-    it('splitting a constant rate phase of three chunk\'s length into two parts.', () => {
+  describe('#impl.splitPhaseByDurationInSeconds splits PHASES that are TOO LONG', () => {
+    it('splitting a constant rate phase of three chunk\'s durationInSeconds into two parts.', () => {
       phase = {
         duration: 3 * handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
         arrivalRate: 1,
@@ -258,10 +258,10 @@ describe('serverless-artillery Handler Tests', () => {
           arrivalRate: 1,
         },
       }
-      result = handler.impl.splitPhaseByLength(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
+      result = handler.impl.splitPhaseByDurationInSeconds(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
       expect(result).to.deep.equal(expected)
     })
-    it('splitting a ramping phase of two chunk\'s length into two parts.', () => {
+    it('splitting a ramping phase of two chunk\'s duration into two parts.', () => {
       phase = {
         duration: 3 * handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
         arrivalRate: 1,
@@ -279,10 +279,10 @@ describe('serverless-artillery Handler Tests', () => {
           rampTo: 4,
         },
       }
-      result = handler.impl.splitPhaseByLength(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
+      result = handler.impl.splitPhaseByDurationInSeconds(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
       expect(result).to.deep.equal(expected)
     })
-    it('splits ramp of two chunk\'s length into two parts, rounding to the nearest integer rate per second.', () => {
+    it('splits ramp of two chunk\'s duration into two parts, rounding to the nearest integer rate per second.', () => {
       phase = {
         duration: 2 * handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
         arrivalRate: 1,
@@ -300,10 +300,10 @@ describe('serverless-artillery Handler Tests', () => {
           rampTo: 2,
         },
       }
-      result = handler.impl.splitPhaseByLength(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
+      result = handler.impl.splitPhaseByDurationInSeconds(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
       expect(result).to.deep.equal(expected)
     })
-    it('splitting an arrival count phase of two chunk\'s length into two parts.', () => {
+    it('splitting an arrival count phase of two chunk\'s duration into two parts.', () => {
       phase = {
         duration: 2 * handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
         arrivalCount: 2 * handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
@@ -318,10 +318,10 @@ describe('serverless-artillery Handler Tests', () => {
           arrivalCount: handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
         },
       }
-      result = handler.impl.splitPhaseByLength(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
+      result = handler.impl.splitPhaseByDurationInSeconds(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
       expect(result).to.deep.equal(expected)
     })
-    it('splitting a pause phase of two chunk\'s length into two parts.', () => {
+    it('splitting a pause phase of two chunk\'s duration into two parts.', () => {
       phase = {
         pause: 2 * handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
       }
@@ -333,14 +333,14 @@ describe('serverless-artillery Handler Tests', () => {
           pause: handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS,
         },
       }
-      result = handler.impl.splitPhaseByLength(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
+      result = handler.impl.splitPhaseByDurationInSeconds(phase, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
       expect(result).to.deep.equal(expected)
     })
   })
   /**
-   * SPLIT SCRIPT BY LENGTH
+   * SPLIT SCRIPT BY DURATION
    */
-  describe('#impl.splitScriptByLength The handler splits SCRIPTS that are TOO LONG', () => {
+  describe('#impl.splitScriptByDurationInSeconds The handler splits SCRIPTS that are TOO LONG', () => {
     it('splitting a script where there is a natural phase split at MAX_CHUNK_DURATION between two phases.', () => {
       script = {
         config: {
@@ -378,7 +378,7 @@ describe('serverless-artillery Handler Tests', () => {
           },
         },
       }
-      result = handler.impl.splitScriptByLength(script, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
+      result = handler.impl.splitScriptByDurationInSeconds(script, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
       expect(result).to.deep.equal(expected)
     })
     it('splitting a script where there is a natural phase split at MAX_CHUNK_DURATION between many phases.', () => {
@@ -442,7 +442,7 @@ describe('serverless-artillery Handler Tests', () => {
           },
         },
       }
-      result = handler.impl.splitScriptByLength(script, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
+      result = handler.impl.splitScriptByDurationInSeconds(script, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
       expect(result).to.deep.equal(expected)
     })
     it('splitting a script where a phase must be split at MAX_CHUNK_DURATION.', () => {
@@ -494,14 +494,14 @@ describe('serverless-artillery Handler Tests', () => {
           },
         },
       }
-      result = handler.impl.splitScriptByLength(script, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
+      result = handler.impl.splitScriptByDurationInSeconds(script, handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS)
       expect(result).to.deep.equal(expected)
     })
   })
   /**
-   * SPLIT PHASE BY WIDTH
+   * SPLIT PHASE BY RequestsPerSecond
    */
-  describe('#impl.splitPhaseByWidth The handler splits PHASES that are TOO WIDE (RPS > MAX_RPS)', () => {
+  describe('#impl.splitPhaseByRequestsPerSecond The handler splits PHASES that are TOO WIDE (RPS > MAX_RPS)', () => {
     // min >= chunkSize
     it('splitting a ramp phase that at all times exceeds a rate of DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND into a' +
       ' constant rate and remainder ramp phases.', () => {
@@ -525,7 +525,7 @@ describe('serverless-artillery Handler Tests', () => {
           },
         ],
       }
-      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      result = handler.impl.splitPhaseByRequestsPerSecond(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
       expect(result).to.deep.equal(expected)
     })
     // max <= chunkSize
@@ -550,7 +550,7 @@ describe('serverless-artillery Handler Tests', () => {
           },
         ],
       }
-      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      result = handler.impl.splitPhaseByRequestsPerSecond(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
       expect(result).to.deep.equal(expected)
     })
     it('splitting an ascending ramp phase that starts lower than and ends higher than' +
@@ -584,7 +584,7 @@ describe('serverless-artillery Handler Tests', () => {
           },
         ],
       }
-      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      result = handler.impl.splitPhaseByRequestsPerSecond(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
       expect(result).to.deep.equal(expected)
     })
     it('splitting a descending ramp phase that starts lower than and ends higher than' +
@@ -618,10 +618,10 @@ describe('serverless-artillery Handler Tests', () => {
           },
         ],
       }
-      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      result = handler.impl.splitPhaseByRequestsPerSecond(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
       expect(result).to.deep.equal(expected)
     })
-    it('splits an arrivalRate of less than a chunk\'s width into a chunk of that width and remainder of pause', () => {
+    it('splits an arrivalRate of less than a chunk\'s requestsPerSecond into a chunk of that requestsPerSecond and remainder of pause', () => {
       phase = {
         arrivalRate: handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND * 0.75,
         duration: 1,
@@ -639,10 +639,10 @@ describe('serverless-artillery Handler Tests', () => {
           },
         ],
       }
-      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      result = handler.impl.splitPhaseByRequestsPerSecond(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
       expect(result).to.deep.equal(expected)
     })
-    it('splitting an arrivalRate phase of two chunk\'s width into two parts.', () => {
+    it('splitting an arrivalRate phase of two chunk\'s requestsPerSecond into two parts.', () => {
       phase = {
         arrivalRate: handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND * 2,
         duration: 1,
@@ -661,10 +661,10 @@ describe('serverless-artillery Handler Tests', () => {
           },
         ],
       }
-      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      result = handler.impl.splitPhaseByRequestsPerSecond(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
       expect(result).to.deep.equal(expected)
     })
-    it('splitting an arrivalCount phase of two chunk\'s width into two parts.', () => {
+    it('splitting an arrivalCount phase of two chunk\'s requestsPerSecond into two parts.', () => {
       phase = {
         arrivalCount: handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND * 2,
         duration: 1,
@@ -683,10 +683,10 @@ describe('serverless-artillery Handler Tests', () => {
           },
         ],
       }
-      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      result = handler.impl.splitPhaseByRequestsPerSecond(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
       expect(result).to.deep.equal(expected)
     })
-    it('splitting an arrivalCount phase of less than chunkSize\'s width into an arrival count and pause phase.', () => {
+    it('splitting an arrivalCount phase of less than chunkSize\'s requestsPerSecond into an arrival count and pause phase.', () => {
       phase = {
         arrivalCount: handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND * 0.75,
         duration: 1,
@@ -704,7 +704,7 @@ describe('serverless-artillery Handler Tests', () => {
           },
         ],
       }
-      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      result = handler.impl.splitPhaseByRequestsPerSecond(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
       expect(result).to.deep.equal(expected)
     })
     it('splitting a pause phase into two pause phases.', () => {
@@ -719,14 +719,14 @@ describe('serverless-artillery Handler Tests', () => {
           { pause: handler.constants.DEFAULT_MAX_CHUNK_DURATION_IN_SECONDS },
         ],
       }
-      result = handler.impl.splitPhaseByWidth(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      result = handler.impl.splitPhaseByRequestsPerSecond(phase, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
       expect(result).to.deep.equal(expected)
     })
   })
   /**
-   * SPLIT SCRIPT BY WIDTH
+   * SPLIT SCRIPT BY RequestsPerSecond
    */
-  describe('#impl.splitScriptByWidth the handler splits SCRIPTS that are TOO WIDE', () => {
+  describe('#impl.splitScriptByRequestsPerSecond the handler splits SCRIPTS that are TOO WIDE', () => {
     it('splits a script with a phase that specifies twice DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND load.', () => {
       script = {
         config: {
@@ -760,7 +760,7 @@ describe('serverless-artillery Handler Tests', () => {
           },
         },
       }
-      result = handler.impl.splitScriptByWidth(script, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      result = handler.impl.splitScriptByRequestsPerSecond(script, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
       expect(result).to.deep.equal(expected)
     })
     it('splits a script of two phases that specify twice DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND load to split.', () => {
@@ -808,7 +808,7 @@ describe('serverless-artillery Handler Tests', () => {
           },
         },
       }
-      result = handler.impl.splitScriptByWidth(script, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
+      result = handler.impl.splitScriptByRequestsPerSecond(script, handler.constants.DEFAULT_MAX_CHUNK_REQUESTS_PER_SECOND)
       expect(result).to.deep.equal(expected)
     })
   })
