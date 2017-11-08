@@ -1,5 +1,3 @@
-/* eslint-disable class-methods-use-this */
-
 // The Ultimate Unit Testing Cheat-sheet
 // https://gist.github.com/yoavniran/1e3b0162e1545055429e
 
@@ -187,12 +185,124 @@ describe('serverless-artillery implementation', () => {
     // TODO implement tests
   })
 
+  describe('#impl.generateScriptDefaults', () => {
+    it('provides defaults for empty options', () => {
+      const res = slsart.impl.generateScriptDefaults()
+      expect(res).to.not.equal(null)
+      expect(res.endpoint).to.eql('http://aws.amazon.com')
+      expect(res.duration).to.eql(5)
+      expect(res.rate).to.eql(2)
+      expect(res.rampTo).to.eql(undefined)
+      expect(res.urlParts.protocol).to.eql('http:')
+      expect(res.urlParts.slashes).to.eql(true)
+      expect(res.urlParts.auth).to.eql(null)
+      expect(res.urlParts.host).to.eql('aws.amazon.com')
+      expect(res.urlParts.port).to.eql(null)
+      expect(res.urlParts.hostname).to.eql('aws.amazon.com')
+      expect(res.urlParts.hash).to.eql(null)
+      expect(res.urlParts.search).to.eql(null)
+      expect(res.urlParts.query).to.eql(null)
+      expect(res.urlParts.pathname).to.eql('/')
+      expect(res.urlParts.path).to.eql('/')
+      expect(res.urlParts.href).to.eql('http://aws.amazon.com/')
+    })
+    it('uses a given endpoint', () => {
+      const endpoint = 'http://www.google.com'
+      const res = slsart.impl.generateScriptDefaults({ endpoint })
+      expect(res.endpoint).to.eql(endpoint)
+    })
+    it('uses a given duration', () => {
+      const duration = 1
+      const res = slsart.impl.generateScriptDefaults({ duration })
+      expect(res.duration).to.eql(duration)
+    })
+    it('uses a given rate', () => {
+      const rate = 2
+      const res = slsart.impl.generateScriptDefaults({ rate })
+      expect(res.rate).to.eql(rate)
+    })
+    it('uses a given rampTo', () => {
+      const rampTo = 3
+      const res = slsart.impl.generateScriptDefaults({ rampTo })
+      expect(res.rampTo).to.equal(rampTo)
+    })
+  })
+
   describe('#impl.generateScript', () => {
-    // TODO implement tests
+    const makeScript = (target, rampTo, hash) => `# Thank you for trying serverless-artillery!
+# This default script is intended to get you started quickly.
+# There is a lot more that Artillery can do.
+# You can find great documentation of the possibilities at:
+# https://artillery.io/docs/
+config:
+  # this hostname will be used as a prefix for each URI in the flow unless a complete URI is specified
+  target: "${target || 'http://aws.amazon.com'}"
+  phases:
+    -
+      duration: 5
+      arrivalRate: 2${rampTo || ''}
+scenarios:
+  -
+    flow:
+      -
+        get:
+          url: "/${hash || ''}"
+` // eslint-disable-line comma-dangle
+    it('generates the default script without options', () => {
+      const script = slsart.impl.generateScript()
+      expect(script).to.eql(makeScript())
+    })
+    it('respects an auth declaration in the endpoint', () => {
+      const endpoint = 'http://foo:bar@aws.amazon.com'
+      const script = slsart.impl.generateScript({ endpoint })
+      expect(script).to.eql(makeScript(endpoint))
+    })
+    it('respects the rampTo option', () => {
+      const script = slsart.impl.generateScript({ rampTo: 10 })
+      expect(script).to.eql(makeScript(null, '\n      rampTo: 10'))
+    })
+    it('respects a hash declaration in the endpoint', () => {
+      const script = slsart.impl.generateScript({ endpoint: 'http://aws.amazon.com/#foo' })
+      expect(script).to.eql(makeScript(null, null, '#foo'))
+    })
   })
 
   describe('#impl.findServicePath', () => {
-    // TODO implement tests
+    const lambdaPath = path.resolve('lib', 'lambda')
+    const replaceImpl = (cwdResult, fileExistsResult, func) => (() => {
+      const cwd = process.cwd
+      const fileExists = slsart.impl.fileExists
+      process.cwd = () => cwdResult
+      slsart.impl.fileExists = () => fileExistsResult
+      return func().then(() => {
+        slsart.impl.fileExists = fileExists
+        process.cwd = cwd
+      })
+    })
+    it(
+      'detects service path is current working directory',
+      replaceImpl(
+        'foo',
+        true,
+        () => BbPromise.resolve()
+          .then(() => {
+            const res = slsart.impl.findServicePath()
+            expect(res).to.eql('foo')
+          }) // eslint-disable-line comma-dangle
+      ) // eslint-disable-line comma-dangle
+    )
+    it(
+      'detects lack of serverless.yml in current working directory',
+      replaceImpl(
+        __dirname,
+        false,
+        () => BbPromise.resolve()
+          .then(() => {
+            const res = slsart.impl.findServicePath()
+            expect(res).to.eql(lambdaPath)
+          }) // eslint-disable-line comma-dangle
+      ) // eslint-disable-line comma-dangle
+    )
   })
 
   describe('#impl.serverlessRunner', () => {
