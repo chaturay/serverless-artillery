@@ -3,6 +3,7 @@
 // The Ultimate Unit Testing Cheat-sheet
 // https://gist.github.com/yoavniran/1e3b0162e1545055429e
 
+const aws = require('aws-sdk')
 const BbPromise = require('bluebird')
 const expect = require('chai').expect
 const fs = BbPromise.promisifyAll(require('fs'))
@@ -183,8 +184,77 @@ describe('serverless-artillery implementation', () => {
     })
   })
 
-  describe('#impl.scriptExtent', () => {
-    // TODO implement tests
+  describe('#impl.scriptConstraints', () => {
+    const replaceImpl = (timeout, func) => (() => {
+      const config = aws.config
+      aws.config = { httpOptions: { timeout } }
+      return func().then(() => {
+        aws.config = config
+      })
+    })
+    let script
+    beforeEach(() => {
+      script = {
+        config: {
+          phases: [
+            {
+              duration: 10,
+              arrivalRate: 5,
+            },
+          ],
+        },
+      }
+    })
+    it('returns the expected default values when not splitting', () => {
+      const res = slsart.impl.scriptConstraints(script)
+      expect(res.allowance).to.equal(118) // 120 - 2
+      expect(res.required).to.equal(13) // 10 + 3
+    })
+    it('returns the expected default values when splitting by duration', () => {
+      script.config.phases[0].duration = 250
+      const res = slsart.impl.scriptConstraints(script)
+      expect(res.allowance).to.equal(118) // 120 - 2
+      expect(res.required).to.equal(268) // 250 + 3 + 15
+    })
+    it('returns the expected default values when splitting by RPS', () => {
+      script.config.phases[0].arrivalRate = 26
+      const res = slsart.impl.scriptConstraints(script)
+      expect(res.allowance).to.equal(118) // 120 - 2
+      expect(res.required).to.equal(28) // 10 + 3 + 15
+    })
+    it('adjusts to an decreased http timeout',
+      replaceImpl(
+        10000, // 10 s
+        () => BbPromise.resolve()
+          .then(() => {
+            const res = slsart.impl.scriptConstraints(script)
+            expect(res.allowance).to.equal(8) // 10 - 2
+            expect(res.required).to.equal(13) // 10 + 3
+          }) // eslint-disable-line comma-dangle
+      ) // eslint-disable-line comma-dangle
+    )
+    it('adjusts to an increased http timeout that is not above the lambda chunk maximum',
+      replaceImpl(
+        180000, // 180 s
+        () => BbPromise.resolve()
+          .then(() => {
+            const res = slsart.impl.scriptConstraints(script)
+            expect(res.allowance).to.equal(178) // 180 - 2
+            expect(res.required).to.equal(13) // 10 + 3
+          }) // eslint-disable-line comma-dangle
+      ) // eslint-disable-line comma-dangle
+    )
+    it('uses the lambda maximum defaults if the timeout is sufficiently high',
+      replaceImpl(
+        Number.MAX_VALUE,
+        () => BbPromise.resolve()
+          .then(() => {
+            const res = slsart.impl.scriptConstraints(script)
+            expect(res.allowance).to.equal(238) // 240 - 2
+            expect(res.required).to.equal(13) // 10 + 3
+          }) // eslint-disable-line comma-dangle
+      ) // eslint-disable-line comma-dangle
+    )
   })
 
   describe('#impl.generateScript', () => {
@@ -226,15 +296,15 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
     const willCompleteMessage = durationInSeconds => `${os.EOL
     }\tYour function has been invoked. The load is scheduled to be completed in ${durationInSeconds} seconds.${os.EOL}`
 
-    const replaceImpl = (scriptExtentResult, serverlessRunnerResult, func) => (() => {
-      const scriptExtent = slsart.impl.scriptExtent
+    const replaceImpl = (scriptConstraintsResult, serverlessRunnerResult, func) => (() => {
+      const scriptConstraints = slsart.impl.scriptConstraints
       const serverlessRunner = slsart.impl.serverlessRunner
       const replaceInput = slsart.impl.replaceArgv
-      slsart.impl.scriptExtent = () => scriptExtentResult
+      slsart.impl.scriptConstraints = () => scriptConstraintsResult
       slsart.impl.serverlessRunner = () => BbPromise.resolve(serverlessRunnerResult)
       slsart.impl.replaceArgv = () => {}
       return func().then(() => {
-        slsart.impl.scriptExtent = scriptExtent
+        slsart.impl.scriptConstraints = scriptConstraints
         slsart.impl.serverlessRunner = serverlessRunner
         slsart.impl.replaceArgv = replaceInput
       })
@@ -260,7 +330,7 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
     describe('performance mode', () => {
       it('indicates function completeness and results (when the script can be excuted by one function)',
         replaceImpl(
-          { requestsPerSecond: 1, durationInSeconds: 1, maxRequestsPerSecond: 2, maxDurationInSeconds: 2 },
+          { allowance: 2, required: 1 },
           {},
           () => slsart.invoke({ d: testJsonScriptStringified })
             .then(() => expect(logs[1]).to.eql(completeMessage)) // eslint-disable-line comma-dangle
@@ -268,7 +338,7 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
       )
       it('reports future completion estimate (when script must be distributed across functions)',
         replaceImpl(
-          { requestsPerSecond: 1, durationInSeconds: 3, maxRequestsPerSecond: 2, maxDurationInSeconds: 2 },
+          { allowance: 2, required: 3 },
           {},
           () => slsart.invoke({ d: testJsonScriptStringified })
             .then(() => expect(logs[1]).to.eql(willCompleteMessage(3))) // eslint-disable-line comma-dangle
@@ -278,7 +348,7 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
     describe('acceptance mode', () => {
       it('adds `mode: \'acc\' to the script',
         replaceImpl(
-          { requestsPerSecond: 1, durationInSeconds: 3, maxRequestsPerSecond: 2, maxDurationInSeconds: 2 },
+          { allowance: 2, required: 3 },
           {},
           () => slsart.invoke({ acceptance: true, d: testJsonScriptStringified })
             .then(() => expect(logs[1]).to.eql(completeMessage)) // eslint-disable-line comma-dangle
@@ -286,7 +356,7 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
       )
       it('respects scripts declaring acceptance mode',
         replaceImpl(
-          { requestsPerSecond: 1, durationInSeconds: 3, maxRequestsPerSecond: 2, maxDurationInSeconds: 2 },
+          { allowance: 2, required: 3 },
           {},
           () => {
             const script = JSON.parse(testJsonScriptStringified)
@@ -296,9 +366,21 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
           } // eslint-disable-line comma-dangle
         ) // eslint-disable-line comma-dangle
       )
+      it('respects scripts declaring acceptance mode',
+        replaceImpl(
+          { allowance: 2, required: 3 },
+          {},
+          () => {
+            const script = JSON.parse(testJsonScriptStringified)
+            script.mode = 'acceptance'
+            return slsart.invoke({ d: JSON.stringify(script) })
+              .then(() => expect(logs[1]).to.eql(completeMessage))
+          } // eslint-disable-line comma-dangle
+        ) // eslint-disable-line comma-dangle
+      )
       it('reports acceptance test results to the console',
         replaceImpl(
-          { requestsPerSecond: 1, durationInSeconds: 1, maxRequestsPerSecond: 2, maxDurationInSeconds: 2 },
+          { allowance: 2, required: 1 },
           { foo: 'bar' },
           () => {
             const script = JSON.parse(testJsonScriptStringified)
@@ -312,7 +394,7 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
       )
       it('exits the process with a non-zero exit code when an error occurs during the acceptance test',
         replaceImpl(
-          { requestsPerSecond: 1, durationInSeconds: 1, maxRequestsPerSecond: 2, maxDurationInSeconds: 2 },
+          { allowance: 2, required: 1 },
           { errors: 1, reports: [{ errors: 1 }] },
           () => {
             // save/replace process.exit
@@ -362,6 +444,18 @@ describe('serverless-artillery commands', function slsartCommands() { // eslint-
       () => slsart.script({ out: 'README.md' })
         .then(() => expect(false))
         .catch(() => expect(true)) // eslint-disable-line comma-dangle
+    )
+    it('write default values to the default file',
+      () => BbPromise.resolve()
+        .then(() => {
+          slsart.impl.generateScript = () => ({ foo: 'bar' })
+        })
+        .then(() => slsart.script({ debug: true, trace: true }))
+        .then(() => {
+          slsart.impl.generateScript = generateScript
+          fs.unlink('script.yml')
+        })
+        .catch(() => expect(false)) // eslint-disable-line comma-dangle
     )
     it('write default values to a new file',
       () => BbPromise.resolve()
