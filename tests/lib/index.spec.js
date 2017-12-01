@@ -119,6 +119,9 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
       it('rejects badly formatted YML', () => {
         expect(() => slsart.impl.parseInput(testBadYmlScriptStringified)).to.throw(yaml.YAMLException)
       })
+      it('rejects invalid but well formed scripts', () => {
+        expect(() => slsart.impl.parseInput('{}')).to.throw(Error)
+      })
     })
 
     describe('#replaceArgv', () => {
