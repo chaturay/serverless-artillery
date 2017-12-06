@@ -884,6 +884,21 @@ describe('serverless-artillery Handler Tests', () => {
         },
       ])
     })
+    it('reads a payload file with options.', () => {
+      const newScript = {
+        config: {
+          payload: {
+            path: path.join(__dirname, 'example.0.csv'),
+            options: { from: 2 },
+          },
+        },
+      }
+      const payload = handler.impl.readPayload(newScript)
+      expect(payload).to.deep.equal([
+        ['234567', 'Jane Doe'],
+        ['345678', 'Baby Doe'],
+      ])
+    })
   })
   /**
    * SPLIT SCRIPT BY FLOW
