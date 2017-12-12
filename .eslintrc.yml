@@ -4,6 +4,7 @@ rules:
   max-len: off
   no-console: off
   no-else-return: off
+  no-nested-ternary: off
   no-plusplus:
     - error
     - allowForLoopAfterthoughts: true

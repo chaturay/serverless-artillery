@@ -9,6 +9,7 @@
   },
   "scripts": {
     "test": "./node_modules/.bin/nyc ./node_modules/.bin/mocha -r aws-sdk -r artillery-core --recursive -R min tests",
+    "unit": "./node_modules/.bin/mocha --recursive tests",
     "lint": "./node_modules/.bin/eslint . bin/serverless-artillery",
     "postinstall": "node ./postinstall.js",
     "publish": "./node_modules/.bin/np"
@@ -52,7 +53,8 @@
     "mocha": "^3.0.2",
     "mock-stdin": "^0.3.1",
     "np": "^2.16.0",
-    "nyc": "^11.0.3"
+    "nyc": "^11.0.3",
+    "sinon": "^4.1.2"
   },
   "nyc": {
     "check-coverage": true,
