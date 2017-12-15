@@ -13,10 +13,10 @@ describe('lib/configurator', () => {
       let sideEffects
       beforeEach(() => {
         sideEffects = freeze({
-          log: stub(),
+          logger: stub(),
           randomid: stub().returns(randomValue),
           writeFileIfNotExists: stub().returns(Promise.resolve(true)),
-          readLambdaFile: stub().returns(Promise.resolve(fileData)),
+          readLocalFile: stub().returns(Promise.resolve(fileData)),
           deleteFile: stub().returns(Promise.resolve()),
           npmInstall: stub().returns(Promise.resolve()),
         })
@@ -25,7 +25,7 @@ describe('lib/configurator', () => {
 
       const expectedLogs = [[messages.complete]]
       it('should log status messages', () =>
-        assert.deepStrictEqual(sideEffects.log.args, expectedLogs))
+        assert.deepStrictEqual(sideEffects.logger.args, expectedLogs))
 
       const expectedFileData =
         `file data ${serviceName}-${randomValue} more file data`
@@ -44,10 +44,10 @@ describe('lib/configurator', () => {
       let sideEffects
       beforeEach(() => {
         sideEffects = freeze({
-          log: stub(),
+          logger: stub(),
           randomid: stub().returns(randomValue),
           writeFileIfNotExists: stub().returns(Promise.resolve(true)),
-          readLambdaFile: stub().returns(Promise.resolve(fileData)),
+          readLocalFile: stub().returns(Promise.resolve(fileData)),
           deleteFile: stub().returns(Promise.resolve()),
           npmInstall: stub().returns(Promise.resolve()),
         })
@@ -61,7 +61,7 @@ describe('lib/configurator', () => {
         [messages.complete],
       ]
       it('should log status and debug messages', () =>
-        assert.deepStrictEqual(sideEffects.log.args, expectedLogs))
+        assert.deepStrictEqual(sideEffects.logger.args, expectedLogs))
 
       const expectedFileData =
         `file data ${serviceName}-${randomValue} more file data`
@@ -80,10 +80,10 @@ describe('lib/configurator', () => {
       let sideEffects
       beforeEach(() => {
         sideEffects = freeze({
-          log: stub(),
+          logger: stub(),
           randomid: stub().returns(randomValue),
           writeFileIfNotExists: stub().returns(Promise.resolve(true)),
-          readLambdaFile: stub().returns(Promise.resolve(fileData)),
+          readLocalFile: stub().returns(Promise.resolve(fileData)),
           deleteFile: stub().returns(Promise.resolve()),
           npmInstall: stub().returns(Promise.reject(new Error('failed'))),
         })
@@ -92,7 +92,7 @@ describe('lib/configurator', () => {
 
       const expectedLogs = [[messages.complete], [messages.npmInstallError]]
       it('should log status messages', () =>
-        assert.deepStrictEqual(sideEffects.log.args, expectedLogs))
+        assert.deepStrictEqual(sideEffects.logger.args, expectedLogs))
 
       const expectedFileData =
         `file data ${serviceName}-${randomValue} more file data`
@@ -116,10 +116,10 @@ describe('lib/configurator', () => {
       let sideEffects
       beforeEach(() => {
         sideEffects = freeze({
-          log: stub(),
+          logger: stub(),
           randomid: stub().returns(randomValue),
           writeFileIfNotExists: stub().returns(Promise.resolve(true)),
-          readLambdaFile: stub().returns(Promise.resolve(fileData)),
+          readLocalFile: stub().returns(Promise.resolve(fileData)),
           deleteFile: stub().returns(Promise.resolve()),
           npmInstall: stub().returns(Promise.reject(new Error('failed'))),
         })
@@ -134,7 +134,7 @@ describe('lib/configurator', () => {
         [messages.npmInstallError],
       ]
       it('should log status and debug messages', () =>
-        assert.deepStrictEqual(sideEffects.log.args, expectedLogs))
+        assert.deepStrictEqual(sideEffects.logger.args, expectedLogs))
 
       const expectedFileData =
         `file data ${serviceName}-${randomValue} more file data`
@@ -161,11 +161,11 @@ describe('lib/configurator', () => {
       let sideEffects
       beforeEach(() => {
         sideEffects = freeze({
-          log: stub(),
+          logger: stub(),
           randomid: stub().returns(randomValue),
           writeFileIfNotExists: stub().callsFake(name =>
             Promise.resolve(!conflictFiles.includes(name))),
-          readLambdaFile: stub().returns(Promise.resolve(fileData)),
+          readLocalFile: stub().returns(Promise.resolve(fileData)),
           deleteFile: stub().returns(Promise.resolve()),
           npmInstall: stub().returns(Promise.resolve()),
         })
@@ -174,7 +174,7 @@ describe('lib/configurator', () => {
 
       const expectedLogs = [[messages.conflictList(conflictFiles)]]
       it('should log status messages', () =>
-        assert.deepStrictEqual(sideEffects.log.args, expectedLogs))
+        assert.deepStrictEqual(sideEffects.logger.args, expectedLogs))
 
       const expectedFileData =
         `file data ${serviceName}-${randomValue} more file data`
@@ -198,11 +198,11 @@ describe('lib/configurator', () => {
       let sideEffects
       beforeEach(() => {
         sideEffects = freeze({
-          log: stub(),
+          logger: stub(),
           randomid: stub().returns(randomValue),
           writeFileIfNotExists: stub().callsFake(name =>
             Promise.resolve(!conflictFiles.includes(name))),
-          readLambdaFile: stub().returns(Promise.resolve(fileData)),
+          readLocalFile: stub().returns(Promise.resolve(fileData)),
           deleteFile: stub().returns(Promise.resolve()),
           npmInstall: stub().returns(Promise.resolve()),
         })
@@ -215,7 +215,7 @@ describe('lib/configurator', () => {
         [messages.conflictList(conflictFiles)],
       ]
       it('should log status messages', () =>
-        assert.deepStrictEqual(sideEffects.log.args, expectedLogs))
+        assert.deepStrictEqual(sideEffects.logger.args, expectedLogs))
 
       const expectedFileData =
         `file data ${serviceName}-${randomValue} more file data`

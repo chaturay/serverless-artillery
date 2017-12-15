@@ -1,6 +1,6 @@
 const assert = require('assert')
 const {
-  pipe, tap, map, freeze, tapif,
+  pipe, tap, map, freeze, tapif, pipeif,
 } = require('../../lib/fp')
 
 /* eslint-disable no-return-assign */
@@ -57,6 +57,20 @@ describe('lib/fp', () => {
       let mutatable = 2
       tap((n) => { mutatable = n })(3)
       assert(mutatable, 3)
+    })
+  })
+
+  describe('pipeif', () => {
+    it('should pipe to truepath if condition is true', () => {
+      const actual =
+        pipeif(value => value, [() => 'true'], [() => 'false'])(true)
+      assert.strictEqual(actual, 'true')
+    })
+
+    it('should pipe to falsepath if condition is false', () => {
+      const actual =
+        pipeif(value => value, [() => 'true'], [() => 'false'])(false)
+      assert.strictEqual(actual, 'false')
     })
   })
 
