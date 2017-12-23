@@ -157,67 +157,6 @@ describe('./lib/lambda/handler.js', () => {
           })
         })
       })
-      describe('phase definition (unless in acceptance mode)', () => {
-        it('rejects an undefined config', () => {
-          delete script.config
-          expect(handler.impl.validScript(script, null, noop)).to.be.false
-          script.mode = handler.constants.modes.ACCEPTANCE
-          expect(handler.impl.validScript(script, null, noop)).to.be.true
-        })
-        it('rejects a non-array config.phases', () => {
-          script.config.phases = ''
-          expect(handler.impl.validScript(script, null, noop)).to.be.false
-          script.mode = handler.constants.modes.ACCEPTANCE
-          expect(handler.impl.validScript(script, null, noop)).to.be.true
-        })
-        it('rejects an empty-array config.phases', () => {
-          script.config.phases = []
-          expect(handler.impl.validScript(script, null, noop)).to.be.false
-          script.mode = handler.constants.modes.ACCEPTANCE
-          expect(handler.impl.validScript(script, null, noop)).to.be.true
-        })
-      })
-      describe('mode declaration', () => {
-        Object.keys(handler.constants.modes).forEach((mode) => {
-          it(`accepts valid mode declaration '${mode}'`, () => {
-            script.mode = handler.constants.modes[mode]
-            expect(handler.impl.validScript(script, null, noop)).to.be.true
-          })
-        })
-        it('reject unknown modes', () => {
-          script.mode = 'UNKNOWN_MODE'
-          expect(handler.impl.validScript(script, null, noop)).to.be.false
-        })
-        it('reject unsupported mode capitalizations', () => {
-          script.mode = 'aCc'
-          expect(handler.impl.validScript(script, null, noop)).to.be.false
-        })
-      })
-      describe('evaluates load constraints (unless in acceptance mode)', () => {
-        it('rejects scripts with invalid phases', () => {
-          script.config.phases = [{ arrivalRate: 10 }] // invalid duration
-          expect(handler.impl.validScript(script, null, noop)).to.be.false
-          script.mode = handler.constants.modes.ACCEPTANCE
-          expect(handler.impl.validScript(script, null, noop)).to.be.true
-          delete script.mode
-          script.config.phases = [{ duration: 10 }] // invalid rate
-          expect(handler.impl.validScript(script, null, noop)).to.be.false
-          script.mode = handler.constants.modes.ACCEPTANCE
-          expect(handler.impl.validScript(script, null, noop)).to.be.true
-        })
-        it('rejects scripts with excessive duration', () => {
-          script.config.phases = [{ duration: handler.constants.DEFAULT_MAX_SCRIPT_DURATION_IN_SECONDS + 1, arrivalRate: 10 }]
-          expect(handler.impl.validScript(script, null, noop)).to.be.false
-          script.mode = handler.constants.modes.ACCEPTANCE
-          expect(handler.impl.validScript(script, null, noop)).to.be.true
-        })
-        it('rejects scripts with excessive requests per second', () => {
-          script.config.phases = [{ duration: 10, arrivalRate: handler.constants.DEFAULT_MAX_SCRIPT_REQUESTS_PER_SECOND + 1 }]
-          expect(handler.impl.validScript(script, null, noop)).to.be.false
-          script.mode = handler.constants.modes.ACCEPTANCE
-          expect(handler.impl.validScript(script, null, noop)).to.be.true
-        })
-      })
     })
 
     /**
