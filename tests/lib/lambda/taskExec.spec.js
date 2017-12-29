@@ -92,9 +92,18 @@ describe('./lib/lambda/taskExec.js', () => {
           },
         ])
       })
+      it('rejects a string payload value', () => {
+        const newScript = {
+          config: {
+            payload: 'a string',
+          },
+        }
+        const payload = taskExec.impl.readPayload(newScript)
+        expect(payload).to.be.undefined
+      })
     })
 
-    describe('#runLoad', () => {
+    describe('#execLoad', () => {
       let loadProcessorStub
       let readPayloadStub
       let runner
@@ -114,7 +123,7 @@ describe('./lib/lambda/taskExec.js', () => {
       it('does nothing in simulation mode',
         () => new Promise((resolve) => {
           script = { _trace: true, _simulation: true }
-          taskExec.impl.runLoad(1, script, tagContext, (err, res) => {
+          taskExec.impl.execLoad(1, script, tagContext, (err, res) => {
             expect(err).to.be.null
             expect(res).to.eql({ Payload: '{ "errors": 0 }' })
             resolve()
@@ -130,7 +139,7 @@ describe('./lib/lambda/taskExec.js', () => {
           script = {}
           const opts = {}
           const report = {}
-          taskExec.impl.runLoad(1, script, tagContext, (err, res) => {
+          taskExec.impl.execLoad(1, script, tagContext, (err, res) => {
             expect(err).to.be.null
             expect(res).to.equal(report)
             resolve()
@@ -153,7 +162,7 @@ describe('./lib/lambda/taskExec.js', () => {
           script = { _trace: true }
           const opts = {}
           const report = {}
-          taskExec.impl.runLoad(1, script, tagContext, (err, res) => {
+          taskExec.impl.execLoad(1, script, tagContext, (err, res) => {
             expect(err).to.be.null
             expect(res).to.equal(report)
             resolve()
@@ -175,7 +184,7 @@ describe('./lib/lambda/taskExec.js', () => {
         () => new Promise((resolve) => {
           script = {}
           runnerStub.throws()
-          taskExec.impl.runLoad(1, script, tagContext, (err, res) => {
+          taskExec.impl.execLoad(1, script, tagContext, (err, res) => {
             expect(err).to.be.a('string')
             expect(res).to.be.undefined
             resolve()
