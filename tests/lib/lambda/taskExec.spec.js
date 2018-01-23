@@ -1,18 +1,18 @@
-const artillery = require('artillery-core')
 const chai = require('chai')
+const chaiAsPromised = require('chai-as-promised')
 const EventEmitter = require('events')
 const path = require('path')
 const sinon = require('sinon')
 const sinonChai = require('sinon-chai')
 
+chai.use(chaiAsPromised)
 chai.use(sinonChai)
+chai.should()
 
 const expect = chai.expect
-const tagContext = {
-  functionName: 'name',
-}
-const noop = () => {}
 
+// eslint-disable-next-line import/no-dynamic-require
+const artillery = require(path.join('..', '..', '..', 'lib', 'lambda', 'node_modules', 'artillery-core'))
 // eslint-disable-next-line import/no-dynamic-require
 const taskExec = require(path.join('..', '..', '..', 'lib', 'lambda', 'taskExec.js'))
 
@@ -112,7 +112,7 @@ describe('./lib/lambda/taskExec.js', () => {
         loadProcessorStub = sinon.stub(taskExec.impl, 'loadProcessor').returns()
         readPayloadStub = sinon.stub(taskExec.impl, 'readPayload').returns()
         runner = new EventEmitter()
-        runner.run = noop
+        runner.run = () => {}
         runnerStub = sinon.stub(artillery, 'runner').returns(runner)
       })
       afterEach(() => {
@@ -120,85 +120,71 @@ describe('./lib/lambda/taskExec.js', () => {
         readPayloadStub.restore()
         runnerStub.restore()
       })
-      it('does nothing in simulation mode',
-        () => new Promise((resolve) => {
-          script = { _trace: true, _simulation: true }
-          taskExec.impl.execLoad(1, script, tagContext, (err, res) => {
-            expect(err).to.be.null
-            expect(res).to.eql({ Payload: '{ "errors": 0 }' })
-            resolve()
+      it('does nothing in simulation mode', () => {
+        script = { _trace: true, _simulation: true }
+        return taskExec.impl.execLoad(1, script)
+          .should.eventually.eql({ Payload: '{ "errors": 0 }' })
+          .then(() => {
+            expect(loadProcessorStub).to.not.be.called
+            expect(readPayloadStub).to.not.be.called
+            expect(runnerStub).to.not.be.called
           })
-        }).then(() => {
-          expect(loadProcessorStub).to.not.be.called
-          expect(readPayloadStub).to.not.be.called
-          expect(runnerStub).to.not.be.called
-        }) // eslint-disable-line comma-dangle
-      )
-      it('"loads" a processor, "reads" a payload, and "executes" the script before the callback is executed in standard mode',
-        () => new Promise((resolve) => {
-          script = {}
-          const opts = {}
-          const report = {}
-          taskExec.impl.execLoad(1, script, tagContext, (err, res) => {
-            expect(err).to.be.null
-            expect(res).to.equal(report)
-            resolve()
+      })
+      it('"loads" a processor, "reads" a payload, and "executes" the script before the callback is executed in standard mode', () => {
+        script = {}
+        const opts = {}
+        const report = {}
+        const ret = taskExec.impl.execLoad(1, script)
+          .should.eventually.equal(report)
+          .then(() => {
+            expect(loadProcessorStub).to.be.calledOnce
+            expect(loadProcessorStub).to.be.calledBefore(readPayloadStub)
+            expect(readPayloadStub).to.be.calledAfter(loadProcessorStub)
+            expect(readPayloadStub).to.be.calledOnce
+            expect(readPayloadStub).to.be.calledBefore(runnerStub)
+            expect(runnerStub).to.be.calledAfter(readPayloadStub)
+            expect(runnerStub).to.be.calledOnce
           })
-          runner.emit('phaseStarted', opts)
-          runner.emit('phaseCompleted', opts)
-          runner.emit('done', report)
-        }).then(() => {
-          expect(loadProcessorStub).to.be.calledOnce
-          expect(loadProcessorStub).to.be.calledBefore(readPayloadStub)
-          expect(readPayloadStub).to.be.calledAfter(loadProcessorStub)
-          expect(readPayloadStub).to.be.calledOnce
-          expect(readPayloadStub).to.be.calledBefore(runnerStub)
-          expect(runnerStub).to.be.calledAfter(readPayloadStub)
-          expect(runnerStub).to.be.calledOnce
-        }) // eslint-disable-line comma-dangle
-      )
-      it('"loads" a processor, "reads" a payload, and "executes" the script before the callback is executed in trace mode',
-        () => new Promise((resolve) => {
-          script = { _trace: true }
-          const opts = {}
-          const report = {}
-          taskExec.impl.execLoad(1, script, tagContext, (err, res) => {
-            expect(err).to.be.null
-            expect(res).to.equal(report)
-            resolve()
+        runner.emit('phaseStarted', opts)
+        runner.emit('phaseCompleted', opts)
+        runner.emit('done', report)
+        return ret
+      })
+      it('"loads" a processor, "reads" a payload, and "executes" the script before the callback is executed in trace mode', () => {
+        script = { _trace: true }
+        const opts = {}
+        const report = {}
+        const ret = taskExec.impl.execLoad(1, script)
+          .should.eventually.equal(report)
+          .then(() => {
+            expect(loadProcessorStub).to.be.calledOnce
+            expect(loadProcessorStub).to.be.calledBefore(readPayloadStub)
+            expect(readPayloadStub).to.be.calledAfter(loadProcessorStub)
+            expect(readPayloadStub).to.be.calledOnce
+            expect(readPayloadStub).to.be.calledBefore(runnerStub)
+            expect(runnerStub).to.be.calledAfter(readPayloadStub)
+            expect(runnerStub).to.be.calledOnce
           })
-          runner.emit('phaseStarted', opts)
-          runner.emit('phaseCompleted', opts)
-          runner.emit('done', report)
-        }).then(() => {
-          expect(loadProcessorStub).to.be.calledOnce
-          expect(loadProcessorStub).to.be.calledBefore(readPayloadStub)
-          expect(readPayloadStub).to.be.calledAfter(loadProcessorStub)
-          expect(readPayloadStub).to.be.calledOnce
-          expect(readPayloadStub).to.be.calledBefore(runnerStub)
-          expect(runnerStub).to.be.calledAfter(readPayloadStub)
-          expect(runnerStub).to.be.calledOnce
-        }) // eslint-disable-line comma-dangle
-      )
-      it('handled exepected errors in the artillery runner or runner event invocations',
-        () => new Promise((resolve) => {
-          script = {}
-          runnerStub.throws()
-          taskExec.impl.execLoad(1, script, tagContext, (err, res) => {
-            expect(err).to.be.a('string')
-            expect(res).to.be.undefined
-            resolve()
+        runner.emit('phaseStarted', opts)
+        runner.emit('phaseCompleted', opts)
+        runner.emit('done', report)
+        return ret
+      })
+      it('handled exepected errors in the artillery runner or runner event invocations', () => {
+        script = {}
+        runnerStub.throws()
+        return taskExec.impl.execLoad(1, script)
+          .should.eventually.be.rejected
+          .then(() => {
+            expect(loadProcessorStub).to.be.calledOnce
+            expect(loadProcessorStub).to.be.calledBefore(readPayloadStub)
+            expect(readPayloadStub).to.be.calledAfter(loadProcessorStub)
+            expect(readPayloadStub).to.be.calledOnce
+            expect(readPayloadStub).to.be.calledBefore(runnerStub)
+            expect(runnerStub).to.be.calledAfter(readPayloadStub)
+            expect(runnerStub).to.be.calledOnce
           })
-        }).then(() => {
-          expect(loadProcessorStub).to.be.calledOnce
-          expect(loadProcessorStub).to.be.calledBefore(readPayloadStub)
-          expect(readPayloadStub).to.be.calledAfter(loadProcessorStub)
-          expect(readPayloadStub).to.be.calledOnce
-          expect(readPayloadStub).to.be.calledBefore(runnerStub)
-          expect(runnerStub).to.be.calledAfter(readPayloadStub)
-          expect(runnerStub).to.be.calledOnce
-        }) // eslint-disable-line comma-dangle
-      )
+      })
     })
   })
 })

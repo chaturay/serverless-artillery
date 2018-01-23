@@ -9,10 +9,13 @@ const fs = BbPromise.promisifyAll(require('fs'))
 const quibble = require('quibble')
 const os = require('os')
 const path = require('path')
+const sinon = require('sinon')
+const sinonChai = require('sinon-chai')
 const yaml = require('js-yaml')
 
 BbPromise.longStackTraces()
 chai.use(chaiAsPromised)
+chai.use(sinonChai)
 
 const expect = chai.expect
 
@@ -32,10 +35,32 @@ const argv = process.argv.slice(0)
 
 let npmInstallResult
 
+// ## Serverless Fake BEGIN ##
+let Payload = '{}'
+class AwsInvoke {
+  log() {} // eslint-disable-line class-methods-use-this
+}
+let slsFakeInit = () => Promise.resolve()
+class ServerlessFake {
+  constructor() {
+    this.version = '1.0.3'
+    this.pluginManager = {
+      plugins: [new AwsInvoke()],
+    }
+  }
+  init() { return slsFakeInit(this) }
+  run() { return Promise.resolve(this).then((that) => { that.pluginManager.plugins[0].log({ Payload }) }) }
+}
+ServerlessFake.dirname = require.resolve(path.join('..', '..', 'node_modules', 'serverless'))
+// ## Serverless Fake END ##
+
 quibble(path.join('..', '..', 'lib', 'npm'), { install: () => npmInstallResult() })
+quibble(path.join('..', '..', 'lib', 'serverless-fx'), ServerlessFake)
 quibble('get-stdin', () => BbPromise.resolve(testJsonScriptStringified))
 
-const slsart = require('../../lib/index')
+const func = require(path.join('..', '..', 'lib', 'lambda', 'func.js')) // eslint-disable-line import/no-dynamic-require
+const task = require(path.join('..', '..', 'lib', 'lambda', 'task.js')) // eslint-disable-line import/no-dynamic-require
+const slsart = require(path.join('..', '..', 'lib', 'index.js')) // eslint-disable-line import/no-dynamic-require
 
 describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefer-arrow-callback
   describe(':impl', () => {
@@ -172,10 +197,10 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
     })
 
     describe('#scriptConstraints', () => {
-      const replaceImpl = (timeout, func) => (() => {
+      const replaceImpl = (timeout, testFunc) => (() => {
         const config = aws.config
         aws.config = { httpOptions: { timeout } }
-        return func().then(() => {
+        return testFunc().then(() => {
           aws.config = config
         })
       })
@@ -353,12 +378,12 @@ scenarios:
 
     describe('#findServicePath', () => {
       const lambdaPath = path.resolve('lib', 'lambda')
-      const replaceImpl = (cwdResult, fileExistsResult, func) => (() => {
+      const replaceImpl = (cwdResult, fileExistsResult, testFunc) => (() => {
         const cwd = process.cwd
         const fileExists = slsart.impl.fileExists
         process.cwd = () => cwdResult
         slsart.impl.fileExists = () => fileExistsResult
-        return func().then(() => {
+        return testFunc().then(() => {
           slsart.impl.fileExists = fileExists
           process.cwd = cwd
         })
@@ -390,7 +415,47 @@ scenarios:
     })
 
     describe('#serverlessRunner', () => {
-      // TODO implement tests
+      let implFindServicePathStub
+      beforeEach(() => {
+        implFindServicePathStub = sinon.stub(slsart.impl, 'findServicePath').returns(__dirname)
+      })
+      afterEach(() => {
+        implFindServicePathStub.restore()
+      })
+      it('checks for SLS version compatibility', () =>
+        expect(slsart.impl.serverlessRunner({ debug: true, verbose: true })).to.eventually.be.fulfilled // eslint-disable-line comma-dangle
+      )
+      it('rejects earlier SLS versions', () => {
+        const slsVersion = slsart.constants.CompatibleServerlessSemver
+        slsart.constants.CompatibleServerlessSemver = '^1.0.4'
+        return expect(slsart.impl.serverlessRunner({})).to.eventually.be.rejected
+          .then(() => { slsart.constants.CompatibleServerlessSemver = slsVersion })
+      })
+      it('rejects later SLS versions', () => {
+        const slsVersion = slsart.constants.CompatibleServerlessSemver
+        slsart.constants.CompatibleServerlessSemver = '^0.0.0'
+        return expect(slsart.impl.serverlessRunner({})).to.eventually.be.rejected
+          .then(() => { slsart.constants.CompatibleServerlessSemver = slsVersion })
+      })
+      it('handles empty function invocation payloads', () => {
+        const payload = Payload
+        Payload = 0
+        return expect(slsart.impl.serverlessRunner({ debug: true })).to.eventually.be.fulfilled
+          .then(() => { Payload = payload })
+      })
+      it('handles unparsable function invocation payloads', () => {
+        const payload = Payload
+        Payload = '{'
+        return expect(slsart.impl.serverlessRunner({})).to.eventually.be.fulfilled
+          .then(() => { Payload = payload })
+      })
+      it('handles rejections along the promise chain', () => {
+        const fakeInit = slsFakeInit
+        slsFakeInit = () => Promise.reject('rejected')
+        return expect(slsart.impl.serverlessRunner({})).to.eventually.be.fulfilled
+          .then(() => { slsFakeInit = fakeInit })
+          .catch((ex) => { slsFakeInit = fakeInit; throw ex })
+      })
     })
   })
   describe(':exports', function slsartCommands() { // eslint-disable-line prefer-arrow-callback
@@ -416,14 +481,14 @@ scenarios:
       const willCompleteMessage = durationInSeconds => `${os.EOL
       }\tYour function has been invoked. The load is scheduled to be completed in ${durationInSeconds} seconds.${os.EOL}`
 
-      const replaceImpl = (scriptConstraintsResult, serverlessRunnerResult, func) => (() => {
+      const replaceImpl = (scriptConstraintsResult, serverlessRunnerResult, testFunc) => (() => {
         const scriptConstraints = slsart.impl.scriptConstraints
         const serverlessRunner = slsart.impl.serverlessRunner
         const replaceInput = slsart.impl.replaceArgv
         slsart.impl.scriptConstraints = () => scriptConstraintsResult
         slsart.impl.serverlessRunner = () => BbPromise.resolve(serverlessRunnerResult)
         slsart.impl.replaceArgv = () => {}
-        return func().then(() => {
+        return testFunc().then(() => {
           slsart.impl.scriptConstraints = scriptConstraints
           slsart.impl.serverlessRunner = serverlessRunner
           slsart.impl.replaceArgv = replaceInput
@@ -447,7 +512,33 @@ scenarios:
         console.log = log
         process.argv = argv.slice(0)
       })
-
+      describe('error handling', () => {
+        let implParseInputStub
+        let processExitStub
+        beforeEach(() => {
+          implParseInputStub = sinon.stub(slsart.impl, 'parseInput')
+          processExitStub = sinon.stub(process, 'exit').returns()
+        })
+        afterEach(() => {
+          implParseInputStub.restore()
+          processExitStub.restore()
+        })
+        it('handles and reports validation errors from the function plugin, exiting the process', () => {
+          implParseInputStub.throws(new func.def.FunctionError('func.error'))
+          return expect(slsart.invoke({ d: testJsonScriptStringified })).to.eventually.be.fulfilled
+            .then(() => expect(processExitStub).to.have.been.calledWithExactly(1))
+        })
+        it('handles and reports validation errors from the task plugin, exiting the process', () => {
+          implParseInputStub.throws(new task.def.TaskError('task.error'))
+          return expect(slsart.invoke({ d: testJsonScriptStringified })).to.eventually.be.fulfilled
+            .then(() => expect(processExitStub).to.have.been.calledWithExactly(1))
+        })
+        it('handles and reports unexpected errors, exiting the process', () => {
+          implParseInputStub.throws(new Error('error'))
+          return expect(slsart.invoke({ d: testJsonScriptStringified })).to.eventually.be.fulfilled
+            .then(() => expect(processExitStub).to.have.been.calledWithExactly(1))
+        })
+      })
       describe('performance mode', () => {
         it('indicates function completeness and results (when the script can be excuted by one function)',
           replaceImpl(
