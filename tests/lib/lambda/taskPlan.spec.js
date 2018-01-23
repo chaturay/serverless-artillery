@@ -36,6 +36,9 @@ describe('./lib/lambda/taskPlan.js', () => {
     defaultSettings = func.def.getSettings({})
   })
   describe(':impl', () => {
+    // ###############
+    // ## DURATIONS ##
+    // ###############
     describe('#phaseDurationInSeconds', () => {
       it('extracts the duration of a constant rate phase', () => {
         phase = {
@@ -452,6 +455,9 @@ describe('./lib/lambda/taskPlan.js', () => {
       })
     })
 
+    // ##############
+    // ## REQUESTS ##
+    // ##############
     describe('#phaseRequestsPerSecond', () => {
       it('calculates the arrivals per second specified in an ascending rampTo phase', () => {
         phase = { arrivalRate: 10, rampTo: 20 }
@@ -975,63 +981,9 @@ describe('./lib/lambda/taskPlan.js', () => {
       })
     })
 
-    describe('#planPerformance', () => {
-      // explicitly not stubbing scriptDurationInSeconds and scriptRequestsPerSecond
-      let chunk
-      let remainder
-      let splitScriptByDurationInSecondsAndScheduleStub
-      let splitScriptByRequestsPerSecondAndScheduleStub
-      beforeEach(() => {
-        script = validScript()
-        chunk = validScript()
-        remainder = validScript()
-        splitScriptByDurationInSecondsAndScheduleStub = sinon.stub(task.plan.impl, 'splitScriptByDurationInSecondsAndSchedule').returns({ chunk, remainder })
-        splitScriptByRequestsPerSecondAndScheduleStub = sinon.stub(task.plan.impl, 'splitScriptByRequestsPerSecondAndSchedule').returns([chunk, remainder])
-      })
-      afterEach(() => {
-        splitScriptByDurationInSecondsAndScheduleStub.restore()
-        splitScriptByRequestsPerSecondAndScheduleStub.restore()
-      })
-      it('returns the given script in an array if that script is within limits', () => {
-        result = task.plan.impl.planPerformance(1, script, defaultSettings)
-        expect(splitScriptByDurationInSecondsAndScheduleStub).to.not.have.been.called
-        expect(splitScriptByRequestsPerSecondAndScheduleStub).to.not.have.been.called
-        expect(result.length).to.equal(1)
-        expect(result[0]).to.equal(script)
-      })
-      it('splits a script with a duration that is greater than the given limits', () => {
-        script.config.phases[0].duration = defaultSettings.maxChunkDurationInSeconds + 1
-        result = task.plan.impl.planPerformance(1, script, defaultSettings)
-        expect(splitScriptByDurationInSecondsAndScheduleStub).to.have.been.calledOnce
-        expect(splitScriptByDurationInSecondsAndScheduleStub).to.have.been.calledWithExactly(1, script, defaultSettings)
-        expect(splitScriptByRequestsPerSecondAndScheduleStub).to.not.have.been.called
-        expect(result.length).to.equal(2)
-      })
-      it('splits a script with a requests per second that are greater than the given limits', () => {
-        script.config.phases[0].arrivalRate = defaultSettings.maxChunkRequestsPerSecond + 1
-        result = task.plan.impl.planPerformance(1, script, defaultSettings)
-        expect(splitScriptByDurationInSecondsAndScheduleStub).to.not.have.been.called
-        expect(splitScriptByRequestsPerSecondAndScheduleStub).to.have.been.calledOnce
-        expect(splitScriptByRequestsPerSecondAndScheduleStub).to.have.been.calledWithExactly(1, script, defaultSettings)
-        expect(result.length).to.equal(2)
-      })
-      it('splits a script with a both duration and requests per second that are greater than the given limits, in trace mode', () => {
-        script._trace = true
-        script.config.phases[0].duration = defaultSettings.maxChunkDurationInSeconds + 1
-        script.config.phases[0].arrivalRate = defaultSettings.maxChunkRequestsPerSecond + 1
-        chunk.config.phases[0].duration = defaultSettings.maxChunkRequestsPerSecond
-        chunk.config.phases[0].arrivalRate = defaultSettings.maxChunkRequestsPerSecond + 1
-        remainder.config.phases[0].duration = 1
-        remainder.config.phases[0].arrivalRate = defaultSettings.maxChunkRequestsPerSecond + 1
-        result = task.plan.impl.planPerformance(1, script, defaultSettings)
-        expect(splitScriptByDurationInSecondsAndScheduleStub).to.have.been.calledOnce
-        expect(splitScriptByDurationInSecondsAndScheduleStub).to.have.been.calledWithExactly(1, script, defaultSettings)
-        expect(splitScriptByRequestsPerSecondAndScheduleStub).to.have.been.calledOnce
-        expect(splitScriptByRequestsPerSecondAndScheduleStub).to.have.been.calledWithExactly(1, chunk, defaultSettings)
-        expect(result.length).to.equal(3)
-      })
-    })
-
+    // ######################
+    // ## REINTERPRETATION ##
+    // ######################
     /**
      * SPLIT SCRIPT BY FLOW
      */
@@ -1130,6 +1082,66 @@ describe('./lib/lambda/taskPlan.js', () => {
             ],
           },
         ])
+      })
+    })
+
+    // ##############
+    // ## PLANNING ##
+    // ##############
+    describe('#planPerformance', () => {
+      // explicitly not stubbing scriptDurationInSeconds and scriptRequestsPerSecond
+      let chunk
+      let remainder
+      let splitScriptByDurationInSecondsAndScheduleStub
+      let splitScriptByRequestsPerSecondAndScheduleStub
+      beforeEach(() => {
+        script = validScript()
+        chunk = validScript()
+        remainder = validScript()
+        splitScriptByDurationInSecondsAndScheduleStub = sinon.stub(task.plan.impl, 'splitScriptByDurationInSecondsAndSchedule').returns({ chunk, remainder })
+        splitScriptByRequestsPerSecondAndScheduleStub = sinon.stub(task.plan.impl, 'splitScriptByRequestsPerSecondAndSchedule').returns([chunk, remainder])
+      })
+      afterEach(() => {
+        splitScriptByDurationInSecondsAndScheduleStub.restore()
+        splitScriptByRequestsPerSecondAndScheduleStub.restore()
+      })
+      it('returns the given script in an array if that script is within limits', () => {
+        result = task.plan.impl.planPerformance(1, script, defaultSettings)
+        expect(splitScriptByDurationInSecondsAndScheduleStub).to.not.have.been.called
+        expect(splitScriptByRequestsPerSecondAndScheduleStub).to.not.have.been.called
+        expect(result.length).to.equal(1)
+        expect(result[0]).to.equal(script)
+      })
+      it('splits a script with a duration that is greater than the given limits', () => {
+        script.config.phases[0].duration = defaultSettings.maxChunkDurationInSeconds + 1
+        result = task.plan.impl.planPerformance(1, script, defaultSettings)
+        expect(splitScriptByDurationInSecondsAndScheduleStub).to.have.been.calledOnce
+        expect(splitScriptByDurationInSecondsAndScheduleStub).to.have.been.calledWithExactly(1, script, defaultSettings)
+        expect(splitScriptByRequestsPerSecondAndScheduleStub).to.not.have.been.called
+        expect(result.length).to.equal(2)
+      })
+      it('splits a script with a requests per second that are greater than the given limits', () => {
+        script.config.phases[0].arrivalRate = defaultSettings.maxChunkRequestsPerSecond + 1
+        result = task.plan.impl.planPerformance(1, script, defaultSettings)
+        expect(splitScriptByDurationInSecondsAndScheduleStub).to.not.have.been.called
+        expect(splitScriptByRequestsPerSecondAndScheduleStub).to.have.been.calledOnce
+        expect(splitScriptByRequestsPerSecondAndScheduleStub).to.have.been.calledWithExactly(1, script, defaultSettings)
+        expect(result.length).to.equal(2)
+      })
+      it('splits a script with a both duration and requests per second that are greater than the given limits, in trace mode', () => {
+        script._trace = true
+        script.config.phases[0].duration = defaultSettings.maxChunkDurationInSeconds + 1
+        script.config.phases[0].arrivalRate = defaultSettings.maxChunkRequestsPerSecond + 1
+        chunk.config.phases[0].duration = defaultSettings.maxChunkRequestsPerSecond
+        chunk.config.phases[0].arrivalRate = defaultSettings.maxChunkRequestsPerSecond + 1
+        remainder.config.phases[0].duration = 1
+        remainder.config.phases[0].arrivalRate = defaultSettings.maxChunkRequestsPerSecond + 1
+        result = task.plan.impl.planPerformance(1, script, defaultSettings)
+        expect(splitScriptByDurationInSecondsAndScheduleStub).to.have.been.calledOnce
+        expect(splitScriptByDurationInSecondsAndScheduleStub).to.have.been.calledWithExactly(1, script, defaultSettings)
+        expect(splitScriptByRequestsPerSecondAndScheduleStub).to.have.been.calledOnce
+        expect(splitScriptByRequestsPerSecondAndScheduleStub).to.have.been.calledWithExactly(1, chunk, defaultSettings)
+        expect(result.length).to.equal(3)
       })
     })
 
