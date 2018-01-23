@@ -101,6 +101,21 @@ describe('./lib/lambda/taskExec.js', () => {
         const payload = taskExec.impl.readPayload(newScript)
         expect(payload).to.be.undefined
       })
+      it('reads a payload file with options.', () => {
+        const newScript = {
+          config: {
+            payload: {
+              path: path.join(__dirname, 'example.0.csv'),
+              options: { from: 2 },
+            },
+          },
+        }
+        const payload = taskExec.impl.readPayload(newScript)
+        expect(payload).to.deep.equal([
+          ['234567', 'Jane Doe'],
+          ['345678', 'Baby Doe'],
+        ])
+      })
     })
 
     describe('#execLoad', () => {
