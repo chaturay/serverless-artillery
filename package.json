@@ -8,7 +8,8 @@
     "slsart": "./bin/serverless-artillery"
   },
   "scripts": {
-    "test": "./node_modules/.bin/nyc ./node_modules/.bin/mocha -r aws-sdk -r ./lib/lambda/node_modules/artillery-core --recursive -R min tests",
+    "test": "./node_modules/.bin/nyc ./node_modules/.bin/_mocha -r aws-sdk -r ./lib/lambda/node_modules/artillery-core --recursive tests",
+    "coverage": "./node_modules/.bin/nyc report --reporter=text-lcov | coveralls",
     "lint": "./node_modules/.bin/eslint . bin/serverless-artillery",
     "postinstall": "node ./postinstall.js",
     "publish": "./node_modules/.bin/np"
@@ -45,6 +46,7 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-as-promised": "^7.1.1",
+    "coveralls": "^3.0.0",
     "eslint": "^4.7.2",
     "eslint-config-airbnb": "^15.1.0",
     "eslint-plugin-import": "^2.7.0",
@@ -59,11 +61,6 @@
     "sinon-chai": "^2.14.0"
   },
   "nyc": {
-    "check-coverage": true,
-    "lines": 45,
-    "statements": 25,
-    "functions": 30,
-    "branches": 15,
     "include": [
       "**/*.js"
     ],
