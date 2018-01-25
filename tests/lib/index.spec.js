@@ -16,6 +16,7 @@ const yaml = require('js-yaml')
 BbPromise.longStackTraces()
 chai.use(chaiAsPromised)
 chai.use(sinonChai)
+chai.should()
 
 const expect = chai.expect
 
@@ -54,9 +55,12 @@ class ServerlessFake {
 ServerlessFake.dirname = require.resolve(path.join('..', '..', 'node_modules', 'serverless'))
 // ## Serverless Fake END ##
 
+let shortidResult = 'abcdefgh'
+
 quibble(path.join('..', '..', 'lib', 'npm'), { install: () => npmInstallResult() })
 quibble(path.join('..', '..', 'lib', 'serverless-fx'), ServerlessFake)
 quibble('get-stdin', () => BbPromise.resolve(testJsonScriptStringified))
+quibble('shortid', { generate: () => shortidResult })
 
 const func = require(path.join('..', '..', 'lib', 'lambda', 'func.js')) // eslint-disable-line import/no-dynamic-require
 const task = require(path.join('..', '..', 'lib', 'lambda', 'task.js')) // eslint-disable-line import/no-dynamic-require
@@ -423,7 +427,8 @@ scenarios:
         implFindServicePathStub.restore()
       })
       it('checks for SLS version compatibility', () =>
-        expect(slsart.impl.serverlessRunner({ debug: true, verbose: true })).to.eventually.be.fulfilled // eslint-disable-line comma-dangle
+        slsart.impl.serverlessRunner({ debug: true, verbose: true })
+          .should.be.fulfilled // eslint-disable-line comma-dangle
       )
       it('rejects earlier SLS versions', () => {
         const slsVersion = slsart.constants.CompatibleServerlessSemver
@@ -440,21 +445,24 @@ scenarios:
       it('handles empty function invocation payloads', () => {
         const payload = Payload
         Payload = 0
-        return expect(slsart.impl.serverlessRunner({ debug: true })).to.eventually.be.fulfilled
+        return slsart.impl.serverlessRunner({ debug: true })
           .then(() => { Payload = payload })
+          .should.be.fulfilled
       })
       it('handles unparsable function invocation payloads', () => {
         const payload = Payload
         Payload = '{'
-        return expect(slsart.impl.serverlessRunner({})).to.eventually.be.fulfilled
+        return slsart.impl.serverlessRunner({})
           .then(() => { Payload = payload })
+          .should.be.fulfilled
       })
       it('handles rejections along the promise chain', () => {
         const fakeInit = slsFakeInit
         slsFakeInit = () => Promise.reject('rejected')
-        return expect(slsart.impl.serverlessRunner({})).to.eventually.be.fulfilled
+        return slsart.impl.serverlessRunner({})
           .then(() => { slsFakeInit = fakeInit })
           .catch((ex) => { slsFakeInit = fakeInit; throw ex })
+          .should.be.fulfilled
       })
     })
   })
@@ -471,8 +479,9 @@ scenarios:
         slsart.impl.serverlessRunner = slsRunner
       })
       it('passes through argv to Serverless "as-is"',
-        () => expect(slsart.deploy({})).to.eventually.be.fulfilled
-          .then(() => expect(argv).to.eql(process.argv)) // eslint-disable-line comma-dangle
+        () => slsart.deploy({})
+          .then(() => expect(argv).to.eql(process.argv))
+          .should.be.fulfilled // eslint-disable-line comma-dangle
       )
     })
 
@@ -525,18 +534,21 @@ scenarios:
         })
         it('handles and reports validation errors from the function plugin, exiting the process', () => {
           implParseInputStub.throws(new func.def.FunctionError('func.error'))
-          return expect(slsart.invoke({ d: testJsonScriptStringified })).to.eventually.be.fulfilled
+          return slsart.invoke({ d: testJsonScriptStringified })
             .then(() => expect(processExitStub).to.have.been.calledWithExactly(1))
+            .should.be.fulfilled
         })
         it('handles and reports validation errors from the task plugin, exiting the process', () => {
           implParseInputStub.throws(new task.def.TaskError('task.error'))
-          return expect(slsart.invoke({ d: testJsonScriptStringified })).to.eventually.be.fulfilled
+          return slsart.invoke({ d: testJsonScriptStringified })
             .then(() => expect(processExitStub).to.have.been.calledWithExactly(1))
+            .should.be.fulfilled
         })
         it('handles and reports unexpected errors, exiting the process', () => {
           implParseInputStub.throws(new Error('error'))
-          return expect(slsart.invoke({ d: testJsonScriptStringified })).to.eventually.be.fulfilled
+          return slsart.invoke({ d: testJsonScriptStringified })
             .then(() => expect(processExitStub).to.have.been.calledWithExactly(1))
+            .should.be.fulfilled
         })
       })
       describe('performance mode', () => {
@@ -641,8 +653,9 @@ scenarios:
         slsart.impl.serverlessRunner = slsRunner
       })
       it('passes through argv to Serverless "as-is"',
-        () => expect(slsart.remove({})).to.eventually.be.fulfilled
-          .then(() => expect(argv).to.eql(process.argv)) // eslint-disable-line comma-dangle
+        () => slsart.remove({})
+          .then(() => expect(argv).to.eql(process.argv))
+          .should.be.fulfilled // eslint-disable-line comma-dangle
       )
     })
 
@@ -650,10 +663,10 @@ scenarios:
       const generateScript = slsart.impl.generateScript
       const notAFile = 'not.a.script.yml'
       it('refuses to overwrite an existing script',
-        () => expect(slsart.script({ out: 'README.md' })).to.eventually.be.rejected // eslint-disable-line comma-dangle
+        () => slsart.script({ out: 'README.md' }).should.be.rejected // eslint-disable-line comma-dangle
       )
       it('refuses to overwrite an existing script with debug',
-        () => expect(slsart.script({ out: 'README.md', debug: true })).to.eventually.be.rejected // eslint-disable-line comma-dangle
+        () => slsart.script({ out: 'README.md', debug: true }).should.be.rejected // eslint-disable-line comma-dangle
       )
       it('writes default values to the default file',
         () => BbPromise.resolve()
@@ -704,34 +717,44 @@ scenarios:
         restoreCwd()
         rmdir(tmpdir)
       })
-      it(`refuses to overwrite existing ${slsart.constants.ServerlessFiles.join(', ')} files`,
-        () => {
-          replaceCwd(path.join(__dirname, '..', '..', 'lib', 'lambda'))
-          return expect(slsart.configure({})).to.eventually.be.rejected
-        } // eslint-disable-line comma-dangle
-      )
-      it(`refuses to overwrite existing ${slsart.constants.ServerlessFiles.join(', ')} files with debug and tracing`,
-        () => {
-          replaceCwd(path.join(__dirname, '..', '..', 'lib', 'lambda'))
-          return expect(slsart.configure({ debug: true, trace: true })).to.eventually.be.rejected
-        } // eslint-disable-line comma-dangle
-      )
-      it('creates unique project artifacts and resolves after mock dependency install',
-        () => {
-          replaceCwd(tmpdir)
-          npmInstallResult = BbPromise.resolve
-          return expect(slsart.configure({ debug: true, trace: true })
-            .then(() => BbPromise.all(slsart.constants.ServerlessFiles.map(
-              file => expect(fs.accessAsync(path.join(tmpdir, file))).to.eventually.be.fullfilled // eslint-disable-line comma-dangle
-            )))).to.eventually.be.fullfilled
-        } // eslint-disable-line comma-dangle
-      )
+      it(`refuses to overwrite existing ${slsart.constants.ServerlessFiles.join(', ')} files`, () => {
+        replaceCwd(path.join(__dirname, '..', '..', 'lib', 'lambda'))
+        return slsart.configure({}).should.be.rejected
+      })
+      it(`refuses to overwrite existing ${slsart.constants.ServerlessFiles.join(', ')} files with debug and tracing`, () => {
+        replaceCwd(path.join(__dirname, '..', '..', 'lib', 'lambda'))
+        return slsart.configure({ debug: true, trace: true }).should.be.rejected
+      })
+      it('creates unique project artifacts and resolves after mock dependency install', () => {
+        replaceCwd(tmpdir)
+        npmInstallResult = BbPromise.resolve
+        return slsart.configure({ debug: true, trace: true })
+          .then(() => BbPromise.all(slsart.constants.ServerlessFiles.map(
+            file => expect(fs.accessAsync(path.join(tmpdir, file))).to.eventually.be.fullfilled // eslint-disable-line comma-dangle
+          )))
+          .should.be.fullfilled
+      })
+      it('ensures that the invalid character "_" is not part of the generated short id appended to the service name', () => {
+        const shortidRes = shortidResult
+        shortidResult = '_a_b_c_d_'
+        replaceCwd(tmpdir)
+        npmInstallResult = BbPromise.resolve
+        return slsart.configure({})
+          .then(() => { shortidResult = shortidRes })
+          .then(() => BbPromise.resolve({ path: path.join(tmpdir, 'serverless.yml') }))
+          .then(slsart.impl.getInput)
+          .then((yml) => {
+            const sls = yaml.safeLoad(yml)
+            expect(sls.service).to.not.have.string('_')
+          })
+          .should.be.fullfilled
+      })
       it('rejects the promise if npm install fails',
         function createUniqueArtifacts() { // eslint-ignore-line prefer-arrow-callback
           this.timeout(60000) // hopefully entirely excessive
           replaceCwd(tmpdir)
           npmInstallResult = () => { throw new Error('npm failure') }
-          return expect(slsart.configure({})).to.eventually.be.rejected
+          return slsart.configure({}).should.be.rejected
         } // eslint-disable-line comma-dangle
       )
     })
