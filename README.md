@@ -115,7 +115,9 @@ Options:
   -d, --data        A stringified script to execute
   -p, --path        A path to the file containing the script to execute
   --si, --stdIn     Have serverless read the event to invoke the remote function
-                    with from the "standard in" stream.
+                    with from the "standard in" stream
+  --jo, --jsonOnly  Only write JSON to console.log to facilitate piping the
+                    invocation result into a tool such as jq
 
 See https://serverless.com/framework/docs/providers/aws/cli-reference/invoke/ for further supported options.
 

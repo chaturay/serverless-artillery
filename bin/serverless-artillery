@@ -59,7 +59,12 @@ const yargs = require('yargs')
       },
       si: {
         alias: 'stdIn',
-        description: 'Have serverless read the event to invoke the remote function with from the "standard in" stream.',
+        description: 'Have serverless read the event to invoke the remote function with from the "standard in" stream',
+        requiresArg: false,
+      },
+      jo: {
+        alias: 'jsonOnly',
+        description: 'Only write JSON to console.log to facilitate piping the invocation result into a tool such as jq',
         requiresArg: false,
       },
     },
@@ -85,7 +90,7 @@ const yargs = require('yargs')
       // TODO while we transition our users away from providing the script via -s/--script, we reject those flags and
       // TODO redirect them.
       if (hasFlag(breakingFlags, argv)) {
-        console.log([
+        console.error([
           os.EOL,
           `DDOS Off!${os.EOL}${os.EOL}`,
           `TL;DR: use -p/--path to supply a script, use --stage to supply a stage.${os.EOL}${os.EOL}`,
@@ -109,7 +114,7 @@ const yargs = require('yargs')
       }
       // ##!! LEGACY MANAGEMENT END   !!##
       if (hasFlag(reservedFlags, argv)) {
-        console.log([
+        console.error([
           os.EOL,
           `!ERROR!${os.EOL}`,
           'One of the `serverless` flags you provided is reserved for exclusive `serverless-artillery` use, ',
@@ -121,7 +126,7 @@ const yargs = require('yargs')
         ].join(''))
         process.exit(1)
       } else if (hasFlag(unsupportedFlags, argv)) {
-        console.log([
+        console.error([
           os.EOL,
           `!ERROR!${os.EOL}`,
           `One of the flags you provided is unsupported by \`serverless-artillery\`.  Unsupported flags include: "${
@@ -188,8 +193,9 @@ if (yargs.debug) {
 
 slsArt[command](yargs)
   .catch((ex) => {
-    console.log(ex.message)
+    console.error(ex.message)
     if (yargs.verbose) {
-      console.log(ex.stack)
+      console.error(ex.stack)
     }
+    process.exit(1)
   })

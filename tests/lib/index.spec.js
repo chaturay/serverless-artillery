@@ -640,6 +640,29 @@ scenarios:
             } // eslint-disable-line comma-dangle
           ) // eslint-disable-line comma-dangle
         )
+        const result = { msg: 'a result' }
+        it('writes only the JSON result of the invocation to the console.log stream',
+          replaceImpl(
+            { allowance: 2, required: 1 },
+            result,
+            () => slsart.invoke({ jo: true, acceptance: true, d: testJsonScriptStringified })
+              .then(() => {
+                expect(logs.length).to.be.equal(1)
+                expect(logs[0]).to.equal(JSON.stringify(result, null, 2))
+              }) // eslint-disable-line comma-dangle
+          ) // eslint-disable-line comma-dangle
+        )
+        it('writes only the JSON result of the invocation to the console.log stream',
+          replaceImpl(
+            { allowance: 2, required: 1 },
+            result,
+            () => slsart.invoke({ jsonOnly: true, acceptance: true, d: testJsonScriptStringified })
+              .then(() => {
+                expect(logs.length).to.be.equal(1)
+                expect(logs[0]).to.equal(JSON.stringify(result, null, 2))
+              }) // eslint-disable-line comma-dangle
+          ) // eslint-disable-line comma-dangle
+        )
       })
     })
 

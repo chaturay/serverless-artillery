@@ -166,12 +166,12 @@ describe('./lib/lambda/handler.js', () => {
           .then(() => expect(script._start).to.equal(timeNow)) // eslint-disable-line no-underscore-dangle
       })
       describe('error logging', () => {
-        let consoleLogStub
+        let consoleErrorStub
         beforeEach(() => {
-          consoleLogStub = sinon.stub(console, 'log').returns()
+          consoleErrorStub = sinon.stub(console, 'error').returns()
         })
         afterEach(() => {
-          consoleLogStub.restore()
+          consoleErrorStub.restore()
         })
         it('logs and throws errors that are throw up the promise chain by impl.deploy', () => {
           implDelayStub.throws(new Error('impl.deploy'))
@@ -181,31 +181,31 @@ describe('./lib/lambda/handler.js', () => {
           implDelayStub.returns(Promise.reject(new Error('impl.deploy')))
           return expect(handler.impl.execute(Date.now(), {}, defaultSettings))
             .to.eventually.be.rejected
-            .then(() => expect(consoleLogStub).to.have.been.called)
+            .then(() => expect(consoleErrorStub).to.have.been.called)
         })
         it('logs and throws errors that are throw up the promise chain by task.exec', () => {
           taskExecStub.throws(new Error('task.exec'))
           return expect(handler.impl.execute(Date.now(), {}, defaultSettings))
             .to.eventually.be.rejected
-            .then(() => expect(consoleLogStub).to.have.been.called)
+            .then(() => expect(consoleErrorStub).to.have.been.called)
         })
         it('logs and throws errors resulting from a rejection by task.exec', () => {
           taskExecStub.returns(Promise.reject(new Error('task.exec')))
           return expect(handler.impl.execute(Date.now(), {}, defaultSettings))
             .to.eventually.be.rejected
-            .then(() => expect(consoleLogStub).to.have.been.called)
+            .then(() => expect(consoleErrorStub).to.have.been.called)
         })
         it('logs and throws errors that are throw up the promise chain by task.result', () => {
           taskResultStub.throws(new Error('task.result'))
           return expect(handler.impl.execute(Date.now(), {}, defaultSettings))
             .to.eventually.be.rejected
-            .then(() => expect(consoleLogStub).to.have.been.called)
+            .then(() => expect(consoleErrorStub).to.have.been.called)
         })
         it('logs and throws errors resulting from a rejection by task.result', () => {
           taskResultStub.returns(Promise.reject(new Error('task.result')))
           return expect(handler.impl.execute(Date.now(), {}, defaultSettings))
             .to.eventually.be.rejected
-            .then(() => expect(consoleLogStub).to.have.been.called)
+            .then(() => expect(consoleErrorStub).to.have.been.called)
         })
       })
     })
