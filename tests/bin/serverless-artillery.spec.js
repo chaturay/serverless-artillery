@@ -8,9 +8,9 @@ const slsart = (args, expectedCode, done) => {
   })
 }
 
-describe('serverless-artillery CLI', function slsartCli() { // eslint-disable-line prefer-arrow-callback
+describe('./bin/serverless-artillery', function slsartCli() { // eslint-disable-line prefer-arrow-callback
   this.timeout(0)
-  describe('#invoke command', () => {
+  describe('#invoke', () => {
     // ##!! LEGACY MANAGEMENT BEGIN !!##
     describe('rejects legacy flags', () => {
       it('rejects `-s`', (done) => {
