@@ -47,6 +47,12 @@ const yargs = require('yargs')
         description: 'Execute the script in acceptance mode.  It will execute each flow once, reporting failures.',
         requiresArg: false,
       },
+      m: {
+        alias: 'monitoring',
+        description: 'Execute the script in monitoring mode.  It will execute each flow a multiple of times, alerting ' +
+          'if the number of errors exceeds the configured threshold.',
+        requiresArg: false,
+      },
       d: {
         alias: 'data',
         description: 'A stringified script to execute',
@@ -180,6 +186,25 @@ const yargs = require('yargs')
   )
   .command('configure', 'Create a local copy of the deployment assets for modification and deployment.  See ' +
     'https://docs.serverless.com for documentation.', {})
+  .command(
+    'monitor',
+    'Modify or create a local copy of the deployment assets with declarations of a schedule upon which monitoring ' +
+    'requests will occur as well as an SNS topic for sending alert notifications.',
+    {
+      p: {
+        alias: 'path',
+        description: 'The path of the script to schedule the function with.',
+        requiresArg: true,
+        type: 'string',
+      },
+      t: {
+        alias: 'threshold',
+        description: 'The minimum number of errors the system must observe prior to sending an alert notification',
+        requiresArg: true,
+        type: 'number',
+      },
+    } // eslint-disable-line comma-dangle
+  )
   .demand(1)
   .strict()
   .argv
