@@ -14,15 +14,15 @@ describe('./lib/lambda/funcHandle.js', () => {
   describe(':impl', () => {
     describe('#handleUnhandledRejection', () => {
       it('prints to the console and calls the callback', () => {
-        const consoleLog = console.log
+        const consoleLog = console.error
         let logCalled = false
-        console.log = () => { logCalled = true }
+        console.error = () => { logCalled = true }
         let callbackCalled = false
         func.handle.callback = () => { callbackCalled = true }
         func.handle.impl.handleUnhandledRejection(new Error('tag'))
         expect(logCalled).to.be.true
         expect(callbackCalled).to.be.true
-        console.log = consoleLog
+        console.error = consoleLog
       })
     })
     describe('#handler', () => {
