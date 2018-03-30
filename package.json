@@ -38,6 +38,7 @@
   "dependencies": {
     "aws-sdk": "^2.5.0",
     "bluebird": "^3.4.6",
+    "diff": "^3.5.0",
     "get-stdin": "^5.0.1",
     "js-yaml": "^3.6.1",
     "semver": "^5.3.0",

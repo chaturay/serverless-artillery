@@ -12,6 +12,7 @@ const expect = chai.expect
 
 const packageJson = require(path.join(__dirname, '..', '..', 'lib', 'lambda', 'package.json')) // eslint-disable-line import/no-dynamic-require
 const slsart = require('../../lib/index')
+const npm = require('../../lib/npm')
 
 describe('./lib/npm.js:exports', () => {
   describe('#install', function exportsConfigure() { // eslint-disable-line prefer-arrow-callback
@@ -41,6 +42,10 @@ describe('./lib/npm.js:exports', () => {
           .then(() => {
             replaceCwd(tmpdir)
             return slsart.configure({ debug: true, trace: true })
+          })
+          .then(() => {
+            npm.install(tmpdir, 'aws-sdk') // given that it is skipped as "already present in lambda"
+            require(path.join(tmpdir, 'handler.js')) // eslint-disable-line global-require, import/no-dynamic-require
           })
           .then(() => {
             let dependencyChecks = []

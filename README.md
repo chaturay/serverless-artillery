@@ -241,7 +241,8 @@ Consequences:
 1. an environment variable will be added to the `loadGenerator` function containing the ARN for the created SNS topic
 
 Tasks for you:
-1. modify your `serverless.yml` to enable subscriptions to any alerts raised by the monitoring function.  (What good is monitoring if noone is listening?)
+1. modify your `serverless.yml` to enable subscriptions to any alerts raised by the monitoring function.  (What good is monitoring if no one is listening?)
+1. deploy your project by running `slsart deploy`
 
 To run the script in monitoring mode a single time for testing purposes (as opposed to scheduling it):
 

@@ -380,6 +380,285 @@ scenarios:
       })
     })
 
+    const validService = () => ({
+      provider: {
+        iamRoleStatements: [],
+      },
+      functions: {
+        [slsart.constants.TestFunctionName]: {},
+      },
+    })
+
+    describe('#validateService', () => {
+      const aString = 'some value'
+      let service
+      // service config
+      it('rejects falsy service configurations', () => {
+        service = undefined
+        expect(() => slsart.impl.validateService(service)).to.throw()
+      })
+      it('rejects non-object service configurations', () => {
+        service = aString
+        expect(() => slsart.impl.validateService(service)).to.throw()
+      })
+      // provider.iamRoleStatements
+      it('rejects falsy provider', () => {
+        service = validService()
+        service.provider = false
+        expect(() => slsart.impl.validateService(service)).to.throw()
+      })
+      it('rejects falsy provider.iamRoleStatements', () => {
+        service = validService()
+        service.provider.iamRoleStatements = false
+        expect(() => slsart.impl.validateService(service)).to.throw()
+      })
+      it('rejects non-array provider.iamRoleStatements', () => {
+        service = validService()
+        service.provider.iamRoleStatements = aString
+        expect(() => slsart.impl.validateService(service)).to.throw()
+      })
+      // functions[constants.TestFunctionName]
+      it('rejects falsy functions', () => {
+        service = validService()
+        service.functions = false
+        expect(() => slsart.impl.validateService(service)).to.throw()
+      })
+      it('rejects falsy functions[constants.TestFunctionName]', () => {
+        service = validService()
+        service.functions[slsart.constants.TestFunctionName] = false
+        expect(() => slsart.impl.validateService(service)).to.throw()
+      })
+      it('rejects non-object functions[constants.TestFunctionName]', () => {
+        service = validService()
+        service.functions[slsart.constants.TestFunctionName] = aString
+        expect(() => slsart.impl.validateService(service)).to.throw()
+      })
+      // functions[constants.TestFunctionName].environment['TOPIC_ARN' || 'TOPIC_NAME']
+      it('accepts undefined functions[constants.TestFunctionName].environment', () => {
+        service = validService()
+        delete service.functions[slsart.constants.TestFunctionName].environment
+        expect(() => slsart.impl.validateService(service)).to.not.throw()
+      })
+      it('accepts functions[constants.TestFunctionName].environment without TOPIC_ARN or TOPIC_NAME', () => {
+        service = validService()
+        service.functions[slsart.constants.TestFunctionName].environment = { NOT_TOPIC_ARN_OR_TOPIC_NAME: aString }
+        expect(() => slsart.impl.validateService(service)).to.not.throw()
+      })
+      it('rejects functions[constants.TestFunctionName].environment with TOPIC_ARN', () => {
+        service = validService()
+        service.functions[slsart.constants.TestFunctionName].environment = { TOPIC_ARN: aString }
+        expect(() => slsart.impl.validateService(service)).to.throw()
+      })
+      it('rejects functions[constants.TestFunctionName].environment with TOPIC_NAME', () => {
+        service = validService()
+        service.functions[slsart.constants.TestFunctionName].environment = { TOPIC_NAME: aString }
+        expect(() => slsart.impl.validateService(service)).to.throw()
+      })
+      // functions[constants.TestFunctionName].events
+      it('accepts an undefined functions[constants.TestFunctionName].events', () => {
+        service = validService()
+        delete service.functions[slsart.constants.TestFunctionName].events
+        expect(() => slsart.impl.validateService(service)).to.not.throw()
+      })
+      it('rejects non-array functions[constants.TestFunctionName].events', () => {
+        service = validService()
+        service.functions[slsart.constants.TestFunctionName].events = aString
+        expect(() => slsart.impl.validateService(service)).to.throw()
+      })
+      it('rejects functions[constants.TestFunctionName].events with a schedule event named constants.ScheduleName', () => {
+        service = validService()
+        service.functions[slsart.constants.TestFunctionName].events = [{ schedule: { name: slsart.constants.ScheduleName } }]
+        expect(() => slsart.impl.validateService(service)).to.throw()
+      })
+      // resources.Resources[constants.AlertingName]
+      it('accepts an undefined resources.Resources[constants.AlertingName]', () => {
+        service = validService()
+        delete service.resources
+        expect(() => slsart.impl.validateService(service)).to.not.throw()
+      })
+      it('accepts an undefined resources.Resources[constants.AlertingName]', () => {
+        service = validService()
+        if (service.resources) {
+          delete service.resources.Resources
+        }
+        expect(() => slsart.impl.validateService(service)).to.not.throw()
+      })
+      it('accepts an undefined resources.Resources[constants.AlertingName]', () => {
+        service = validService()
+        if (service.resources && service.resources.Resources) {
+          delete service.resources.Resources[slsart.constants.AlertingName]
+        }
+        expect(() => slsart.impl.validateService(service)).to.not.throw()
+      })
+      it('reject a defined resources.Resources[constants.AlertingName]', () => {
+        service = validService()
+        service.resources = {
+          Resources: {
+            [slsart.constants.AlertingName]: aString,
+          },
+        }
+        expect(() => slsart.impl.validateService(service)).to.throw()
+      })
+    })
+
+    describe('#addAssets', () => {
+      let service
+      it('adds the expected assets to the given service', () => {
+        service = validService()
+        slsart.impl.addAssets(service, { t: 1, p: 'foo.yml' })
+        expect(service.provider.iamRoleStatements.length).to.equal(1)
+        expect(service.functions[slsart.constants.TestFunctionName].environment.TOPIC_ARN).to.be.a('string')
+        expect(service.functions[slsart.constants.TestFunctionName].environment.TOPIC_NAME).to.be.a('string')
+        expect(service.functions[slsart.constants.TestFunctionName].events[0].schedule).to.be.a('object')
+        expect(service.functions[slsart.constants.TestFunctionName].events[0].schedule.name).to.have.string(slsart.constants.ScheduleName)
+        expect(service.resources.Resources[`${slsart.constants.AlertingName}${slsart.constants.yamlComments.doNotEditKey}`]).to.be.an('object')
+      })
+      it('retains existing environment variables', () => {
+        service = validService()
+        service.functions[slsart.constants.TestFunctionName].environment = { VAR: 'VAL' }
+        expect(slsart.impl.addAssets(service, {}).functions[slsart.constants.TestFunctionName].environment.VAR).to.equal('VAL')
+      })
+      it('retains existing events', () => {
+        service = validService()
+        service.functions[slsart.constants.TestFunctionName].events = ['foo']
+        expect(service.functions[slsart.constants.TestFunctionName].events[0]).to.equal('foo')
+      })
+      it('retains existing resources', () => {
+        service = validService()
+        service.resources = { foo: 'bar' }
+        expect(service.resources).to.have.property('foo', 'bar')
+      })
+      it('retains existing resources.Resources', () => {
+        service = validService()
+        service.resources = { Resources: { foo: 'bar' } }
+        expect(service.resources.Resources).to.have.property('foo', 'bar')
+      })
+    })
+
+    describe('#splitIgnore', () => {
+      let str
+      it('splits strings by newlines', () => {
+        str = 'a\nb\nc'
+        expect(slsart.impl.splitIgnore(str)).to.eql(['a', 'b', 'c'])
+      })
+      it('converts `-\n  -` to `-  -` and splits', () => {
+        str = 'a\n-\n  -\n    b'
+        expect(slsart.impl.splitIgnore(str)).to.eql(['a', '- -', '    b'])
+      })
+      it('removes leading and trailing whitespace', () => {
+        str = ' \ta\t \n \tb \t'
+        expect(slsart.impl.splitIgnore(str)).to.eql(['a\t ', ' \tb'])
+      })
+      it('removes single and double quotes', () => {
+        str = '\'a\'\n"b"\nc'
+        expect(slsart.impl.splitIgnore(str)).to.eql(['a', 'b', 'c'])
+      })
+    })
+
+    describe('#splitExcept', () => {
+      let str
+      it('splits strings by newlines', () => {
+        str = 'a\nb\nc'
+        expect(slsart.impl.splitExcept(str)).to.eql(['a', 'b', 'c'])
+      })
+      it('ignores newlines within array equivalencies', () => {
+        str = 'a\n-\n  - b\nc'
+        expect(slsart.impl.splitExcept(str)).to.eql(['a', '-\n  - b', 'c'])
+      })
+      it('ignores newlines within larger array equivalencies', () => {
+        str = 'a\n  -\n    - b\nc'
+        expect(slsart.impl.splitExcept(str)).to.eql(['a', '  -\n    - b', 'c'])
+      })
+      it('ignores many newlines within array equivalencies', () => {
+        str = 'a\n-\n\n\n\n\n\n\n\n\n\n\n\n\n  - b\nc'
+        expect(slsart.impl.splitExcept(str)).to.eql(['a', '-\n\n\n\n\n\n\n\n\n\n\n\n\n  - b', 'c'])
+      })
+    })
+
+    describe('#compareRestore', () => {
+      let existing
+      let augmented
+      let expected
+      it('leaves unchanged strings alone', () => {
+        existing = 'a string'
+        augmented = existing
+        expected = existing
+        expect(slsart.impl.compareRestore(existing, augmented)).to.equal(existing)
+      })
+      it('leaves additive only augmentations alone', () => {
+        existing = 'a string\n'
+        augmented = `${existing}\nanother string\n`
+        expected = augmented
+        expect(slsart.impl.compareRestore(existing, augmented)).to.equal(expected)
+      })
+      it('restores removed comments', () => {
+        existing = 'foo: # an object\n  bar: "biz"\n'
+        augmented = 'foo:\n  bar: "biz"\n  gar: "giz"\n'
+        expected = 'foo: # an object\n  bar: "biz"\n  gar: "giz"\n'
+        expect(slsart.impl.compareRestore(existing, augmented)).to.equal(expected)
+      })
+      // TODO too few cases?
+    })
+
+    describe('#replaceCommentKeys', () => {
+      let input
+      let result
+      it('replaces the known keys', () => {
+        input = `${
+          slsart.constants.yamlComments.doNotEditKey}\n${
+          slsart.constants.yamlComments.mustMatchKey}\n${
+          slsart.constants.yamlComments.snsSubscriptionsKey}\nEffect: Allow`
+        result = slsart.impl.replaceCommentKeys(input)
+        expect(result).to.not.have.string(slsart.constants.yamlComments.doNotEditKey)
+        expect(result).to.not.have.string(slsart.constants.yamlComments.mustMatchKey)
+        expect(result).to.not.have.string(slsart.constants.yamlComments.snsSubscriptionsKey)
+        expect(result).to.not.have.string('Effect: Allow')
+      })
+    })
+
+    describe('#writeBackup', () => {
+      const err = { code: 'EEXIST' }
+      const content = 'content'
+      let fsWriteFileAsyncStub
+      beforeEach(() => {
+        fsWriteFileAsyncStub = sinon.stub(fs, 'writeFileAsync')
+      })
+      afterEach(() => {
+        fsWriteFileAsyncStub.restore()
+      })
+      it('writes content to serverless.yml.bak', () => {
+        fsWriteFileAsyncStub.returns(BbPromise.resolve())
+        return slsart.impl.writeBackup(content).should.be.fulfilled
+          .then(() => {
+            fsWriteFileAsyncStub.should.have.been.calledOnce
+            expect(fsWriteFileAsyncStub.args[0][0]).to.eql(`${slsart.constants.ServerlessFiles[0]}.bak`)
+          })
+      })
+      it('tries writing to subsequent serverless.yml.N.bak files until succeeding', () => {
+        fsWriteFileAsyncStub.onCall(0).rejects(err)
+        fsWriteFileAsyncStub.onCall(1).rejects(err)
+        fsWriteFileAsyncStub.onCall(2).rejects(err)
+        fsWriteFileAsyncStub.onCall(3).rejects(err)
+        fsWriteFileAsyncStub.onCall(4).resolves()
+        return slsart.impl.writeBackup(content).should.be.fulfilled
+          .then(() => {
+            fsWriteFileAsyncStub.should.have.callCount(5)
+            expect(fsWriteFileAsyncStub.args[0][0]).to.eql(`${slsart.constants.ServerlessFiles[0]}.bak`)
+            expect(fsWriteFileAsyncStub.args[1][0]).to.eql(`${slsart.constants.ServerlessFiles[0]}.1.bak`)
+            expect(fsWriteFileAsyncStub.args[2][0]).to.eql(`${slsart.constants.ServerlessFiles[0]}.2.bak`)
+            expect(fsWriteFileAsyncStub.args[3][0]).to.eql(`${slsart.constants.ServerlessFiles[0]}.3.bak`)
+            expect(fsWriteFileAsyncStub.args[4][0]).to.eql(`${slsart.constants.ServerlessFiles[0]}.4.bak`)
+          })
+      })
+      it('gives up writing after 100 attempts', () => {
+        fsWriteFileAsyncStub.returns(BbPromise.reject(err))
+        return slsart.impl.writeBackup(content).should.be.rejected
+          .then(() => {
+            fsWriteFileAsyncStub.should.have.callCount(slsart.constants.backupAttempts)
+          })
+      })
+    })
+
     describe('#findServicePath', () => {
       const lambdaPath = path.resolve('lib', 'lambda')
       const replaceImpl = (cwdResult, fileExistsResult, testFunc) => (() => {
@@ -570,7 +849,7 @@ scenarios:
         )
       })
       describe('acceptance mode', () => {
-        it('adds `mode: \'acc\' to the script',
+        it('adds `mode: \'acc\'` to the script',
           replaceImpl(
             { allowance: 2, required: 3 },
             {},
@@ -632,9 +911,7 @@ scenarios:
                 acceptance: true,
               }).then(() => {
                 expect(exitCode).to.equal(1)
-              }).catch(() => {
-                expect.fail()
-              }).then(() => {
+              }).finally(() => {
                 process.exit = exit
               })
             } // eslint-disable-line comma-dangle
@@ -657,6 +934,99 @@ scenarios:
             { allowance: 2, required: 1 },
             result,
             () => slsart.invoke({ jsonOnly: true, acceptance: true, d: testJsonScriptStringified })
+              .then(() => {
+                expect(logs.length).to.be.equal(1)
+                expect(logs[0]).to.equal(JSON.stringify(result, null, 2))
+              }) // eslint-disable-line comma-dangle
+          ) // eslint-disable-line comma-dangle
+        )
+      })
+      describe('monitoring mode', () => {
+        it('adds `mode: \'mon\'` to the script',
+          replaceImpl(
+            { allowance: 2, required: 3 },
+            {},
+            () => slsart.invoke({ monitoring: true, d: testJsonScriptStringified })
+              .then(() => expect(logs[1]).to.eql(completeMessage)) // eslint-disable-line comma-dangle
+          ) // eslint-disable-line comma-dangle
+        )
+        it('respects scripts declaring monitoring mode',
+          replaceImpl(
+            { allowance: 2, required: 3 },
+            {},
+            () => {
+              const script = JSON.parse(testJsonScriptStringified)
+              script.mode = task.def.modes.MON
+              return slsart.invoke({ d: JSON.stringify(script) })
+                .then(() => expect(logs[1]).to.eql(completeMessage))
+            } // eslint-disable-line comma-dangle
+          ) // eslint-disable-line comma-dangle
+        )
+        it('respects scripts declaring monitoring mode',
+          replaceImpl(
+            { allowance: 2, required: 3 },
+            {},
+            () => {
+              const script = JSON.parse(testJsonScriptStringified)
+              script.mode = task.def.modes.MONITORING
+              return slsart.invoke({ d: JSON.stringify(script) })
+                .then(() => expect(logs[1]).to.eql(completeMessage))
+            } // eslint-disable-line comma-dangle
+          ) // eslint-disable-line comma-dangle
+        )
+        it('reports monitoring test results to the console',
+          replaceImpl(
+            { allowance: 2, required: 1 },
+            { foo: 'bar' },
+            () => {
+              const script = JSON.parse(testJsonScriptStringified)
+              script.mode = 'mon'
+              return slsart.invoke({ acceptance: true, d: testJsonScriptStringified })
+                .then(() => {
+                  expect(logs[3]).to.eql(JSON.stringify({ foo: 'bar' }, null, 2))
+                })
+            } // eslint-disable-line comma-dangle
+          ) // eslint-disable-line comma-dangle
+        )
+        it('exits the process with a non-zero exit code when an error occurs during the monitoring test',
+          replaceImpl(
+            { allowance: 2, required: 1 },
+            { errors: 5, reports: [{ errors: 5 }] },
+            () => {
+              // save/replace process.exit
+              const exit = process.exit
+              let exitCode
+              process.exit = (code) => {
+                exitCode = code
+              }
+              return slsart.invoke({
+                script: phaselessScriptPath,
+                monitoring: true,
+              }).then(() => {
+                expect(exitCode).to.equal(5)
+              }).finally(() => {
+                process.exit = exit
+              })
+            } // eslint-disable-line comma-dangle
+          ) // eslint-disable-line comma-dangle
+        )
+        const result = { msg: 'a result' }
+        it('writes only the JSON result of the invocation to the console.log stream',
+          replaceImpl(
+            { allowance: 2, required: 1 },
+            result,
+            () => slsart.invoke({ jo: true, monitoring: true, d: testJsonScriptStringified })
+              .then(() => {
+                expect(logs.length).to.be.equal(1)
+                expect(logs[0]).to.equal(JSON.stringify(result, null, 2))
+              }) // eslint-disable-line comma-dangle
+          ) // eslint-disable-line comma-dangle
+        )
+        it('writes only the JSON result of the invocation to the console.log stream',
+          replaceImpl(
+            { allowance: 2, required: 1 },
+            result,
+            () => slsart.invoke({ jsonOnly: true, monitoring: true, d: testJsonScriptStringified })
               .then(() => {
                 expect(logs.length).to.be.equal(1)
                 expect(logs[0]).to.equal(JSON.stringify(result, null, 2))
@@ -780,6 +1150,50 @@ scenarios:
           return slsart.configure({}).should.be.rejected
         } // eslint-disable-line comma-dangle
       )
+    })
+
+    describe('#monitor', () => {
+      let configureStub
+      let fileExistsStub
+      let writeBackupStub
+      let fsReadFileAsyncStub
+      let fsWriteFileAsyncStub
+      beforeEach(() => {
+        configureStub = sinon.stub(slsart, 'configure').resolves()
+        fileExistsStub = sinon.stub(slsart.impl, 'fileExists').returns(true)
+        writeBackupStub = sinon.stub(slsart.impl, 'writeBackup').resolves()
+        fsReadFileAsyncStub = sinon.stub(fs, 'readFileAsync').resolves(JSON.stringify({
+          provider: {
+            iamRoleStatements: [],
+          },
+          functions: {
+            [slsart.constants.TestFunctionName]: {},
+          },
+        }))
+        fsWriteFileAsyncStub = sinon.stub(fs, 'writeFileAsync').resolves()
+      })
+      afterEach(() => {
+        fileExistsStub.restore()
+        configureStub.restore()
+        writeBackupStub.restore()
+        fsReadFileAsyncStub.restore()
+        fsWriteFileAsyncStub.restore()
+      })
+      it('modifies and writes the service', () => slsart.monitor({}).should.be.fulfilled
+        .then(() => fsWriteFileAsyncStub.should.have.been.called))
+      it('writes a backup if serverless.yml is present', () => slsart.monitor({}).should.be.fulfilled
+        .then(() => {
+          configureStub.should.not.have.been.called
+          writeBackupStub.should.have.been.calledOnce
+        }))
+      it('configures and does not write a backup if no serverless.yml', () => {
+        fileExistsStub.returns(false)
+        return slsart.monitor({}).should.be.fulfilled
+          .then(() => {
+            configureStub.should.have.been.calledOnce
+            writeBackupStub.should.not.have.been.called
+          })
+      })
     })
   })
 })
