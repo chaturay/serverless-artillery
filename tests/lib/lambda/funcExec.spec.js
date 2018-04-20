@@ -10,7 +10,7 @@ chai.use(sinonChai)
 
 const expect = chai.expect
 
-let lambdaInvokeStub
+let awsStub
 
 // eslint-disable-next-line import/no-dynamic-require
 const func = require(path.join('..', '..', '..', 'lib', 'lambda', 'func.js'))
@@ -32,10 +32,10 @@ const validScript = () => ({
 
 describe('./lib/lambda/funcExec.js', () => {
   beforeEach(() => {
-    lambdaInvokeStub = sinon.stub(aws.Service.prototype, 'makeRequest')
+    awsStub = sinon.stub(aws.Service.prototype, 'makeRequest')
   })
   afterEach(() => {
-    lambdaInvokeStub.restore()
+    awsStub.restore()
   })
   describe(':impl', () => {
     let contextInHandler = 'context' in func.handle
@@ -46,7 +46,7 @@ describe('./lib/lambda/funcExec.js', () => {
       handlerContext = func.handle.context
       func.handle.context = tagContext
       // lambda invocation stubbing
-      lambdaInvokeStub.withArgs('invoke', sinon.match.any, sinon.match.any).callsFake(
+      awsStub.withArgs('invoke', sinon.match.any, sinon.match.any).callsFake(
         () => ({ promise: () => Promise.resolve({ Payload: '{}' }) }) // eslint-disable-line comma-dangle
       )
     })
@@ -56,7 +56,7 @@ describe('./lib/lambda/funcExec.js', () => {
       } else {
         delete func.handle.context
       }
-      lambdaInvokeStub.reset()
+      awsStub.reset()
     })
     describe('#execute', () => {
       it('adds SERVERLESS_STAGE to the FunctionName if available', () => {
@@ -67,8 +67,8 @@ describe('./lib/lambda/funcExec.js', () => {
         process.env.SERVERLESS_STAGE = STAGE
         return func.exec(validScript())
           .then(() => {
-            expect(lambdaInvokeStub).to.have.been.calledOnce
-            expect(lambdaInvokeStub.getCall(0).args[1].FunctionName).to.eql(`${tagContext.functionName}:${STAGE}`)
+            expect(awsStub).to.have.been.calledOnce
+            expect(awsStub.getCall(0).args[1].FunctionName).to.eql(`${tagContext.functionName}:${STAGE}`)
           })
           .catch((ex) => { err = ex })
           .then(() => {
@@ -83,26 +83,26 @@ describe('./lib/lambda/funcExec.js', () => {
       it('defaults to an "Event" calling type', () =>
         func.exec(validScript())
           .then(() => {
-            expect(lambdaInvokeStub).to.have.been.calledOnce
-            expect(lambdaInvokeStub.getCall(0).args[1].InvocationType).to.eql('Event')
+            expect(awsStub).to.have.been.calledOnce
+            expect(awsStub.getCall(0).args[1].InvocationType).to.eql('Event')
           }) // eslint-disable-line comma-dangle
       )
       it('defaults to an "Event" calling type', () => {
         const type = 'A_Type'
         return func.exec(validScript(), type)
           .then(() => {
-            expect(lambdaInvokeStub).to.have.been.calledOnce
-            expect(lambdaInvokeStub.getCall(0).args[1].InvocationType).to.equal(type)
+            expect(awsStub).to.have.been.calledOnce
+            expect(awsStub.getCall(0).args[1].InvocationType).to.equal(type)
           })
       })
       it('handles unparsable payloads', () => {
-        lambdaInvokeStub.withArgs('invoke', sinon.match.any, sinon.match.any).callsFake(
+        awsStub.withArgs('invoke', sinon.match.any, sinon.match.any).callsFake(
           () => ({ promise: () => Promise.resolve({ Payload: '{ NOT PARSABLE' }) }) // eslint-disable-line comma-dangle
         )
         return expect(func.exec(validScript())).to.eventually.equal(undefined)
       })
       it('rejects failures during invocation', () => {
-        lambdaInvokeStub.withArgs('invoke', sinon.match.any, sinon.match.any).callsFake(
+        awsStub.withArgs('invoke', sinon.match.any, sinon.match.any).callsFake(
           () => ({ promise: () => Promise.reject(new Error('REJECTED!')) }) // eslint-disable-line comma-dangle
         )
         return expect(func.exec(validScript())).to.eventually.be.rejected

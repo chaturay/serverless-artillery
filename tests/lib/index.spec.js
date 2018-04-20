@@ -771,6 +771,7 @@ scenarios:
 
       const replaceImpl = (scriptConstraintsResult, serverlessRunnerResult, testFunc) => (() => {
         const scriptConstraints = slsart.impl.scriptConstraints
+        scriptConstraints.task = { sampling: task.def.getSettings() }
         const serverlessRunner = slsart.impl.serverlessRunner
         const replaceInput = slsart.impl.replaceArgv
         slsart.impl.scriptConstraints = () => scriptConstraintsResult
@@ -1105,6 +1106,10 @@ scenarios:
         })
         fs.rmdirSync(dir)
       }
+      // ## !! NOTE !! ##
+      // There is a known issue on Windows where files are not deleted according to expectation
+      // It has been decided that this is not worth resolving, not that a contribution to resolve
+      // the matter would be unwelcome.
       beforeEach(() => fs.mkdirAsync(tmpdir))
       afterEach(() => {
         restoreCwd()

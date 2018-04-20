@@ -1,8 +1,9 @@
-const spawn = require('child_process').spawn
 const expect = require('chai').expect
+const path = require('path')
+const spawn = require('cross-spawn')
 
 const slsart = (args, expectedCode, done) => {
-  spawn('bin/serverless-artillery', args).on('close', (code) => {
+  spawn(path.join('bin', 'serverless-artillery'), args).on('close', (code) => {
     expect(code).to.equal(expectedCode)
     done()
   })

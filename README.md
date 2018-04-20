@@ -1,12 +1,17 @@
-# serverless-artillery [![Build Status](https://travis-ci.org/Nordstrom/serverless-artillery.svg)](https://travis-ci.org/Nordstrom/serverless-artillery) [![Coverage Status](https://coveralls.io/repos/github/Nordstrom/serverless-artillery/badge.svg?branch=master)](https://coveralls.io/github/Nordstrom/serverless-artillery?branch=master)
+# serverless-artillery [![Build Status](https://travis-ci.org/Nordstrom/serverless-artillery.svg?branch=master)](https://travis-ci.org/Nordstrom/serverless-artillery) [![Coverage Status](https://coveralls.io/repos/github/Nordstrom/serverless-artillery/badge.svg?branch=master)](https://coveralls.io/github/Nordstrom/serverless-artillery?branch=master)
 
 [//]: # (Thanks to https://www.divio.com/en/blog/documentation/)
 
-Combine [`serverless`](https://serverless.com) with [`artillery`](https://artillery.io) and you get `serverless-artillery` (a.k.a. `slsart`) for instant, cheap, and easy performance testing at scale.
+Combine [`serverless`](https://serverless.com) with [`artillery`](https://artillery.io) and you get `serverless-artillery` (a.k.a. `slsart`) for instant, cheap, and easy system validation at scale.
+
+TL;DR:
+* Performance: I measure system behavior under load both exploring manually and automatically as part of my CI/CD process
+* Acceptance: I validate my CI/CD deployment with synthetic traffic to fail the build in cases of error
+* Monitoring: I periodically sample system behavior with synthetic traffic to monitor system health
 
 We were motivated to create this project in order to facilitate moving performance testing earlier and more frequently into our CI/CD pipelines such that the question wasn't '`whether...`' but '`why wouldn't...`' '`...you automatically (acceptance and) perf test your system every time you check in?`'.
 
-With acceptance testing we asked, '`why wouldn't you schedule that with smart retry to monitor your service?`'.  So we made monitoring mode.
+With acceptance testing in pocket we asked, '`why wouldn't you schedule that to sample and thereby monitor your service?`'.  So we added monitoring mode.
 
 1. [Installation](#installation)
 1. [Quick Start & Finish](#quick-start--finish)
@@ -162,7 +167,7 @@ The `-f` and `--function` flags are reserved because a part of the value that `s
 
 ### Unsupported Flags
 
-The flag `--raw` is unsupported because, while arbitrary functions can accept strings, a string does not comprise a valid artillery script. 
+The flag `--raw` is unsupported because, while arbitrary functions can accept strings, a string does not comprise a valid artillery script.
 
 ## Performance Mode
 
@@ -200,7 +205,7 @@ $ slsart invoke -p trafficSpike.yml
 Find defects before performance testing! Acceptance mode runs each flow in your script exactly once and reports the results.
 
 To use:
- 
+
 Add `-a` to the `invoke` command:
 ```
 $ slsart invoke -a
@@ -208,14 +213,23 @@ $ slsart invoke -a
 
 To run exclusively in acceptance mode, hard code the mode into your script:
 ```
-  mode: acceptance
-  ...
+mode: acceptance
+...
 ```
 *note: 'acceptance' may be abbreviated to 'acc' in the script*
 
 Scripts running in acceptance mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via the `-a` flag) and have them anyway.
 
 For the purposes of facilitating the use of this tool in a CI/CD pipeline, if any of the acceptance tests fail to successfully complete, the process will exit with a non-zero exit code.
+
+To control the number of samples taken and constituting success, you may supply the following (default values listed):
+```
+sampling:
+  size: 1           # The size of sample set
+  averagePause: 5   # The average number of seconds to pause between samples
+  pauseVariance: 2  # The maximum difference of the actual pause from the average pause (in either direction)
+  errorBudget: 0    # The number of observed errors to accept before alerting
+```
 
 ## Monitoring Mode
 
@@ -255,11 +269,20 @@ Scripts running in monitoring mode do not require a `phases` array in the `confi
 
 To run exclusively in monitoring mode, hard code the mode into your script:
 ```
-  mode: monitor
-  ...
+mode: monitoring
+...
 ```
 
 *note: 'monitor' may be abbreviated to 'mon' in the script*
+
+To control sampling and alerting, you may supply the following (default values listed):
+```
+sampling:
+  size: 5           # The size of sample set
+  averagePause: 5   # The average number of seconds to pause between samples
+  pauseVariance: 2  # The maximum difference of the actual pause from the average pause (in either direction)
+  errorBudget: 4    # The number of observed errors to accept before alerting
+```
 
 ## Function Customization
 
@@ -348,7 +371,7 @@ Some helpful notions used in the code and discussion of them follows...
 
 #### Scripts
 
-In fact, an artillery script is composed of a number of phases which occur one after the other.  Each of these phases has its own duration and maximum load.  The duration is straightforwardly how long the phase lasts.  The maximum load of the phase is the maximum Requests Per Second (RPS) that are declared for the entirety of that phase (e.g. a phase declaring a ramp from 0 to 500 RPS {or 500 to 0} has a maximum load of 500 RPS).  Phases are declared in serial in order to provide warming or not as appropriate for the load testing scenario that iterests you.
+In fact, an artillery script is composed of a number of phases which occur one after the other.  Each of these phases has its own duration and maximum load.  The duration is straightforwardly how long the phase lasts.  The maximum load of the phase is the maximum Requests Per Second (RPS) that are declared for the entirety of that phase (e.g. a phase declaring a ramp from 0 to 500 RPS {or 500 to 0} has a maximum load of 500 RPS).  Phases are declared in serial in order to provide warming or not as appropriate for the load testing scenario that interests you.
 
 The duration of the script is the sum of the durations of its phases.  The maximum load of the script is the maximum RPS that any of its phases declares.
 
@@ -436,7 +459,7 @@ See https://serverless.com/framework/docs/providers/aws/cli-reference/invoke/ fo
 
 [//]: # (LEGACY MANAGEMENT BEGIN)
 Removed Flags:
-  -s, --script      In order to support the full CLI experience of the Serverless 
+  -s, --script      In order to support the full CLI experience of the Serverless
                     Framework, a collision between this flag and the -s/--stage
                     flags of those frameworks had to be resovled.  These flags
                     are thereby invalidated and will be rejected.
@@ -445,7 +468,7 @@ Removed Flags:
 Reserved Flags:
 -t, --type          serverless-artillery calculates, based on your HTTP timeout
                     settings, the expected completion of your script and sets
-                    the invocation type appropriately.  Dropping a 
+                    the invocation type appropriately.  Dropping a
                     RequestResponse connection can trigger function retries for
                     triple the load and you will not receive a report directly
                     from an Event invocation type.

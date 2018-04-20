@@ -20,6 +20,9 @@ let result
 let expected
 let defaultSettings
 
+const runOnceSettings = func.def.getSettings()
+runOnceSettings.task = { sampling: task.def.defaultsToSettings(task.def.acceptance) }
+
 const validScript = () => ({
   config: {
     phases: [
@@ -982,7 +985,7 @@ describe('./lib/lambda/taskPlan.js', () => {
     })
 
     // ######################
-    // ## REINTERPRETATION ##
+    // ## SERVICE SAMPLING ##
     // ######################
     /**
      * SPLIT SCRIPT BY FLOW
@@ -1005,13 +1008,14 @@ describe('./lib/lambda/taskPlan.js', () => {
             },
           ],
         }
-        const scripts = task.plan.impl.splitScriptByFlow(newScript)
+        const scripts = task.plan.impl.splitScriptByFlow(newScript, runOnceSettings)
         expect(scripts).to.deep.equal([
           {
             mode: 'perf',
             config: {
               target: 'https://aws.amazon.com',
               phases: [
+                { pause: scripts[0].config.phases[0].pause },
                 { duration: 1, arrivalRate: 1 },
               ],
             },
@@ -1047,13 +1051,14 @@ describe('./lib/lambda/taskPlan.js', () => {
             },
           ],
         }
-        const scripts = task.plan.impl.splitScriptByFlow(newScript)
+        const scripts = task.plan.impl.splitScriptByFlow(newScript, runOnceSettings)
         expect(scripts).to.deep.equal([
           {
             mode: 'perf',
             config: {
               target: 'https://aws.amazon.com',
               phases: [
+                { pause: scripts[0].config.phases[0].pause },
                 { duration: 1, arrivalRate: 1 },
               ],
             },
@@ -1070,6 +1075,7 @@ describe('./lib/lambda/taskPlan.js', () => {
             config: {
               target: 'https://aws.amazon.com',
               phases: [
+                { pause: scripts[1].config.phases[0].pause },
                 { duration: 1, arrivalRate: 1 },
               ],
             },
@@ -1082,6 +1088,77 @@ describe('./lib/lambda/taskPlan.js', () => {
             ],
           },
         ])
+      })
+      it('generates unique pause lengths for each flow script', () => {
+        const newScript = {
+          mode: 'acc',
+          sampling: {
+            size: 1,
+          },
+          config: {
+            target: 'https://aws.amazon.com',
+            phases: [
+              { duration: 1000, arrivalRate: 1000, rampTo: 1000 },
+            ],
+          },
+          scenarios: [
+            {
+              flow: [
+                { get: { url: '/1' } },
+              ],
+            },
+            {
+              flow: [
+                { get: { url: '/2' } },
+              ],
+            },
+            {
+              flow: [
+                { get: { url: '/3' } },
+              ],
+            },
+            {
+              flow: [
+                { get: { url: '/4' } },
+              ],
+            },
+          ],
+        }
+        result = task.plan.impl.splitScriptByFlow(newScript, runOnceSettings)
+        const pauses = result.map(scriptChunk => scriptChunk.config.phases[0].pause)
+        let equalities = 0
+        pauses.forEach((pause, index) => {
+          pauses.slice(index + 1).forEach((value) => {
+            if (pause === value) {
+              equalities += 1
+            }
+          })
+        })
+        expect(equalities).to.be.below(2) // allow one because randomness, probability of two is miniscule
+      })
+    })
+
+    describe('#generateSamplingPhases', () => {
+      it('uses the given sampling configuration to generate phases', () => {
+        const sampling = {
+          size: 1000,
+          averagePause: 5,
+          pauseVariance: 1,
+        }
+        result = task.plan.impl.generateSamplingPhases({ task: { sampling } })
+        expect(result.length).to.equal(sampling.size * 2)
+        expect(result.filter(chunkPhase => // filter for any pauses with a pause value outside of [avgPause - pauseVar, avgPause + pauseVar]
+          'pause' in chunkPhase &&
+          (
+            chunkPhase.pause < sampling.averagePause - sampling.pauseVariance ||
+            chunkPhase.pause > sampling.averagePause + sampling.pauseVariance
+          ) // eslint-disable-line comma-dangle
+        ).length).to.equal(0)
+        expect(result.filter( // filter for any sample phases specifying more than one arrival
+          chunkPhase => (
+            !('pause' in chunkPhase) &&
+            (chunkPhase.duration !== 1 || chunkPhase.arrivalRate !== 1)) // eslint-disable-line comma-dangle
+        ).length).to.equal(0)
       })
     })
 
@@ -1145,7 +1222,7 @@ describe('./lib/lambda/taskPlan.js', () => {
       })
     })
 
-    describe('#planAcceptance', () => {
+    describe('#planSamples', () => {
       let splitScriptByFlowStub
       beforeEach(() => {
         splitScriptByFlowStub = sinon.stub(task.plan.impl, 'splitScriptByFlow').returns()
@@ -1155,52 +1232,68 @@ describe('./lib/lambda/taskPlan.js', () => {
       })
       it('adds _start and _invokeType to the given event', () => {
         script = {}
-        task.plan.impl.planAcceptance(1, script)
+        task.plan.impl.planSamples(1, script, runOnceSettings)
         expect(script._start).to.equal(1)
         expect(script._invokeType).to.eql('RequestResponse')
-        expect(splitScriptByFlowStub).to.have.been.calledWithExactly(script)
+        expect(splitScriptByFlowStub).to.have.been.calledWithExactly(script, runOnceSettings)
       })
     })
 
     describe('#planTask', () => {
-      let planAcceptanceStub
+      let planSamplesStub
       let planPerformanceStub
       beforeEach(() => {
-        planAcceptanceStub = sinon.stub(task.plan.impl, 'planAcceptance').returns()
+        planSamplesStub = sinon.stub(task.plan.impl, 'planSamples').returns()
         planPerformanceStub = sinon.stub(task.plan.impl, 'planPerformance').returns()
       })
       afterEach(() => {
-        planAcceptanceStub.restore()
+        planSamplesStub.restore()
         planPerformanceStub.restore()
       })
       it('detects the lack of mode and calls planPerformance', () => {
         script = {}
         task.plan.impl.planTask(1, script, defaultSettings)
-        expect(planAcceptanceStub).to.not.have.been.called
+        expect(planSamplesStub).to.not.have.been.called
         expect(planPerformanceStub).to.have.been.calledOnce
       })
       it(`detects mode "${task.def.modes.PERF}" and calls planPerformance`, () => {
         script = { mode: task.def.modes.PERF }
         task.plan.impl.planTask(1, script, defaultSettings)
-        expect(planAcceptanceStub).to.not.have.been.called
+        expect(planSamplesStub).to.not.have.been.called
         expect(planPerformanceStub).to.have.been.calledOnce
       })
       it(`detects mode "${task.def.modes.PERFORMANCE}" and calls planPerformance`, () => {
         script = { mode: task.def.modes.PERFORMANCE }
         task.plan.impl.planTask(1, script, defaultSettings)
-        expect(planAcceptanceStub).to.not.have.been.called
+        expect(planSamplesStub).to.not.have.been.called
         expect(planPerformanceStub).to.have.been.calledOnce
       })
-      it(`detects mode "${task.def.modes.ACC}" and calls planAcceptance`, () => {
+      it(`detects mode "${task.def.modes.ACC}" and calls planSamples with sampleWithAcceptanceDefaults`, () => {
         script = { mode: task.def.modes.ACC }
         task.plan.impl.planTask(1, script, defaultSettings)
-        expect(planAcceptanceStub).to.have.been.calledOnce
+        expect(planSamplesStub).to.have.been.calledOnce
+        expect(planSamplesStub.args[0][2]).to.equal(defaultSettings)
         expect(planPerformanceStub).to.not.have.been.called
       })
-      it(`detects mode "${task.def.modes.ACCEPTANCE}" and calls planAcceptance`, () => {
+      it(`detects mode "${task.def.modes.ACCEPTANCE}" and calls planSamples with sampleWithAcceptanceDefaults`, () => {
         script = { mode: task.def.modes.ACCEPTANCE }
         task.plan.impl.planTask(1, script, defaultSettings)
-        expect(planAcceptanceStub).to.have.been.calledOnce
+        expect(planSamplesStub).to.have.been.calledOnce
+        expect(planSamplesStub.args[0][2]).to.equal(defaultSettings)
+        expect(planPerformanceStub).to.not.have.been.called
+      })
+      it(`detects mode "${task.def.modes.MON}" and calls planSamples with sampleWithMonitoringDefaults`, () => {
+        script = { mode: task.def.modes.MON }
+        task.plan.impl.planTask(1, script, defaultSettings)
+        expect(planSamplesStub).to.have.been.calledOnce
+        expect(planSamplesStub.args[0][2]).to.equal(defaultSettings)
+        expect(planPerformanceStub).to.not.have.been.called
+      })
+      it(`detects mode "${task.def.modes.MONITORING}" and calls planSamples with sampleWithMonitoringDefaults`, () => {
+        script = { mode: task.def.modes.MONITORING }
+        task.plan.impl.planTask(1, script, defaultSettings)
+        expect(planSamplesStub).to.have.been.calledOnce
+        expect(planSamplesStub.args[0][2]).to.equal(defaultSettings)
         expect(planPerformanceStub).to.not.have.been.called
       })
     })
