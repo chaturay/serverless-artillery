@@ -1,5 +1,11 @@
+const BbPromise = require('bluebird')
 const chai = require('chai')
 const path = require('path')
+const sinon = require('sinon')
+const sinonChai = require('sinon-chai')
+
+BbPromise.longStackTraces()
+chai.use(sinonChai)
 
 const expect = chai.expect
 
@@ -7,9 +13,26 @@ const expect = chai.expect
 const func = require(path.join('..', '..', '..', 'lib', 'lambda', 'func.js'))
 
 describe('./lib/lambda/funcHandle.js', () => {
+  const maxTimeout = func.def.MAX_TIMEOUT_BUFFER_IN_MILLISECONDS
+  let timeout
+  const context = {
+    getRemainingTimeInMillis: () => timeout,
+  }
+  beforeEach(() => {
+    timeout = 300
+    func.def.MAX_TIMEOUT_BUFFER_IN_MILLISECONDS = maxTimeout
+    func.handle.done = false
+  })
   afterEach(() => {
-    delete func.handle.callback
-    delete func.handle.context
+    if ('callback' in func.handle) {
+      delete func.handle.callback
+    }
+    if ('context' in func.handle) {
+      delete func.handle.context
+    }
+    if ('done' in func.handle) {
+      delete func.handle.done
+    }
   })
   describe(':impl', () => {
     describe('#handleUnhandledRejection', () => {
@@ -17,55 +40,104 @@ describe('./lib/lambda/funcHandle.js', () => {
         const consoleLog = console.error
         let logCalled = false
         console.error = () => { logCalled = true }
-        let callbackCalled = false
-        func.handle.callback = () => { callbackCalled = true }
-        func.handle.impl.handleUnhandledRejection(new Error('tag'))
-        expect(logCalled).to.be.true
-        expect(callbackCalled).to.be.true
-        console.error = consoleLog
+        try {
+          let callbackCalled = false
+          func.handle.callback = () => { callbackCalled = true }
+          func.handle.impl.handleUnhandledRejection(new Error('tag'))
+          expect(logCalled).to.be.true
+          expect(callbackCalled).to.be.true
+        } finally {
+          console.error = consoleLog
+        }
+      })
+    })
+    describe('#handleTimeout', () => {
+      it('prints to the console and calls the callback', () => {
+        const consoleLog = console.error
+        let logCalled = false
+        console.error = () => { logCalled = true }
+        try {
+          let callbackCalled = false
+          func.handle.callback = () => { callbackCalled = true }
+          func.handle.impl.handleTimeout()
+          expect(logCalled).to.be.true
+          expect(callbackCalled).to.be.true
+        } finally {
+          console.error = consoleLog
+        }
+      })
+      it('only calls the handler once despite repeated calls', () => {
+        const callback = sinon.stub()
+        func.handle.callback = callback
+        func.handle.impl.handleTimeout()
+        func.handle.impl.handleTimeout()
+        expect(callback).to.have.been.calledOnce
       })
     })
     describe('#handler', () => {
-      it('stores the given context and callback on the module exports', () => {
-        const handler = func.handle(() => Promise.resolve())
-        const context = {}
-        const callback = () => {}
+      it('stores the given context and callback on the module exports', (done) => {
+        const handler = func.handle(() => BbPromise.resolve())
+        const callback = () => { done() }
         handler({}, context, callback)
         expect(func.handle.context).to.equal(context)
         expect(func.handle.callback).to.equal(callback)
       })
-      it('calls the given taskHandler with the given event', () => {
+      it('calls the given taskHandler with the given event', (done) => {
         const event = {}
         let observed
         const handler = func.handle((script) => {
           observed = script
-          return Promise.resolve()
+          return BbPromise.resolve()
         })
-        handler(event, {}, () => {})
+        handler(event, context, () => { done() })
         expect(observed).to.be.equal(event)
       })
-      it('reports the resolved value', () => {
+      it('reports the resolved value', (done) => {
         const value = {}
-        const handler = func.handle(() => Promise.resolve(value))
-        const callback = (err, res) => { expect(res).to.equal(value) }
+        const handler = func.handle(() => BbPromise.resolve(value))
+        const callback = (err, res) => {
+          expect(res).to.equal(value)
+          done()
+        }
         handler({}, context, callback)
       })
-      it('handles exceptions from the task handler and reports an error', () => {
-        const handler = func.handle(() => Promise.resolve())
+      it('handles exceptions from the task handler and reports an error', (done) => {
+        const handler = func.handle(() => BbPromise.resolve())
         const callback = (err, res) => {
           expect(res).to.have.string('Error validating event: ')
+          done()
         }
-        handler({ _split: { maxChunkDurationInSeconds: 'not a number' } }, null, callback)
+        handler({ _split: { maxChunkDurationInSeconds: 'not a number' } }, context, callback)
       })
-      it('handles exceptions thrown within the task handler promise chain, reporting an error', () => {
-        const handler = func.handle(() => Promise.resolve().then(() => { throw new Error('rejected') }))
-        const callback = (err, res) => { expect(res).to.have.string('Error executing task: ') }
-        handler({}, null, callback)
+      it('handles exceptions thrown within the task handler promise chain, reporting an error', (done) => {
+        const handler = func.handle(() => BbPromise.resolve().then(() => { throw new Error('rejected') }))
+        const callback = (err, res) => {
+          expect(res).to.have.string('Error executing task: ')
+          done()
+        }
+        handler({}, context, callback)
       })
-      it('handles promise rejections within the task handler promise chain, reporting an error', () => {
-        const handler = func.handle(() => Promise.reject(new Error('rejected')))
-        const callback = (err, res) => { expect(res).to.have.string('Error executing task: ') }
-        handler({}, null, callback)
+      it('handles promise rejections within the task handler promise chain, reporting an error', (done) => {
+        const handler = func.handle(() => BbPromise.reject(new Error('rejected')))
+        const callback = (err, res) => {
+          expect(res).to.have.string('Error executing task: ')
+          done()
+        }
+        handler({}, context, callback)
+      })
+      it('times out prior to given limits', (done) => {
+        func.def.MAX_TIMEOUT_BUFFER_IN_MILLISECONDS = 1
+        timeout = 2
+        let promise
+        const handler = func.handle(() => {
+          promise = new BbPromise(resolve => setTimeout(resolve, timeout * 2))
+          return promise
+        })
+        const callback = (err, res) => {
+          expect(res).to.have.string('Error: function timeout')
+          promise.then(done)
+        }
+        handler({}, context, callback)
       })
     })
   })
