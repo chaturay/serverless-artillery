@@ -139,6 +139,20 @@ describe('./lib/lambda/funcHandle.js', () => {
         }
         handler({}, context, callback)
       })
+      it('merges objects with a root merge attribute', (done) => {
+        const input = {
+          '>>': {},
+          mode: 'mon',
+        }
+        const expected = {
+          mode: 'mon',
+        }
+        const handler = func.handle((event) => {
+          expect(event).to.eql(expected)
+          return BbPromise.resolve()
+        })
+        handler(input, context, () => { done() })
+      })
     })
   })
 })

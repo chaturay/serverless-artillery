@@ -14,7 +14,7 @@ const packageJson = require(path.join(__dirname, '..', '..', 'lib', 'lambda', 'p
 const slsart = require('../../lib/index')
 const npm = require('../../lib/npm')
 
-describe('./lib/npm.js:exports', function npmExports() {
+describe('./lib/npm.js:exports', function npmExports() { // eslint-disable-line prefer-arrow-callback
   describe('#install', function exportsConfigure() { // eslint-disable-line prefer-arrow-callback
     const cwd = process.cwd
     const replaceCwd = (dirToReplace) => {
