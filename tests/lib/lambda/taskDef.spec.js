@@ -10,6 +10,20 @@ let script
 let expected
 
 describe('./lib/lambda/taskDef.js', () => {
+  describe(':constants', () => {
+    // The rest of these cases are covered in other tests.  Adding this for completeness
+    describe('#isPerformanceScript', () => {
+      it('identifies a script with no mode as a performance script', () => {
+        expect(task.def.isPerformanceScript({})).to.be.true
+      })
+      it(`identifies a script with mode ${task.def.modes.PERF} as a performance script`, () => {
+        expect(task.def.isPerformanceScript({ mode: task.def.modes.PERF })).to.be.true
+      })
+      it(`identifies a script with mode ${task.def.modes.PERFORMANCE} as a performance script`, () => {
+        expect(task.def.isPerformanceScript({ mode: task.def.modes.PERFORMANCE })).to.be.true
+      })
+    })
+  })
   describe(':impl', () => {
     describe('#getSettings', () => {
       const makeSettings = defaults => ({ sampling: task.def.defaultsToSettings(defaults) })

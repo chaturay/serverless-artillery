@@ -17,6 +17,13 @@ let result
 
 describe('./lib/lambda/taskResult.js', () => {
   describe(':impl', () => {
+    describe('#getDisplayReadyMode', () => {
+      it('returns the given mode if not among the defined', () => {
+        const mode = 'not-really-a-mode'
+        result = taskResult.impl.getDisplayReadyMode({ mode })
+        expect(result).to.eql(mode)
+      })
+    })
     describe('#getErrorBudget', () => {
       it('uses the supplied error budget if specified', () => {
         result = taskResult.impl.getErrorBudget({ sampling: { errorBudget: 1 } }, 2)
@@ -164,6 +171,18 @@ describe('./lib/lambda/taskResult.js', () => {
       })
     })
     describe('#analyzeMonitoring', () => {
+      it('handles a report set with no errors', () => {
+        const reports = [{}]
+        expected = {
+          errors: 0,
+          reports,
+        }
+        expect(taskResult.impl.analyzeMonitoring(
+          { mode: def.modes.MON },
+          { alert: { send: () => Promise.reject() } }, // shouldn't be called
+          reports // eslint-disable-line comma-dangle
+        )).to.eql(expected)
+      })
       it('handles a report set with an report of error counts over budget', () => {
         const reports = [
           {

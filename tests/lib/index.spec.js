@@ -505,7 +505,7 @@ scenarios:
       let service
       it('adds the expected assets to the given service', () => {
         service = validService()
-        slsart.impl.addAssets(service, { t: 1, p: 'foo.yml' })
+        slsart.impl.addAssets(service, { threshold: 1, p: 'foo.yml' })
         expect(service.provider.iamRoleStatements.length).to.equal(1)
         expect(service.functions[slsart.constants.TestFunctionName].environment.TOPIC_ARN).to.be.a('string')
         expect(service.functions[slsart.constants.TestFunctionName].environment.TOPIC_NAME).to.be.a('string')
@@ -655,6 +655,15 @@ scenarios:
         return slsart.impl.writeBackup(content).should.be.rejected
           .then(() => {
             fsWriteFileAsyncStub.should.have.callCount(slsart.constants.backupAttempts)
+          })
+      })
+      it('throws errors without `code = \'EEXIST\'`', () => {
+        const anotherErr = new Error('not eexist')
+        anotherErr.code = 'NOT_EEXIST'
+        fsWriteFileAsyncStub.returns(BbPromise.reject(anotherErr))
+        return slsart.impl.writeBackup(content).should.be.rejectedWith(anotherErr)
+          .then(() => {
+            fsWriteFileAsyncStub.should.have.callCount(1)
           })
       })
     })
