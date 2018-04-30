@@ -13,14 +13,14 @@ const expect = chai.expect
 const func = require(path.join('..', '..', '..', 'lib', 'lambda', 'func.js'))
 
 describe('./lib/lambda/funcHandle.js', () => {
-  const maxTimeout = func.def.MAX_TIMEOUT_BUFFER_IN_MILLISECONDS
-  let timeout
+  const maxTimeoutBufferInMs = func.def.MAX_TIMEOUT_BUFFER_IN_MILLISECONDS
+  let timeoutInMs
   const context = {
-    getRemainingTimeInMillis: () => timeout,
+    getRemainingTimeInMillis: () => timeoutInMs,
   }
   beforeEach(() => {
-    timeout = 300
-    func.def.MAX_TIMEOUT_BUFFER_IN_MILLISECONDS = maxTimeout
+    timeoutInMs = 300 * 1000
+    func.def.MAX_TIMEOUT_BUFFER_IN_MILLISECONDS = maxTimeoutBufferInMs
     func.handle.done = false
   })
   afterEach(() => {
@@ -127,10 +127,10 @@ describe('./lib/lambda/funcHandle.js', () => {
       })
       it('times out prior to given limits', (done) => {
         func.def.MAX_TIMEOUT_BUFFER_IN_MILLISECONDS = 1
-        timeout = 2
+        timeoutInMs = 10
         let promise
         const handler = func.handle(() => {
-          promise = new BbPromise(resolve => setTimeout(resolve, timeout * 2))
+          promise = new BbPromise(resolve => setTimeout(resolve, timeoutInMs * 2))
           return promise
         })
         const callback = (err, res) => {
@@ -141,10 +141,22 @@ describe('./lib/lambda/funcHandle.js', () => {
       })
       it('merges objects with a root merge attribute', (done) => {
         const input = {
-          '>>': {},
+          '>>': {
+            foo: {
+              bar: '1',
+              baz: '2',
+            },
+          },
           mode: 'mon',
+          foo: {
+            bar: '3',
+          },
         }
         const expected = {
+          foo: {
+            bar: '3',
+            baz: '2',
+          },
           mode: 'mon',
         }
         const handler = func.handle((event) => {

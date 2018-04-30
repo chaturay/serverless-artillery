@@ -288,7 +288,7 @@ describe('./lib/lambda/taskResult.js', () => {
         result = taskResult.impl.result(1, script, tagSettings, payloads)
         expect(analyzeAcceptanceStub).to.not.have.been.called
         expect(analyzeMonitoringStub).to.have.been.calledOnce
-        expect(analyzeMonitoringStub).to.have.been.calledWithExactly(script, payloads)
+        expect(analyzeMonitoringStub).to.have.been.calledWithExactly(script, tagSettings, payloads)
         expect(result).to.equal(analysis)
         expect(analyzePerformanceStub).to.not.have.been.called
       })
@@ -298,7 +298,7 @@ describe('./lib/lambda/taskResult.js', () => {
         result = taskResult.impl.result(1, script, tagSettings, payloads)
         expect(analyzeAcceptanceStub).to.not.have.been.called
         expect(analyzeMonitoringStub).to.have.been.calledOnce
-        expect(analyzeMonitoringStub).to.have.been.calledWithExactly(script, payloads)
+        expect(analyzeMonitoringStub).to.have.been.calledWithExactly(script, tagSettings, payloads)
         expect(result).to.equal(analysis)
         expect(analyzePerformanceStub).to.not.have.been.called
       })

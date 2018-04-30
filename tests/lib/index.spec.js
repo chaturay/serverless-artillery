@@ -92,8 +92,11 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
       it('returns an absoute path to the local script.yml if no path was given and one exists', () => {
         const cwd = process.cwd
         process.cwd = () => path.join(__dirname, 'dir')
-        expect(slsart.impl.findScriptPath()).to.eql(testYmlScriptPath)
-        process.cwd = cwd
+        try {
+          expect(slsart.impl.findScriptPath()).to.eql(testYmlScriptPath)
+        } finally {
+          process.cwd = cwd
+        }
       })
       it('returns an absoute path to the global script.yml if no path was given and a local one does not exist', () => {
         const expected = path.join(path.resolve(path.join(__dirname, '..', '..', 'lib', 'lambda')), 'script.yml')
@@ -507,8 +510,10 @@ scenarios:
         service = validService()
         slsart.impl.addAssets(service, { threshold: 1, p: 'foo.yml' })
         expect(service.provider.iamRoleStatements.length).to.equal(1)
-        expect(service.functions[slsart.constants.TestFunctionName].environment.TOPIC_ARN).to.be.a('string')
-        expect(service.functions[slsart.constants.TestFunctionName].environment.TOPIC_NAME).to.be.a('string')
+        expect(service.functions[slsart.constants.TestFunctionName].environment.TOPIC_ARN)
+          .to.eql({ Ref: slsart.constants.AlertingName })
+        expect(service.functions[slsart.constants.TestFunctionName].environment.TOPIC_NAME)
+          .to.eql({ 'Fn::GetAtt': [slsart.constants.AlertingName, 'TopicName'] })
         expect(service.functions[slsart.constants.TestFunctionName].events[0].schedule).to.be.a('object')
         expect(service.functions[slsart.constants.TestFunctionName].events[0].schedule.name).to.have.string(slsart.constants.ScheduleName)
         expect(service.resources.Resources[`${slsart.constants.AlertingName}${slsart.constants.yamlComments.doNotEditKey}`]).to.be.an('object')
@@ -631,7 +636,7 @@ scenarios:
         return slsart.impl.writeBackup(content).should.be.fulfilled
           .then(() => {
             fsWriteFileAsyncStub.should.have.been.calledOnce
-            expect(fsWriteFileAsyncStub.args[0][0]).to.eql(`${slsart.constants.ServerlessFiles[0]}.bak`)
+            expect(fsWriteFileAsyncStub.args[0][0]).to.eql(`${slsart.constants.ServerlessFile}.bak`)
           })
       })
       it('tries writing to subsequent serverless.yml.N.bak files until succeeding', () => {
@@ -643,11 +648,11 @@ scenarios:
         return slsart.impl.writeBackup(content).should.be.fulfilled
           .then(() => {
             fsWriteFileAsyncStub.should.have.callCount(5)
-            expect(fsWriteFileAsyncStub.args[0][0]).to.eql(`${slsart.constants.ServerlessFiles[0]}.bak`)
-            expect(fsWriteFileAsyncStub.args[1][0]).to.eql(`${slsart.constants.ServerlessFiles[0]}.1.bak`)
-            expect(fsWriteFileAsyncStub.args[2][0]).to.eql(`${slsart.constants.ServerlessFiles[0]}.2.bak`)
-            expect(fsWriteFileAsyncStub.args[3][0]).to.eql(`${slsart.constants.ServerlessFiles[0]}.3.bak`)
-            expect(fsWriteFileAsyncStub.args[4][0]).to.eql(`${slsart.constants.ServerlessFiles[0]}.4.bak`)
+            expect(fsWriteFileAsyncStub.args[0][0]).to.eql(`${slsart.constants.ServerlessFile}.bak`)
+            expect(fsWriteFileAsyncStub.args[1][0]).to.eql(`${slsart.constants.ServerlessFile}.1.bak`)
+            expect(fsWriteFileAsyncStub.args[2][0]).to.eql(`${slsart.constants.ServerlessFile}.2.bak`)
+            expect(fsWriteFileAsyncStub.args[3][0]).to.eql(`${slsart.constants.ServerlessFile}.3.bak`)
+            expect(fsWriteFileAsyncStub.args[4][0]).to.eql(`${slsart.constants.ServerlessFile}.4.bak`)
           })
       })
       it('gives up writing after 100 attempts', () => {
@@ -1167,12 +1172,14 @@ scenarios:
     })
 
     describe('#monitor', () => {
+      let scriptStub
       let configureStub
       let fileExistsStub
       let writeBackupStub
       let fsReadFileAsyncStub
       let fsWriteFileAsyncStub
       beforeEach(() => {
+        scriptStub = sinon.stub(slsart, 'script').resolves()
         configureStub = sinon.stub(slsart, 'configure').resolves()
         fileExistsStub = sinon.stub(slsart.impl, 'fileExists').returns(true)
         writeBackupStub = sinon.stub(slsart.impl, 'writeBackup').resolves()
@@ -1187,8 +1194,9 @@ scenarios:
         fsWriteFileAsyncStub = sinon.stub(fs, 'writeFileAsync').resolves()
       })
       afterEach(() => {
-        fileExistsStub.restore()
+        scriptStub.restore()
         configureStub.restore()
+        fileExistsStub.restore()
         writeBackupStub.restore()
         fsReadFileAsyncStub.restore()
         fsWriteFileAsyncStub.restore()
@@ -1197,16 +1205,32 @@ scenarios:
         .then(() => fsWriteFileAsyncStub.should.have.been.called))
       it('writes a backup if serverless.yml is present', () => slsart.monitor({}).should.be.fulfilled
         .then(() => {
+          scriptStub.should.not.have.been.called
           configureStub.should.not.have.been.called
           writeBackupStub.should.have.been.calledOnce
         }))
-      it('configures and does not write a backup if no serverless.yml', () => {
+      it('generates script, configures, and does not write a backup if no script.yml or serverless.yml', () => {
         fileExistsStub.returns(false)
         return slsart.monitor({}).should.be.fulfilled
           .then(() => {
+            scriptStub.should.have.been.calledOnce
             configureStub.should.have.been.calledOnce
             writeBackupStub.should.not.have.been.called
           })
+      })
+      it('rejects the monitor command if running script fails', () => {
+        fileExistsStub.returns(false)
+        scriptStub.returns(BbPromise.reject(new Error('reasons')))
+        return slsart.monitor({}).should.be.rejected
+      })
+      it('rejects the monitor command if running configure fails', () => {
+        fileExistsStub.returns(false)
+        configureStub.returns(BbPromise.reject(new Error('reasons')))
+        return slsart.monitor({}).should.be.rejected
+      })
+      it('rejects the monitor command if reading serverless.yml fails', () => {
+        fsReadFileAsyncStub.returns(BbPromise.reject(new Error('reasons')))
+        return slsart.monitor({}).should.be.rejected
       })
     })
   })

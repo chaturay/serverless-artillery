@@ -150,20 +150,26 @@ describe('./lib/lambda/handler.js', () => {
       it('sets the start time of the given script to the given timeNow if none exists', () => {
         const timeNow = 'not really a time'
         const script = {}
-        handler.impl.execute(timeNow, script, defaultSettings)
+        return handler.impl.execute(timeNow, script, defaultSettings, script)
           .then(() => expect(script._start).to.equal(timeNow)) // eslint-disable-line no-underscore-dangle
       })
       it('does not change the start time if a script comes with one', () => {
         const timeNow = 'not really a time'
         const script = { _start: timeNow }
-        handler.impl.execute('also not a time', script, defaultSettings)
+        return handler.impl.execute('also not a time', script, defaultSettings, script)
           .then(() => expect(script._start).to.equal(timeNow)) // eslint-disable-line no-underscore-dangle
       })
       it('also does not change the start time in trace mode', () => {
         const timeNow = 'not really a time'
         const script = { _start: timeNow, _trace: true }
-        handler.impl.execute('also not a time', script, defaultSettings)
+        return handler.impl.execute('also not a time', script, defaultSettings, script)
           .then(() => expect(script._start).to.equal(timeNow)) // eslint-disable-line no-underscore-dangle
+      })
+      it('passes the sourceEvent to task.result (rather than the event to execute)', () => {
+        const sourceEvent = { _start: 1 }
+        const event = { _start: 2 }
+        return handler.impl.execute(1, sourceEvent, defaultSettings, event)
+          .then(() => expect(taskResultStub.args[0][1]).to.equal(sourceEvent))
       })
       describe('error logging', () => {
         let consoleErrorStub
@@ -175,35 +181,35 @@ describe('./lib/lambda/handler.js', () => {
         })
         it('logs and throws errors that are throw up the promise chain by impl.deploy', () => {
           implDelayStub.throws(new Error('impl.deploy'))
-          return expect(() => handler.impl.execute(Date.now(), {}, defaultSettings)).to.throw()
+          return expect(() => handler.impl.execute(Date.now(), {}, defaultSettings, {})).to.throw()
         })
         it('logs and throws errors resulting from a rejection by impl.deploy', () => {
           implDelayStub.returns(Promise.reject(new Error('impl.deploy')))
-          return expect(handler.impl.execute(Date.now(), {}, defaultSettings))
+          return expect(handler.impl.execute(Date.now(), {}, defaultSettings, {}))
             .to.eventually.be.rejected
             .then(() => expect(consoleErrorStub).to.have.been.called)
         })
         it('logs and throws errors that are throw up the promise chain by task.exec', () => {
           taskExecStub.throws(new Error('task.exec'))
-          return expect(handler.impl.execute(Date.now(), {}, defaultSettings))
+          return expect(handler.impl.execute(Date.now(), {}, defaultSettings, {}))
             .to.eventually.be.rejected
             .then(() => expect(consoleErrorStub).to.have.been.called)
         })
         it('logs and throws errors resulting from a rejection by task.exec', () => {
           taskExecStub.returns(Promise.reject(new Error('task.exec')))
-          return expect(handler.impl.execute(Date.now(), {}, defaultSettings))
+          return expect(handler.impl.execute(Date.now(), {}, defaultSettings, {}))
             .to.eventually.be.rejected
             .then(() => expect(consoleErrorStub).to.have.been.called)
         })
         it('logs and throws errors that are throw up the promise chain by task.result', () => {
           taskResultStub.throws(new Error('task.result'))
-          return expect(handler.impl.execute(Date.now(), {}, defaultSettings))
+          return expect(handler.impl.execute(Date.now(), {}, defaultSettings, {}))
             .to.eventually.be.rejected
             .then(() => expect(consoleErrorStub).to.have.been.called)
         })
         it('logs and throws errors resulting from a rejection by task.result', () => {
           taskResultStub.returns(Promise.reject(new Error('task.result')))
-          return expect(handler.impl.execute(Date.now(), {}, defaultSettings))
+          return expect(handler.impl.execute(Date.now(), {}, defaultSettings, {}))
             .to.eventually.be.rejected
             .then(() => expect(consoleErrorStub).to.have.been.called)
         })
