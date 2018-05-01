@@ -5,7 +5,7 @@
 Combine [`serverless`](https://serverless.com) with [`artillery`](https://artillery.io) and you get `serverless-artillery` (a.k.a. `slsart`) for instant, cheap, and easy system validation at scale.
 
 TL;DR:
-* Performance: I measure system behavior under load both exploring manually and automatically as part of my CI/CD process
+* Performance: I measure system behavior under load, cackling while I add zeros or reviewing my CI/CD process' metric history
 * Acceptance: I validate my CI/CD deployment with synthetic traffic to fail the build in cases of error
 * Monitoring: I periodically sample system behavior with synthetic traffic to monitor system health
 

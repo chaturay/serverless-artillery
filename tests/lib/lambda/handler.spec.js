@@ -103,7 +103,7 @@ describe('./lib/lambda/handler.js', () => {
               expect(implInvokeSelfStub).to.have.callCount(plans.length)
               expect(result).to.equal(taskResultResult)
             }) // eslint-disable-line comma-dangle
-        ).to.eventually.be.fullfilled
+        ).to.eventually.be.fulfilled
       })
       it('invokes itself once for each given plan, returning the consequence of task.result, even in trace mode', () => {
         const plans = [{}, {}, {}]
@@ -113,7 +113,7 @@ describe('./lib/lambda/handler.js', () => {
               expect(implInvokeSelfStub).to.have.callCount(plans.length)
               expect(result).to.equal(taskResultResult)
             }) // eslint-disable-line comma-dangle
-        ).to.eventually.be.fullfilled
+        ).to.eventually.be.fulfilled
       })
       it('calls task.result for every invocation result', () => {
         const plans = [{}, {}, {}, {}, {}]

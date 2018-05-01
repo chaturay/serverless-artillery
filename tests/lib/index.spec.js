@@ -751,7 +751,7 @@ scenarios:
       })
       it('handles rejections along the promise chain', () => {
         const fakeInit = slsFakeInit
-        slsFakeInit = () => Promise.reject('rejected')
+        slsFakeInit = () => Promise.reject(new Error('rejected'))
         return slsart.impl.serverlessRunner({})
           .then(() => { slsFakeInit = fakeInit })
           .catch((ex) => { slsFakeInit = fakeInit; throw ex })
@@ -1142,9 +1142,9 @@ scenarios:
         npmInstallResult = BbPromise.resolve
         return slsart.configure({ debug: true, trace: true })
           .then(() => BbPromise.all(slsart.constants.ServerlessFiles.map(
-            file => expect(fs.accessAsync(path.join(tmpdir, file))).to.eventually.be.fullfilled // eslint-disable-line comma-dangle
+            file => expect(fs.accessAsync(path.join(tmpdir, file))).to.eventually.be.fulfilled // eslint-disable-line comma-dangle
           )))
-          .should.be.fullfilled
+          .should.be.fulfilled
       })
       it('ensures that the invalid character "_" is not part of the generated short id appended to the service name', () => {
         const shortidRes = shortidResult
@@ -1159,7 +1159,7 @@ scenarios:
             const sls = yaml.safeLoad(yml)
             expect(sls.service).to.not.have.string('_')
           })
-          .should.be.fullfilled
+          .should.be.fulfilled
       })
       it('rejects the promise if npm install fails',
         function createUniqueArtifacts() { // eslint-ignore-line prefer-arrow-callback

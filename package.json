@@ -29,39 +29,40 @@
     "scale",
     "lambda"
   ],
-  "author": "Erik Erikson, Jane Savina, Jason Olmstead, Greg Smith, Rob Gruhl, Andy Day",
+  "author": "Erik Erikson, Greg Smith, Rob Gruhl, Danno Mayer, Andy Day",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/Nordstrom/serverless-artillery/issues"
   },
   "homepage": "https://github.com/Nordstrom/serverless-artillery#readme",
   "dependencies": {
-    "aws-sdk": "^2.5.0",
-    "bluebird": "^3.4.6",
+    "aws-sdk": "^2.230.1",
+    "bluebird": "^3.5.1",
     "diff": "^3.5.0",
-    "get-stdin": "^5.0.1",
-    "js-yaml": "^3.6.1",
-    "semver": "^5.3.0",
-    "shortid": "^2.2.6",
-    "yargs": "^6.2.0"
+    "get-stdin": "^6.0.0",
+    "js-yaml": "^3.11.0",
+    "semver": "^5.5.0",
+    "shortid": "^2.2.8",
+    "yargs": "^11.0.0"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
+    "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
-    "coveralls": "^3.0.0",
+    "coveralls": "^3.0.1",
     "cross-spawn": "^6.0.5",
-    "eslint": "^4.7.2",
-    "eslint-config-airbnb": "^15.1.0",
-    "eslint-plugin-import": "^2.7.0",
-    "eslint-plugin-jsx-a11y": "^5.1.1",
-    "eslint-plugin-react": "^7.4.0",
-    "mocha": "^3.0.2",
-    "np": "^2.16.0",
-    "nyc": "^11.0.3",
-    "quibble": "^0.5.3",
-    "serverless": "^1.0.3",
-    "sinon": "^4.1.3",
-    "sinon-chai": "^2.14.0"
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.11.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.7.0",
+    "lodash.merge": "^4.6.1",
+    "mocha": "^5.1.1",
+    "np": "^2.20.1",
+    "nyc": "^11.7.1",
+    "quibble": "^0.5.5",
+    "serverless": "^1.26.1",
+    "sinon": "^5.0.2",
+    "sinon-chai": "^3.0.0"
   },
   "nyc": {
     "include": [
