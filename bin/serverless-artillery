@@ -32,7 +32,7 @@ const yargs = require('yargs')
       requiresArg: false,
     },
   })
-  .global('D', 'V')
+  .global(['D', 'V'])
   .command('deploy', 'Deploy a default version of the function that will execute your Artillery scripts.  See ' +
     'https://serverless.com/framework/docs/providers/aws/cli-reference/deploy/ for reference.', {})
   .command(
