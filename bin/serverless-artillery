@@ -207,20 +207,23 @@ const yargs = require('yargs')
     } // eslint-disable-line comma-dangle
   )
   .demand(1)
-  .strict()
-  .argv
 
-const command = yargs._[0]
+const command = yargs.argv._[0]
 
-if (yargs.debug) {
-  console.log(`options were:${os.EOL}${JSON.stringify(yargs, null, 2)}`)
-  console.log(`command that will be executed: slsArt[${command}](${yargs})`)
+if (yargs.argv.debug) {
+  console.log(`options were:${os.EOL}${JSON.stringify(yargs.argv, null, 2)}`)
+  console.log(`command that will be executed: slsArt[${command}](${yargs.argv})`)
 }
 
-slsArt[command](yargs)
+if (!(command in slsArt)) {
+  yargs.showHelp()
+  process.exit(1)
+}
+
+slsArt[command](yargs.argv)
   .catch((ex) => {
     console.error(ex.message)
-    if (yargs.verbose) {
+    if (yargs.argv.verbose) {
       console.error(ex.stack)
     }
     process.exit(1)
