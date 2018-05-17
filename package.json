@@ -43,7 +43,7 @@
     "js-yaml": "^3.11.0",
     "semver": "^5.5.0",
     "shortid": "^2.2.8",
-    "yargs": "^11.0.0"
+    "yargs": "^11.1.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",
