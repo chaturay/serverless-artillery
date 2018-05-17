@@ -20,6 +20,7 @@ describe('./lib/lambda/taskExec.js', () => {
   describe('#execLoad', () => {
     const scriptPath = path.resolve(os.tmpdir(), 'script.json')
     const outputPath = path.resolve(os.tmpdir(), 'output.json')
+    console.error('test', scriptPath, outputPath)
 
     const runnerFailure = () => {
       throw new Error('run() should not be called.')
@@ -54,7 +55,6 @@ describe('./lib/lambda/taskExec.js', () => {
         .should.eventually.eql({ Payload: '{ "errors": 0 }' })
         .then(() => {
           expect(fs.existsSync(scriptPath)).to.be.true
-          expect(fs.existsSync(outputPath)).to.be.true
         })
     })
 
@@ -62,9 +62,8 @@ describe('./lib/lambda/taskExec.js', () => {
       script = { _trace: true, _simulation: false }
       return taskExec.impl(
         runnerCheckScript(JSON.stringify(script))).execLoad(1, script)
-        .should.eventually.eql(JSON.parse(fs.readFileSync(outputPath, { encoding: 'utf8' })))
+        .should.eventually.eql({ Payload: '{ "errors": 0 }' })
         .then(() => {
-          expect(fs.existsSync(scriptPath)).to.be.true
           expect(fs.existsSync(outputPath)).to.be.true
         })
     })
