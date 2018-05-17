@@ -20,7 +20,6 @@ describe('./lib/lambda/taskExec.js', () => {
   describe('#execLoad', () => {
     const scriptPath = path.resolve(os.tmpdir(), 'script.json')
     const outputPath = path.resolve(os.tmpdir(), 'output.json')
-    console.error('test', scriptPath, outputPath)
 
     const runnerFailure = () => {
       throw new Error('run() should not be called.')
