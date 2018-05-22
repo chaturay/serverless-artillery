@@ -1,9 +1,9 @@
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
-const path = require('path')
-const sinonChai = require('sinon-chai')
 const fs = require('fs')
 const os = require('os')
+const path = require('path')
+const sinonChai = require('sinon-chai')
 
 chai.use(chaiAsPromised)
 chai.use(sinonChai)
@@ -14,6 +14,7 @@ const expect = chai.expect
 // eslint-disable-next-line import/no-dynamic-require
 const taskExec = require(path.join('..', '..', '..', 'lib', 'lambda', 'taskExec.js'))
 
+let results
 let script
 
 describe('./lib/lambda/taskExec.js', () => {
@@ -21,15 +22,15 @@ describe('./lib/lambda/taskExec.js', () => {
     const scriptPath = path.resolve(os.tmpdir(), 'script.json')
     const outputPath = path.resolve(os.tmpdir(), 'output.json')
 
-    const runnerFailure = () => {
+    const runnerFailIfCalled = () => {
       throw new Error('run() should not be called.')
     }
 
-    const runnerCheckScript = expectedScript =>
+    const runnerMock = (expectedScript, actualResults, exitCode) =>
       (aScriptPath) => {
         expect(fs.readFileSync(aScriptPath, { encoding: 'utf8' })).to.equal(expectedScript)
-        fs.writeFileSync(outputPath, JSON.stringify({ Payload: '{ "errors": 0 }' }))
-        process.exit(0)
+        fs.writeFileSync(outputPath, JSON.stringify(actualResults))
+        process.exit(exitCode)
       }
 
     afterEach(() => {
@@ -39,7 +40,7 @@ describe('./lib/lambda/taskExec.js', () => {
 
     it('does nothing in simulation mode', () => {
       script = { _trace: true, _simulation: true }
-      return taskExec.impl(runnerFailure).execLoad(1, script)
+      return taskExec(runnerFailIfCalled)(1, script)
         .should.eventually.eql({ Payload: '{ "errors": 0 }' })
         .then(() => {
           expect(fs.existsSync(scriptPath)).to.be.false
@@ -47,22 +48,29 @@ describe('./lib/lambda/taskExec.js', () => {
         })
     })
 
-    it('writes event to script.json', () => {
+    it('invokes artillery:run and returns the results', () => {
       script = { _trace: true, _simulation: false }
-      return taskExec.impl(
-        runnerCheckScript(JSON.stringify(script))).execLoad(1, script)
-        .should.eventually.eql({ Payload: '{ "errors": 0 }' })
+      results = { Payload: '{ "errors": 0 }' }
+
+      return taskExec(runnerMock(JSON.stringify(script), results, 0))(1, script)
+        .should.eventually.eql(results)
         .then(() => {
-          expect(fs.existsSync(scriptPath)).to.be.true
+          // Verify files have been cleaned up
+          expect(fs.existsSync(scriptPath)).to.be.false
+          expect(fs.existsSync(outputPath)).to.be.false
         })
     })
 
-    it('returns contents of output.json', () => {
+    it('throws for non-zero exit codes', () => {
       script = { _trace: true, _simulation: false }
-      return taskExec.impl(
-        runnerCheckScript(JSON.stringify(script))).execLoad(1, script)
-        .should.eventually.eql({ Payload: '{ "errors": 0 }' })
+      results = { Payload: '{ "errors": 0 }' }
+
+      return taskExec(runnerMock(JSON.stringify(script), results, 1))(1, script)
+        .then(() => { throw new Error('run should not return normally') })
+        .catch(err => expect(err.message).to.contain('Artillery exited with non-zero code: 1'))
         .then(() => {
+          // Verify files have been cleaned up
+          expect(fs.existsSync(scriptPath)).to.be.true
           expect(fs.existsSync(outputPath)).to.be.true
         })
     })
