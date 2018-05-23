@@ -1,0 +1,10 @@
+const idioms = require('../idioms')
+
+module.exports = () => idioms.runIn(__dirname, Promise.resolve()
+  .then(idioms.functionDoesNotExist())
+  .then(idioms.deploy())
+  .then(idioms.functionExists())
+  .then(idioms.invoke())
+  .then(idioms.expect({ scenariosCreated: 23 }))
+  .then(idioms.remove())
+  .then(idioms.functionDoesNotExist()))

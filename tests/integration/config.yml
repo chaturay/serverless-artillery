@@ -1,0 +1,4 @@
+monitor:
+  subscription:
+    - Endpoint: you@host.com
+      Protocol: email
