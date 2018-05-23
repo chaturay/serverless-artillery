@@ -42,10 +42,6 @@ describe('./lib/lambda/taskExec.js', () => {
       script = { _trace: true, _simulation: true }
       return taskExec(runnerFailIfCalled)(1, script)
         .should.eventually.eql({ Payload: '{ "errors": 0 }' })
-        .then(() => {
-          expect(fs.existsSync(scriptPath)).to.be.false
-          expect(fs.existsSync(outputPath)).to.be.false
-        })
     })
 
     it('invokes artillery:run and returns the results', () => {
@@ -66,10 +62,9 @@ describe('./lib/lambda/taskExec.js', () => {
       results = { Payload: '{ "errors": 0 }' }
 
       return taskExec(runnerMock(JSON.stringify(script), results, 1))(1, script)
-        .then(() => { throw new Error('run should not return normally') })
-        .catch(err => expect(err.message).to.contain('Artillery exited with non-zero code: 1'))
+        .should.be.rejectedWith('Artillery exited with non-zero code: 1')
         .then(() => {
-          // Verify files have been cleaned up
+          // Files will remain in this case. S/B helpful for troubleshooting.
           expect(fs.existsSync(scriptPath)).to.be.true
           expect(fs.existsSync(outputPath)).to.be.true
         })
