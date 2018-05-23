@@ -8,8 +8,8 @@
     "slsart": "./bin/serverless-artillery"
   },
   "scripts": {
-    "test": "./node_modules/.bin/nyc ./node_modules/.bin/_mocha -r aws-sdk -r ./lib/lambda/node_modules/artillery-core \"./tests/**/*.spec.js\"",
-    "light": "./node_modules/.bin/nyc ./node_modules/.bin/_mocha -r aws-sdk -r ./lib/lambda/node_modules/artillery-core \"./tests/**/!(serverless-artillery|npm).spec.js\"",
+    "test": "./node_modules/.bin/nyc ./node_modules/.bin/_mocha -r aws-sdk \"./tests/**/*.spec.js\"",
+    "light": "./node_modules/.bin/nyc ./node_modules/.bin/_mocha -r aws-sdk \"./tests/**/!(serverless-artillery|npm).spec.js\"",
     "coverage": "./node_modules/.bin/nyc report --reporter=text-lcov | coveralls",
     "lint": "./node_modules/.bin/eslint . bin/serverless-artillery",
     "postinstall": "node ./postinstall.js",
@@ -43,7 +43,7 @@
     "js-yaml": "^3.11.0",
     "semver": "^5.5.0",
     "shortid": "^2.2.8",
-    "yargs": "^11.0.0"
+    "yargs": "^11.1.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",
