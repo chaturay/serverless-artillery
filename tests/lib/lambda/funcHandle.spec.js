@@ -7,7 +7,7 @@ const sinonChai = require('sinon-chai')
 BbPromise.longStackTraces()
 chai.use(sinonChai)
 
-const expect = chai.expect
+const { expect, assert } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
 const func = require(path.join('..', '..', '..', 'lib', 'lambda', 'func.js'))
@@ -75,31 +75,35 @@ describe('./lib/lambda/funcHandle.js', () => {
       })
     })
     describe('#handler', () => {
-      it('stores the given context and callback on the module exports', (done) => {
+      it('stores the given context and callback on the module exports', () => {
         const handler = func.handle(() => BbPromise.resolve())
-        const callback = () => { done() }
-        handler({}, context, callback)
-        expect(func.handle.context).to.equal(context)
-        expect(func.handle.callback).to.equal(callback)
+        return new Promise((resolve, reject) => {
+          const callback = (err, result) =>
+            err ? reject(err) : resolve(result)
+          handler({}, context, callback)
+            .then(result => {
+              expect(func.handle.context).to.equal(context)
+              expect(func.handle.callback).to.equal(callback)
+            })
+        })
       })
-      it('calls the given taskHandler with the given event', (done) => {
+      it('calls the given taskHandler with the given event', () => {
         const event = {}
-        let observed
         const handler = func.handle((script) => {
-          observed = script
+          expect(script).to.be.equal(event)
           return BbPromise.resolve()
         })
-        handler(event, context, () => { done() })
-        expect(observed).to.be.equal(event)
+        return new Promise((resolve, reject) => {
+          handler(event, context, (err, result) =>
+            err ? reject(err) : resolve(result))
+        })
       })
-      it('reports the resolved value', (done) => {
+      it('reports the resolved value', () => {
         const value = {}
         const handler = func.handle(() => BbPromise.resolve(value))
-        const callback = (err, res) => {
+        const callback = (err, res) =>
           expect(res).to.equal(value)
-          done()
-        }
-        handler({}, context, callback)
+        return handler({}, context, callback)
       })
       it('handles exceptions from the task handler and reports an error', (done) => {
         const handler = func.handle(() => BbPromise.resolve())
@@ -141,12 +145,7 @@ describe('./lib/lambda/funcHandle.js', () => {
       })
       it('merges objects with a root merge attribute', (done) => {
         const input = {
-          '>>': {
-            foo: {
-              bar: '1',
-              baz: '2',
-            },
-          },
+          '>>': './lib/lambda/foo',
           mode: 'mon',
           foo: {
             bar: '3',
@@ -163,7 +162,93 @@ describe('./lib/lambda/funcHandle.js', () => {
           expect(event).to.eql(expected)
           return BbPromise.resolve()
         })
-        handler(input, context, () => { done() })
+        const readScript = () => Promise.resolve({
+          foo: {
+            bar: '1',
+            baz: '2',
+          },
+        })
+        const mergeIf = input => func.handle.impl.mergeIf(input, readScript)
+        handler(input, context, () => { done() }, mergeIf)
+      })
+      describe('getScriptPath', () => {
+        const {
+          getScriptPath,
+          localPathError,
+        } = func.handle.impl
+        it('should fail for non-local absolute path', () =>
+          assert.throws(
+            () => getScriptPath('/foo', undefined, '/bar'),
+            localPathError))
+        it('should fail for non-local relative path', () =>
+          assert.throws(
+            () => getScriptPath('../foo', () => '/foo', '/bar'),
+            localPathError))
+        it('should succeed for absolute local path', () =>
+          assert.strictEqual(
+            getScriptPath('/foo/bar', undefined, '/foo'),
+            '/foo/bar'))
+        it('should succeed for relative local path', () =>
+          assert.strictEqual(
+            getScriptPath('bar', (p) => `/foo/${p}`, '/foo'),
+            '/foo/bar'))
+      })
+      describe('readScript', () => {
+        const {
+          readScript,
+          readScriptError,
+        } = func.handle.impl
+        const mockLog = () => {
+          const log = (...args) => log.calls.push(args)
+          log.calls = []
+          return log
+        }
+        const mockReadFile = (err, data) => {
+          const readFile = (...args) => {
+            readFile.calls.push(args)
+            args[args.length - 1](err, data)
+          }
+          readFile.calls = []
+          return readFile
+        }
+        it('should get the script path before reading', () => {
+          const getScriptPath = path => getScriptPath.path = path
+          const readFile = mockReadFile(undefined, 'bar')
+          return readScript('foo', readFile, mockLog(), getScriptPath)
+            .then(() => assert.strictEqual('foo', getScriptPath.path))
+        })
+        it('should log error with a bad script path', () => {
+          const readFile = mockReadFile(undefined, 'bar')
+          const log = mockLog()
+          return readScript('../foo', readFile, log)
+            .catch(err => err)
+            .then(err =>
+              assert.deepStrictEqual(
+                log.calls,
+                [[readScriptError, '../foo', err.stack]]))
+        })
+        it('should log error with a failed read', () => {
+          const readFile = mockReadFile(new Error('bar'))
+          const log = mockLog()
+          return readScript('../foo', readFile, log)
+            .catch(err => err)
+            .then(err =>
+              assert.deepStrictEqual(
+                log.calls,
+                [[readScriptError, '../foo', err.stack]]))
+        })
+        it('should parse yml', () => {
+          const readFile = mockReadFile(undefined, 'bar: baz')
+          const log = mockLog()
+          return readScript('foo', readFile, log, p => p)
+            .then(data => assert.deepStrictEqual(data,{bar: 'baz'}))
+        })
+        it('should parse json', () => {
+          const readFile = mockReadFile(undefined, '{"bar": "baz"}')
+          const log = mockLog()
+          return readScript('foo', readFile, log, p => p)
+            .then(data => assert.deepStrictEqual(data,{bar: 'baz'}))
+        })
       })
     })
   })
