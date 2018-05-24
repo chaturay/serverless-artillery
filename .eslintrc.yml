@@ -1,6 +1,13 @@
 root: true
 extends: airbnb
 rules:
+  comma-dangle:
+    - error
+    - arrays: always-multiline
+      objects: always-multiline
+      imports: ignore
+      exports: ignore
+      functions: never
   function-paren-newline: off
   max-len: off
   no-console: off

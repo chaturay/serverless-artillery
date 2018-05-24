@@ -37,40 +37,29 @@ describe('./lib/lambda/funcHandle.js', () => {
   describe(':impl', () => {
     describe('#handleUnhandledRejection', () => {
       it('prints to the console and calls the callback', () => {
-        const consoleLog = console.error
-        let logCalled = false
-        console.error = () => { logCalled = true }
-        try {
-          let callbackCalled = false
-          func.handle.callback = () => { callbackCalled = true }
-          func.handle.impl.handleUnhandledRejection(new Error('tag'))
-          expect(logCalled).to.be.true
-          expect(callbackCalled).to.be.true
-        } finally {
-          console.error = consoleLog
-        }
+        const callback = sinon.stub()
+        const error = sinon.stub()
+        func.handle.callback = callback
+        func.handle.impl.handleUnhandledRejection(new Error('tag'), error)
+        expect(error).to.have.been.calledOnce
+        expect(callback).to.have.been.calledOnce
       })
     })
     describe('#handleTimeout', () => {
       it('prints to the console and calls the callback', () => {
-        const consoleLog = console.error
-        let logCalled = false
-        console.error = () => { logCalled = true }
-        try {
-          let callbackCalled = false
-          func.handle.callback = () => { callbackCalled = true }
-          func.handle.impl.handleTimeout()
-          expect(logCalled).to.be.true
-          expect(callbackCalled).to.be.true
-        } finally {
-          console.error = consoleLog
-        }
+        const callback = sinon.stub()
+        const error = sinon.stub()
+        func.handle.callback = callback
+        func.handle.impl.handleTimeout(error)
+        expect(error).to.have.been.calledOnce
+        expect(callback).to.have.been.calledOnce
       })
       it('only calls the handler once despite repeated calls', () => {
         const callback = sinon.stub()
+        const error = sinon.stub()
         func.handle.callback = callback
-        func.handle.impl.handleTimeout()
-        func.handle.impl.handleTimeout()
+        func.handle.impl.handleTimeout(error)
+        func.handle.impl.handleTimeout(error)
         expect(callback).to.have.been.calledOnce
       })
     })
@@ -79,9 +68,9 @@ describe('./lib/lambda/funcHandle.js', () => {
         const handler = func.handle(() => BbPromise.resolve())
         return new Promise((resolve, reject) => {
           const callback = (err, result) =>
-            err ? reject(err) : resolve(result)
+            (err ? reject(err) : resolve(result))
           handler({}, context, callback)
-            .then(result => {
+            .then(() => {
               expect(func.handle.context).to.equal(context)
               expect(func.handle.callback).to.equal(callback)
             })
@@ -95,7 +84,7 @@ describe('./lib/lambda/funcHandle.js', () => {
         })
         return new Promise((resolve, reject) => {
           handler(event, context, (err, result) =>
-            err ? reject(err) : resolve(result))
+            (err ? reject(err) : resolve(result)))
         })
       })
       it('reports the resolved value', () => {
@@ -105,43 +94,44 @@ describe('./lib/lambda/funcHandle.js', () => {
           expect(res).to.equal(value)
         return handler({}, context, callback)
       })
-      it('handles exceptions from the task handler and reports an error', (done) => {
+      it('handles exceptions from the task handler and reports an error', () => {
         const handler = func.handle(() => BbPromise.resolve())
-        const callback = (err, res) => {
+        const callback = (err, res) =>
           expect(res).to.have.string('Error validating event: ')
-          done()
-        }
-        handler({ _split: { maxChunkDurationInSeconds: 'not a number' } }, context, callback)
+        return handler(
+          { _split: { maxChunkDurationInSeconds: 'not a number' } },
+          context,
+          callback,
+          undefined,
+          () => {})
       })
-      it('handles exceptions thrown within the task handler promise chain, reporting an error', (done) => {
+      it('handles exceptions thrown within the task handler promise chain, reporting an error', () => {
         const handler = func.handle(() => BbPromise.resolve().then(() => { throw new Error('rejected') }))
-        const callback = (err, res) => {
+        const callback = (err, res) =>
           expect(res).to.have.string('Error executing task: ')
-          done()
-        }
-        handler({}, context, callback)
+        return handler({}, context, callback, undefined, () => {})
       })
-      it('handles promise rejections within the task handler promise chain, reporting an error', (done) => {
+      it('handles promise rejections within the task handler promise chain, reporting an error', () => {
         const handler = func.handle(() => BbPromise.reject(new Error('rejected')))
-        const callback = (err, res) => {
+        const callback = (err, res) =>
           expect(res).to.have.string('Error executing task: ')
-          done()
-        }
-        handler({}, context, callback)
+        return handler({}, context, callback, undefined, () => {})
       })
-      it('times out prior to given limits', (done) => {
+      it('times out prior to given limits', () => {
         func.def.MAX_TIMEOUT_BUFFER_IN_MILLISECONDS = 1
+        // DANGER: removing this line fails the test (side effects):
         timeoutInMs = 10
-        let promise
-        const handler = func.handle(() => {
-          promise = new BbPromise(resolve => setTimeout(resolve, timeoutInMs * 2))
-          return promise
-        })
-        const callback = (err, res) => {
-          expect(res).to.have.string('Error: function timeout')
-          promise.then(done)
+        const handler = func.handle(() =>
+          new Promise(resolve => setTimeout(resolve, timeoutInMs * 2)))
+        const handleTimeout = () => {
+          handleTimeout.calls = (handleTimeout.calls || 0) + 1
         }
-        handler({}, context, callback)
+        const mergeIf = input => Promise.resolve(input)
+        return new Promise((resolve, reject) => {
+          const callback = (err, res) => (err ? reject(err) : resolve(res))
+          handler({}, context, callback, mergeIf, undefined, handleTimeout)
+        })
+          .then(() => assert.strictEqual(handleTimeout.calls, 1))
       })
       it('merges objects with a root merge attribute', (done) => {
         const input = {
@@ -168,7 +158,8 @@ describe('./lib/lambda/funcHandle.js', () => {
             baz: '2',
           },
         })
-        const mergeIf = input => func.handle.impl.mergeIf(input, readScript)
+        const mergeIf = mergeInput =>
+          func.handle.impl.mergeIf(mergeInput, readScript)
         handler(input, context, () => { done() }, mergeIf)
       })
       describe('getScriptPath', () => {
@@ -190,7 +181,7 @@ describe('./lib/lambda/funcHandle.js', () => {
             '/foo/bar'))
         it('should succeed for relative local path', () =>
           assert.strictEqual(
-            getScriptPath('bar', (p) => `/foo/${p}`, '/foo'),
+            getScriptPath('bar', p => `/foo/${p}`, '/foo'),
             '/foo/bar'))
       })
       describe('readScript', () => {
@@ -198,56 +189,41 @@ describe('./lib/lambda/funcHandle.js', () => {
           readScript,
           readScriptError,
         } = func.handle.impl
-        const mockLog = () => {
-          const log = (...args) => log.calls.push(args)
-          log.calls = []
-          return log
-        }
-        const mockReadFile = (err, data) => {
-          const readFile = (...args) => {
-            readFile.calls.push(args)
-            args[args.length - 1](err, data)
-          }
-          readFile.calls = []
-          return readFile
-        }
+        const mockReadFile = (err, data) =>
+          (...args) => args[args.length - 1](err, data)
         it('should get the script path before reading', () => {
-          const getScriptPath = path => getScriptPath.path = path
+          const getScriptPath = sinon.stub().callsFake(p => p)
           const readFile = mockReadFile(undefined, 'bar')
-          return readScript('foo', readFile, mockLog(), getScriptPath)
-            .then(() => assert.strictEqual('foo', getScriptPath.path))
+          return readScript('foo', readFile, sinon.stub(), getScriptPath)
+            .then(() => getScriptPath.calledWithExactly('foo'))
         })
         it('should log error with a bad script path', () => {
           const readFile = mockReadFile(undefined, 'bar')
-          const log = mockLog()
+          const log = sinon.stub()
           return readScript('../foo', readFile, log)
             .catch(err => err)
             .then(err =>
-              assert.deepStrictEqual(
-                log.calls,
-                [[readScriptError, '../foo', err.stack]]))
+              log.calledWithExactly(readScriptError, '../foo', err.stack))
         })
         it('should log error with a failed read', () => {
           const readFile = mockReadFile(new Error('bar'))
-          const log = mockLog()
+          const log = sinon.stub()
           return readScript('../foo', readFile, log)
             .catch(err => err)
             .then(err =>
-              assert.deepStrictEqual(
-                log.calls,
-                [[readScriptError, '../foo', err.stack]]))
+              log.calledWithExactly(readScriptError, '../foo', err.stack))
         })
         it('should parse yml', () => {
           const readFile = mockReadFile(undefined, 'bar: baz')
-          const log = mockLog()
+          const log = sinon.stub()
           return readScript('foo', readFile, log, p => p)
-            .then(data => assert.deepStrictEqual(data,{bar: 'baz'}))
+            .then(data => assert.deepStrictEqual(data, { bar: 'baz' }))
         })
         it('should parse json', () => {
           const readFile = mockReadFile(undefined, '{"bar": "baz"}')
-          const log = mockLog()
+          const log = sinon.stub()
           return readScript('foo', readFile, log, p => p)
-            .then(data => assert.deepStrictEqual(data,{bar: 'baz'}))
+            .then(data => assert.deepStrictEqual(data, { bar: 'baz' }))
         })
       })
     })
