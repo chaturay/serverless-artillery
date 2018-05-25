@@ -43,7 +43,7 @@ describe('./lib/lambda/funcValid.js', () => {
           expect(() => func.valid(script)).to.throw(func.def.FunctionError)
         })
         const settings = [
-          { name: 'maxChunkDurationInSeconds', max: func.def.MAX_CHUNK_DURATION_IN_SECONDS },
+          { name: 'maxChunkDurationInSeconds', max: func.def.MAX_CHUNK_DURATION_IN_SECONDS, min: func.def.MIN_CHUNK_DURATION_IN_SECONDS },
           { name: 'maxScriptDurationInSeconds', max: func.def.MAX_SCRIPT_DURATION_IN_SECONDS },
           { name: 'maxChunkRequestsPerSecond', max: func.def.MAX_CHUNK_REQUESTS_PER_SECOND },
           { name: 'maxScriptRequestsPerSecond', max: func.def.MAX_SCRIPT_REQUESTS_PER_SECOND },
@@ -63,6 +63,12 @@ describe('./lib/lambda/funcValid.js', () => {
               script._split[setting.name] = setting.max + 1
               expect(() => func.valid(script)).to.throw(func.def.FunctionError)
             })
+            if (setting.min) {
+              it(`rejects values less than ${setting.min}`, () => {
+                script._split[setting.name] = setting.min - 1
+                expect(() => func.valid(script)).to.throw(func.def.FunctionError)
+              })
+            }
           })
         })
       })
