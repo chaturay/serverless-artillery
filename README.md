@@ -311,8 +311,7 @@ The following controls are available in the default deployed function.  That sai
 {
   _split: {
     maxScriptDurationInSeconds: 86400,  # Default listed.  Hard-coded max is 518400
-    maxChunkDurationInSeconds: 240,     # Default listed.  Hard-coded max is 285
-                                                           Hard-coded min is 15
+    maxChunkDurationInSeconds: 240,     # Default listed.  Hard-coded max is 285, min is 15
     maxScriptRequestsPerSecond: 5000,   # Default listed.  Hard-coded max is 50000
     maxChunkRequestsPerSecond: 25,      # Default listed.  Hard-coded max is 500
     timeBufferInMilliseconds: 15000,    # Default listed.  Hard-coded max is 30000
