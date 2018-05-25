@@ -264,7 +264,7 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
         }
         const res = slsart.impl.scriptConstraints(script)
         expect(res.allowance).to.equal(118) // 120 - 2
-        expect(res.required).to.equal(243) // 60 + 120 + 60 + 3
+        expect(res.required).to.equal(258) // TODO: 60 + 120 + 60 + 3 + 15
       })
       it('adjusts to an decreased http timeout',
         replaceImpl(
@@ -279,11 +279,11 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
       )
       it('adjusts to an increased http timeout that is not above the lambda chunk maximum',
         replaceImpl(
-          180000, // 180 s
+          100000, // TODO: 100 s
           () => BbPromise.resolve()
             .then(() => {
               const res = slsart.impl.scriptConstraints(script)
-              expect(res.allowance).to.equal(178) // 180 - 2
+              expect(res.allowance).to.equal(98) // 100 - 2
               expect(res.required).to.equal(13) // 10 + 3
             }) // eslint-disable-line comma-dangle
         ) // eslint-disable-line comma-dangle
@@ -294,7 +294,7 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
           () => BbPromise.resolve()
             .then(() => {
               const res = slsart.impl.scriptConstraints(script)
-              expect(res.allowance).to.equal(238) // 240 - 2
+              expect(res.allowance).to.equal(118) // TODO: 120 - 2
               expect(res.required).to.equal(13) // 10 + 3
             }) // eslint-disable-line comma-dangle
         ) // eslint-disable-line comma-dangle
