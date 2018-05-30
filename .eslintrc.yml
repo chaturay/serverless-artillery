@@ -1,6 +1,8 @@
 root: true
 extends: airbnb
 rules:
+  # Note: this is to prevent compile errors for Node < 8.x. When Node 6 is
+  #   deprecated, this comma-dangle rule exception can be removed.
   comma-dangle:
     - error
     - arrays: always-multiline

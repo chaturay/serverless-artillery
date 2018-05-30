@@ -13,27 +13,6 @@ const { expect, assert } = chai
 const func = require(path.join('..', '..', '..', 'lib', 'lambda', 'func.js'))
 
 describe('./lib/lambda/funcHandle.js', () => {
-  const maxTimeoutBufferInMs = func.def.MAX_TIMEOUT_BUFFER_IN_MILLISECONDS
-  let timeoutInMs
-  const context = {
-    getRemainingTimeInMillis: () => timeoutInMs,
-  }
-  beforeEach(() => {
-    timeoutInMs = 300 * 1000
-    func.def.MAX_TIMEOUT_BUFFER_IN_MILLISECONDS = maxTimeoutBufferInMs
-    func.handle.done = false
-  })
-  afterEach(() => {
-    if ('callback' in func.handle) {
-      delete func.handle.callback
-    }
-    if ('context' in func.handle) {
-      delete func.handle.context
-    }
-    if ('done' in func.handle) {
-      delete func.handle.done
-    }
-  })
   describe(':impl', () => {
     describe('#handleUnhandledRejection', () => {
       it('prints to the console and calls the callback', () => {
@@ -54,7 +33,119 @@ describe('./lib/lambda/funcHandle.js', () => {
       })
     })
     describe('#lambdaEntryPoint', () => {
-      // todo
+      const { lambdaEntryPoint } = func.handle.impl
+      it('should capture an unhandled rejection', () => {
+        const handler = sinon.stub().returns(Promise.resolve())
+        const unhandledException = new Error('reasons')
+        const context = {
+          getRemainingTimeInMillis: () => 60000
+        }
+        setTimeout(() => Promise.reject(unhandledException), 20)
+        return new Promise((resolve, reject) => {
+          const handleUnhandledRejection = sinon.stub().callsFake(resolveTask =>
+            (ex) => {
+              try {
+                assert.strictEqual(ex, unhandledException)
+                resolveTask()
+                resolve()
+              } catch (err) {
+                reject(err)
+              }
+            })
+          const entry = lambdaEntryPoint({ handleUnhandledRejection, handler })()
+          entry({}, context, sinon.stub())
+        })
+      })
+      it('should time out', () => {
+        const handleUnhandledRejection = func.handle.impl.handleUnhandledRejection
+        const handler = sinon.stub()
+          .returns(new Promise(resolve => setTimeout(resolve, 20)))
+        const handleTimeout = sinon.stub().callsFake(resolve =>
+          resolve('reasons'))
+        const context = {
+          getRemainingTimeInMillis: () => 20
+        }
+        return new Promise((resolve, reject) => {
+          const entry = lambdaEntryPoint(
+            { handleUnhandledRejection, handleTimeout, handler },
+            10
+          )()
+          const callback = (err, result) => err ? reject(err) : resolve(result)
+          entry({}, context, callback)
+        })
+          .then(result => assert.strictEqual(result, 'reasons'))
+      })
+      it('should invoke the handler', () => {
+        const { handleUnhandledRejection, handleTimeout } = func.handle.impl
+        const answer = {}
+        const handler = sinon.stub().returns(Promise.resolve(answer))
+        const context = {
+          getRemainingTimeInMillis: () => 60000
+        }
+        const taskHandler = () => {}
+        const input = {}
+        return new Promise((resolve, reject) => {
+          const entry = lambdaEntryPoint(
+            { handleUnhandledRejection, handleTimeout, handler }
+          )(taskHandler)
+          const callback = (err, result) => err ? reject(err) : resolve(result)
+          entry(input, context, callback)
+        })
+          .then(result => {
+            assert.strictEqual(result, answer)
+            assert.isOk(handler.calledWithExactly(taskHandler, input))
+          })
+      })
+      it('should return a message on handler error', () => {
+        const { handleUnhandledRejection, handleTimeout } = func.handle.impl
+        const handler = sinon.stub()
+          .returns(Promise.reject(new Error('reasons')))
+        const context = {
+          getRemainingTimeInMillis: () => 60000
+        }
+        const input = {}
+        return new Promise((resolve, reject) => {
+          const entry = lambdaEntryPoint(
+            { handleUnhandledRejection, handleTimeout, handler }
+          )()
+          const callback = (err, result) => err ? reject(err) : resolve(result)
+          entry(input, context, callback)
+        })
+          .then(result =>
+            assert.strictEqual(result, 'Error executing handler: reasons'))
+      })
+    })
+    describe('#mergeIf', () => {
+      const mergeIf = func.handle.impl.mergeIf
+      it('should read the designated script', () => {
+        const readScript = sinon.stub().returns(Promise.resolve({}))
+        return mergeIf({ '>>': 'foo' }, readScript)
+          .then(() => assert.isOk(readScript.calledWithExactly('foo')))
+      })
+      it('should merge objects with a root merge attribute', () => {
+        const input = {
+          '>>': './lib/lambda/foo',
+          mode: 'mon',
+          foo: {
+            bar: '3',
+          },
+        }
+        const readScript = sinon.stub().returns(Promise.resolve({
+          foo: {
+            bar: '1',
+            baz: '2',
+          },
+        }))
+        const expected = {
+          foo: {
+            bar: '3',
+            baz: '2',
+          },
+          mode: 'mon',
+        }
+        return mergeIf(input, readScript)
+          .then(event => assert.deepStrictEqual(event, expected))
+      })
     })
     describe('#handler', () => {
       const handler = func.handle.impl.handler
@@ -84,10 +175,8 @@ describe('./lib/lambda/funcHandle.js', () => {
       })
     })
     describe('#getScriptPath', () => {
-      const {
-        getScriptPath,
-        localPathError,
-      } = func.handle.impl
+      const { getScriptPath } = func.handle.impl
+      const { MONITORING_SCRIPT_PATH_ERROR: localPathError } = func.def
       it('should fail for non-local absolute path', () =>
         assert.throws(
           () => getScriptPath('/foo', undefined, '/bar'),
@@ -106,10 +195,8 @@ describe('./lib/lambda/funcHandle.js', () => {
           '/foo/bar'))
     })
     describe('#readScript', () => {
-      const {
-        readScript,
-        readScriptError,
-      } = func.handle.impl
+      const { readScript } = func.handle.impl
+      const { MONITORING_SCRIPT_READ_ERROR: readScriptError } = func.def
       const mockReadFile = (err, data) =>
         (...args) => args[args.length - 1](err, data)
       it('should get the script path before reading', () => {
