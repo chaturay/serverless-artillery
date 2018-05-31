@@ -206,7 +206,7 @@ describe('./lib/lambda/funcHandle.js', () => {
       )
     })
     describe('#readScript', () => {
-      const { readScript, readScriptError } = func.handle.impl
+      const { readScript } = func.handle.impl
       const getScriptPath = sinon.stub().callsFake(p => Promise.resolve(p))
       it('should get the script path before reading', () => {
         const readFile = sinon.stub().returns(Promise.resolve('bar'))
@@ -219,7 +219,12 @@ describe('./lib/lambda/funcHandle.js', () => {
         return readScript('../foo', readFile, log)
           .catch(err => err)
           .then(err =>
-            log.calledWithExactly(readScriptError, '../foo', err.stack))
+            log.calledWithExactly(
+              'Failed to read script.',
+              '../foo',
+              err.stack
+            )
+          )
       })
       it('should log error with a failed read', () => {
         const readFile = sinon.stub()
@@ -228,7 +233,12 @@ describe('./lib/lambda/funcHandle.js', () => {
         return readScript('../foo', readFile, log)
           .catch(err => err)
           .then(err =>
-            log.calledWithExactly(readScriptError, '../foo', err.stack))
+            log.calledWithExactly(
+              'Failed to read script.',
+              '../foo',
+              err.stack
+            )
+          )
       })
       it('should parse yml', () => {
         const readFile = sinon.stub().returns(Promise.resolve('bar: baz'))
