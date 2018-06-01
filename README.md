@@ -2,16 +2,13 @@
 
 [//]: # (Thanks to https://www.divio.com/en/blog/documentation/)
 
-Instant, cheap, and easy system validation at scale ([`serverless`](https://serverless.com) + [`artillery`](https://artillery.io) = `serverless-artillery` (a.k.a. `slsart`, a.k.a. **orbital lasers!**).
+Combine [`serverless`](https://serverless.com) with [`artillery`](https://artillery.io) and you get `serverless-artillery` (a.k.a. `slsart`) for instant, cheap, and easy system validation at scale.
 
 TL;DR:
-* Performance: I measure system behavior under load, cackling while I add zeros or reviewing my CI/CD process' metric history
-* Acceptance: I validate my CI/CD deployment with synthetic traffic to fail the build in cases of error
-* Monitoring: I periodically sample system behavior with synthetic traffic to monitor system health
-
-We were motivated to create this project in order to facilitate moving performance testing earlier and more frequently into our CI/CD pipelines such that the question wasn't '`whether...`' but '`why wouldn't...`' '`...you automatically (acceptance and) perf test your system every time you check in?`'.
-
-With acceptance testing in pocket we asked, '`why wouldn't you schedule that to sample and thereby monitor your service?`'.  So we added monitoring mode.
+From a single test script and without deploying or maintaining any servers or infrastructure, you get:
+* Performance Mode: measure system behavior under load, instantaneously and to arbitrarily large levels of load
+* Acceptance Mode: validate your CI/CD deployment with synthetic traffic and fail or gate the build in cases of error
+* Monitoring Mode: regularly validate system behavior and health with small bursts of synthetic traffic
 
 1. [Installation](#installation)
 1. [Quick Start & Finish](#quick-start--finish)
@@ -29,20 +26,29 @@ With acceptance testing in pocket we asked, '`why wouldn't you schedule that to 
 1. [Command Reference](#detailed-usage)
 1. [External References](#external-references)
 
-## Installation
+### There's a workshop for that
 
-We assume you have node.js (v4 or better) installed.  Likewise you should have the serverless framework (v1.0+) either installed globally or available in the local `node_modules`.
+We've created a complete workshop detailing end-to-end usage of serverless-artillery.  Check out our conference-style [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for step by step lessons on how to set your system up for successful deployment, invocation, and removal.  If you're not in the mood for a workshop, or just want the facts, read on!
+
+### Installation
+
+Requires node.js (v4 or better) installed and the serverless framework (v1.0+) either installed globally or available in the local `node_modules`.
 
 ```
+npm install -g serverless
 npm install -g serverless-artillery
 ```
 
-## Quick Start & Finish
+### Permissions and proxy settings
+
+Depending on the AWS account environment you're working in, you may need to define `AWS_PROFILE` to declare the AWS credentials to use and possibly `HTTP_PROXY` in order to escape your corporate proxy.  See the [Serverless Framework docs](https://serverless.com/framework/docs/) or the [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for details of how to set your system up for successful deployment, invocation, and removal.
+
+### Quick start smoke test
 
 ```
-$ slsart deploy   // and then
-$ slsart invoke   // repeat as desired, before...
-$ slsart remove
+$ slsart deploy   // deploys serverless artillery with a simple default script
+$ slsart invoke   // runs serverless-artillery using this script, creating traffic against the sample endpoint
+$ slsart remove   // halts serverless-artillery and removes the deployed lambda from your account
 ```
 
 ### Deeper Dive
@@ -62,29 +68,33 @@ $ slsart invoke
 $ slsart remove
 ```
 
-Note that you may need to define `AWS_PROFILE` to declare the AWS credentials to use and perhaps `HTTP_PROXY` in order to escape your corporate proxy.  See the [Serverless Framework docs](https://serverless.com/framework/docs/) or the [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for details of how to set your system up for successful deployment, invocation, and removal.
+### Common use cases
 
-### More advanced use cases
-
-Use arbitrary script files
+Use your own test script files:
 
 `$ slsart -p /my/path/to/my.other.script.yml`
 
-Generate a customizable script on the CLI (hit `https://your.endpoint.com` with `10` requests per second, scaling up to `25` requests per second over `60` seconds)
+You can quickly generate a customizable test script from the command line.  In this example, you want to create a test script that will hit `https://example.com` with `10` requests per second, scaling up to `25` requests per second over `60` seconds:
 
-`$ slsart script -e https://your.endpoint.com -d 60 -r 10 -t 25`
+`$ slsart script -e https://example.com -d 60 -r 10 -t 25`
 
-Generate a local copy of the function that can be edited and redeployed with your changed settings.  This enables more advanced configurations of the function to send [load against VPC hosted services](https://serverless.com/framework/docs/providers/aws/guide/functions/#vpc-configuration), [use CSV files to specify variables in your URLs](https://artillery.io/docs/script-reference.html#Payloads) (hint: put your `csv` in the same directory as your `serverless.yml` and redeploy), or other non-default use cases.  Similarly, you'll want to do this if you need to alter hard-coded limits.  See https://docs.serverless.com for function configuration related documentation.  See https://artillery.io/docs for script configuration related documentation.
+### Related helpful/necessary tools and plugins
+
+* [artillery-plugin-aws-sigv4](https://github.com/Nordstrom/artillery-plugin-aws-sigv4) for testing against an authenticated AWS API Gateway endpoint
+* [artillery-plugin-influxdb](https://github.com/Nordstrom/artillery-plugin-influxdb) to record test results to InfluxDB
+* [artillery-plugin-cloudwatch](https://github.com/Nordstrom/artillery-plugin-cloudwatch) to record test results to AWS CloudWatch
+* [artillery-plugin-datadog](https://www.npmjs.com/package/artillery-plugin-datadog) to record test results to DataDog
+* [serverless-attach-managed-policy](https://www.npmjs.com/package/serverless-attach-managed-policy) if you have automatic IAM role modification in your corporate/shared AWS account 
+
+### Advanced customization use cases
+
+If you want to make even more customizations to how serverless-artillery works, you can generate a local copy of the serverless function code that can be edited and redeployed with your changed settings.  This enables more advanced configurations of the function to send [load against VPC hosted services](https://serverless.com/framework/docs/providers/aws/guide/functions/#vpc-configuration), [use CSV files to specify variables in your URLs](https://artillery.io/docs/script-reference.html#Payloads) (hint: put your `csv` in the same directory as your `serverless.yml` and redeploy), or other non-default use cases.  Similarly, you'll want to do this if you need to alter hard-coded limits.  See https://docs.serverless.com for function configuration related documentation.  See https://artillery.io/docs for script configuration related documentation.
 
 ```
 $ slsart configure
 $ nano serverless.yml
 $ nano handler.js
 ```
-
-### Much deeper dive
-
-We have created a tutorial course available at the companion repository, [serverless-artillery-workshop](https://github.com/Nordstrom/serverless-artillery-workshop).
 
 ## So what is it?
 
@@ -94,38 +104,14 @@ Artillery is itself an accessible load generation tool that provides a simple bu
 
 `serverless-artillery` allows your script to specify an amount of load far exceeding the capacity of a single server to execute.  It will break that script into chunks sized for a single function and distribute the chunks for execution.  Since this is done using a FaaS provider, the ephemeral infrastructure used to execute your load disappears as soon as your load tests are complete.
 
-If you would like a more detailed walk through of motivations, how it works, step-by-step setup, and usage, please consider reviewing the [associated workshop](https://github.com/Nordstrom/serverless-artillery-workshop) (presented at ServerlessConf London in 2016)
+## Viewing the results of your test script
 
-* Load testing an ApiGateway endpoint?  You may want to use the [artillery-plugin-aws-sigv4](https://www.npmjs.com/package/artillery-plugin-aws-sigv4).
-* Want to record your results in DataDog?  You may want to use [artillery-plugin-datadog](https://www.npmjs.com/package/artillery-plugin-datadog).
-* Want to record your results in InfluxDb?  You may want to use [artillery-plugin-influxdb](https://www.npmjs.com/package/artillery-plugin-influxdb).
-* Want to record your results without setting up a database? You may want to use [artillery-plugin-cloudwatch](https://www.npmjs.com/package/artillery-plugin-cloudwatch).
-* Have automatic IAM role modification?  You may want to use [serverless-attach-managed-policy](https://www.npmjs.com/package/serverless-attach-managed-policy).
+* Providing a data sink.  The volume of load can be such that it cannot pass back to the original requestor.  If the specified load is no more than a single function can provide, the response will have your results.  Otherwise, you are responsible for sending them (usually via a plugin) to a data store for later review and/or analysis.  See the plugins listed above in "Related helpful/necessary tools and plugins"
 
-## Missing Pieces
+### Test payload files
 
-Here are some things you will have to think about or solve for:
-
-* Providing a data sink.  The volume of load can be such that it cannot pass back to the original requestor.  If the specified load is no more than a single function can provide, the response will have your results.  Otherwise, you are responsible for sending them (usually via a plugin) to a data store for later review and/or analysis.
-* Distributing data for your tests.  Currently if you need to use IDs (or the like) from a payload file then you must deploy that file in your function.  Another option is to write some custom code (i.e. write a custom processor or modify the `serverless-artillery` codebase) that will retrieve the data for you prior to the execution of any load.  Either way, this isn't simple and paved for you.
-
-Apologies... we're still working on these!
-
-## Generalization
-
-Wait.  There's a general pattern here of distributed workload execution!
-
-Yes!
-
-We know!
-
-We're excited too!
-
-We've already begun writing a plugin-driven generalization of this pattern.  You will be able to dynamically distribute and execute any task for which a declaration can be provided which can be split into concurrently executed chunks.
-
-Watch for that effort both here and at https://github.com/Nordstrom/serverless-star
-
-We expect to retro-fit this project with the serverless-star project as its first use case and proof-of-not-a-painful-waste-of-our-time-ness™.  In some regards, we have already begun.
+* Distributing data for your tests.  Currently if you need to use IDs (or the like) from a payload file then you must deploy that file in your function.  
+* If your payload file is too large, you may need to write some custom code (i.e. write a custom processor or modify the `serverless-artillery` codebase) that will retrieve the data from S3 for you prior to the execution of any load.
 
 ## Script Customization
 
@@ -535,3 +521,29 @@ Options:
 2. [serverless.com](https://docs.serverless.com/framework/docs/) for documentation about how to create a custom function configuration
 3. [serverless-artillery](https://github.com/Nordstrom/serverless-artillery) README for documentation on the use of this tool
 4. [serverless-star](https://github.com/Nordstrom/serverless-star) Next generation implementation and generalization of the arbitrarily wide work distribution capability
+
+## Background and motivation
+
+We were motivated to create this project in order to facilitate moving performance testing earlier and more frequently into our CI/CD pipelines such that the question wasn't '`whether...`' but '`why wouldn't...`' '`...you automatically (acceptance and) perf test your system every time you check in?`'.
+
+With acceptance testing in pocket we asked, '`why wouldn't you schedule that to sample and thereby monitor your service?`'.  So we added monitoring mode.
+
+## The future of serverless-artillery
+
+Wait.  There's a general pattern here of distributed load execution!
+
+Yes!
+
+We know!
+
+We're excited too!
+
+We've already begun writing a plugin-driven generalization of this pattern.  Any task that a declaration can be provided for which itself can be executed in parallel and broken into parallelizable chunks can be driven using this capabiltiy.
+
+Watch for that effort here: https://github.com/Nordstrom/serverless-star
+
+We expect to retro-fit this project with the serverless-star project as its first use case and proof-of-not-a-painful-waste-of-our-time-ness™.
+
+## If you've read this far
+
+We're happy to buy you a drink at any conference we both attend.  Hit us up!
