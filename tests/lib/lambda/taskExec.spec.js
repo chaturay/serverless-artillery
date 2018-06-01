@@ -19,6 +19,7 @@ let script
 
 describe('./lib/lambda/taskExec.js', () => {
   describe('#execLoad', () => {
+    const scriptPath = path.resolve(os.tmpdir(), 'script.json')
     const outputPath = path.resolve(os.tmpdir(), 'output.json')
 
     const runnerFailIfCalled = () => {
@@ -26,13 +27,14 @@ describe('./lib/lambda/taskExec.js', () => {
     }
 
     const runnerMock = (expectedScript, actualResults, exitCode) =>
-      (aScript) => {
-        expect(aScript).to.deep.equal(expectedScript)
+      (aScriptPath) => {
+        expect(fs.readFileSync(aScriptPath, { encoding: 'utf8' })).to.equal(expectedScript)
         fs.writeFileSync(outputPath, JSON.stringify(actualResults))
         process.exit(exitCode)
       }
 
     afterEach(() => {
+      if (fs.existsSync(scriptPath)) fs.unlinkSync(scriptPath)
       if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath)
     })
 
@@ -46,10 +48,11 @@ describe('./lib/lambda/taskExec.js', () => {
       script = { _trace: true, _simulation: false }
       results = { Payload: '{ "errors": 0 }' }
 
-      return taskExec(runnerMock(script, results, 0))(1, script)
+      return taskExec(runnerMock(JSON.stringify(script), results, 0))(1, script)
         .should.eventually.eql(results)
         .then(() => {
           // Verify files have been cleaned up
+          expect(fs.existsSync(scriptPath)).to.be.false
           expect(fs.existsSync(outputPath)).to.be.false
         })
     })
@@ -58,10 +61,11 @@ describe('./lib/lambda/taskExec.js', () => {
       script = { _trace: true, _simulation: false }
       results = { Payload: '{ "errors": 0 }' }
 
-      return taskExec(runnerMock(script, results, 1))(1, script)
+      return taskExec(runnerMock(JSON.stringify(script), results, 1))(1, script)
         .should.be.rejectedWith('Artillery exited with non-zero code: 1')
         .then(() => {
           // Files will remain in this case. S/B helpful for troubleshooting.
+          expect(fs.existsSync(scriptPath)).to.be.true
           expect(fs.existsSync(outputPath)).to.be.true
         })
     })
