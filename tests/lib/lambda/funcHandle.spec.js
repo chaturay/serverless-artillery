@@ -121,10 +121,10 @@ describe('./lib/lambda/funcHandle.js', () => {
     })
     describe('#mergeIf', () => {
       const mergeIf = func.handle.impl.mergeIf
-      it('should read the designated script', () => {
-        const readScript = sinon.stub().returns(Promise.resolve({}))
-        return mergeIf({ '>>': 'foo' }, readScript)
-          .then(() => assert.isOk(readScript.calledWithExactly('foo')))
+      it('should read the designated merge file', () => {
+        const readMergeFile = sinon.stub().returns(Promise.resolve({}))
+        return mergeIf({ '>>': 'foo' }, readMergeFile)
+          .then(() => assert.isOk(readMergeFile.calledWithExactly('foo')))
       })
       it('should merge objects with a root merge attribute', () => {
         const input = {
@@ -134,7 +134,7 @@ describe('./lib/lambda/funcHandle.js', () => {
             bar: '3',
           },
         }
-        const readScript = sinon.stub().returns(Promise.resolve({
+        const readMergeFile = sinon.stub().returns(Promise.resolve({
           foo: {
             bar: '1',
             baz: '2',
@@ -147,7 +147,7 @@ describe('./lib/lambda/funcHandle.js', () => {
           },
           mode: 'mon',
         }
-        return mergeIf(input, readScript)
+        return mergeIf(input, readMergeFile)
           .then(event => assert.deepStrictEqual(event, expected))
       })
     })
@@ -178,49 +178,49 @@ describe('./lib/lambda/funcHandle.js', () => {
           .then(result => assert.strictEqual(result, expected))
       })
     })
-    describe('#getScriptPath', () => {
-      const { getScriptPath } = func.handle.impl
+    describe('#getMergeFilePath', () => {
+      const { getMergeFilePath } = func.handle.impl
       it('should fail for non-local absolute path', () =>
         assert.isRejected(
-          getScriptPath('/foo', undefined, '/bar'),
-          'Input script /foo is not a local file path.'
+          getMergeFilePath('/foo', undefined, '/bar'),
+          'Merge file /foo is not a local file path.'
         )
       )
       it('should fail for non-local relative path', () =>
         assert.isRejected(
-          getScriptPath('../foo', () => '/foo', '/bar'),
-          'Input script /foo is not a local file path.'
+          getMergeFilePath('../foo', () => '/foo', '/bar'),
+          'Merge file /foo is not a local file path.'
         )
       )
       it('should succeed for absolute local path', () =>
         assert.isFulfilled(
-          getScriptPath('/foo/bar', undefined, '/foo'),
+          getMergeFilePath('/foo/bar', undefined, '/foo'),
           '/foo/bar'
         )
       )
       it('should succeed for relative local path', () =>
         assert.isFulfilled(
-          getScriptPath('bar', p => `/foo/${p}`, '/foo'),
+          getMergeFilePath('bar', p => `/foo/${p}`, '/foo'),
           '/foo/bar'
         )
       )
     })
-    describe('#readScript', () => {
-      const { readScript } = func.handle.impl
-      const getScriptPath = sinon.stub().callsFake(p => Promise.resolve(p))
-      it('should get the script path before reading', () => {
+    describe('#readMergeFile', () => {
+      const { readMergeFile } = func.handle.impl
+      const getMergeFilePath = sinon.stub().callsFake(p => Promise.resolve(p))
+      it('should get the merge file path before reading', () => {
         const readFile = sinon.stub().returns(Promise.resolve('bar'))
-        return readScript('foo', readFile, sinon.stub(), getScriptPath)
-          .then(() => getScriptPath.calledWithExactly('foo'))
+        return readMergeFile('foo', readFile, sinon.stub(), getMergeFilePath)
+          .then(() => getMergeFilePath.calledWithExactly('foo'))
       })
-      it('should log error with a bad script path', () => {
+      it('should log error with a bad merge file path', () => {
         const readFile = sinon.stub().returns(Promise.resolve('bar'))
         const log = sinon.stub()
-        return readScript('../foo', readFile, log)
+        return readMergeFile('../foo', readFile, log)
           .catch(err => err)
           .then(err =>
             log.calledWithExactly(
-              'Failed to read script.',
+              'Failed to read merge file.',
               '../foo',
               err.stack
             )
@@ -230,11 +230,11 @@ describe('./lib/lambda/funcHandle.js', () => {
         const readFile = sinon.stub()
           .callsFake(() => Promise.reject(new Error('reasons')))
         const log = sinon.stub()
-        return readScript('../foo', readFile, log)
+        return readMergeFile('../foo', readFile, log)
           .catch(err => err)
           .then(err =>
             log.calledWithExactly(
-              'Failed to read script.',
+              'Failed to read merge file.',
               '../foo',
               err.stack
             )
@@ -243,13 +243,13 @@ describe('./lib/lambda/funcHandle.js', () => {
       it('should parse yml', () => {
         const readFile = sinon.stub().returns(Promise.resolve('bar: baz'))
         const log = sinon.stub()
-        return readScript('foo', readFile, log, getScriptPath)
+        return readMergeFile('foo', readFile, log, getMergeFilePath)
           .then(data => assert.deepStrictEqual(data, { bar: 'baz' }))
       })
       it('should parse json', () => {
         const readFile = sinon.stub().returns(Promise.resolve('{"bar": "baz"}'))
         const log = sinon.stub()
-        return readScript('foo', readFile, log, getScriptPath)
+        return readMergeFile('foo', readFile, log, getMergeFilePath)
           .then(data => assert.deepStrictEqual(data, { bar: 'baz' }))
       })
     })
