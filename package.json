@@ -29,7 +29,7 @@
     "scale",
     "lambda"
   ],
-  "author": "Erik Erikson, Greg Smith, Rob Gruhl, Danno Mayer, Andy Day",
+  "author": "Erik Erikson, Greg Smith, Rob Gruhl, Danno Mayer, Andy Day, Grace Lee",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/Nordstrom/serverless-artillery/issues"
