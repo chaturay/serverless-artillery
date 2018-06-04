@@ -55,18 +55,20 @@ describe('./lib/lambda/funcValid.js', () => {
               script._split[setting.name] = 'not a number'
               expect(() => func.valid(script)).to.throw(func.def.FunctionError)
             })
-            it('rejects negative & hard-coded minimum values', () => {
+            it('rejects negative values', () => {
               script._split[setting.name] = -1
               expect(() => func.valid(script)).to.throw(func.def.FunctionError)
-              if (setting.name === 'maxChunkDurationInSeconds') {
-                script._split[setting.name] = setting.min - 1
-                expect(() => func.valid(script)).to.throw(func.def.FunctionError)
-              }
             })
             it(`rejects values greater than ${setting.max}`, () => {
               script._split[setting.name] = setting.max + 1
               expect(() => func.valid(script)).to.throw(func.def.FunctionError)
             })
+            if (setting.min) {
+              it(`rejects values less than ${setting.min}`, () => {
+                script._split[setting.name] = setting.min - 1
+                expect(() => func.valid(script)).to.throw(func.def.FunctionError)
+              })
+            }
           })
         })
       })

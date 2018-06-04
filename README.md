@@ -2,7 +2,7 @@
 
 [//]: # (Thanks to https://www.divio.com/en/blog/documentation/)
 
-Combine [`serverless`](https://serverless.com) with [`artillery`](https://artillery.io) and you get `serverless-artillery` (a.k.a. `slsart`) for instant, cheap, and easy system validation at scale.
+Instant, cheap, and easy system validation at scale ([`serverless`](https://serverless.com) + [`artillery`](https://artillery.io) = `serverless-artillery` (a.k.a. `slsart`, a.k.a. **orbital lasers!**).
 
 TL;DR:
 * Performance: I measure system behavior under load, cackling while I add zeros or reviewing my CI/CD process' metric history
@@ -311,8 +311,7 @@ The following controls are available in the default deployed function.  That sai
 {
   _split: {
     maxScriptDurationInSeconds: 86400,  # Default listed.  Hard-coded max is 518400
-    maxChunkDurationInSeconds: 120,     # Default listed.  Hard-coded max is 285
-                                                           Hard-coded min is 15
+    maxChunkDurationInSeconds: 120,     # Default listed.  Hard-coded max is 285, min is 15
     maxScriptRequestsPerSecond: 5000,   # Default listed.  Hard-coded max is 50000
     maxChunkRequestsPerSecond: 25,      # Default listed.  Hard-coded max is 500
     timeBufferInMilliseconds: 15000,    # Default listed.  Hard-coded max is 30000
