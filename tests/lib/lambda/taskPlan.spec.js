@@ -1302,7 +1302,7 @@ describe('./lib/lambda/taskPlan.js', () => {
       it('correctly calculates a large ramp down', () => {
         script = { config: { phases: [{ duration: 900, arrivalRate: 200, rampTo: 1 }] } }
         expected = [
-          { config: { phases: [{ duration: 780, arrivalRate: 173, rampTo: 1 }] }, _genesis: 0, _start: 135000 }, //TODO
+          { config: { phases: [{ duration: 780, arrivalRate: 173, rampTo: 1 }] }, _genesis: 0, _start: 135000 },
           { config: { phases: [{ duration: 120, arrivalRate: 25 }] }, _genesis: 0, _start: 15000 },
           { config: { phases: [{ duration: 120, arrivalRate: 25 }] }, _genesis: 0, _start: 15000 },
           { config: { phases: [{ duration: 120, arrivalRate: 25 }] }, _genesis: 0, _start: 15000 },
@@ -1334,7 +1334,7 @@ describe('./lib/lambda/taskPlan.js', () => {
           { config: { phases: [{ duration: 120, arrivalRate: 25 }] }, _genesis: 0, _start: 255000 },
           { config: { phases: [{ duration: 120, arrivalRate: 25 }] }, _genesis: 0, _start: 255000 },
           { config: { phases: [{ duration: 120, arrivalRate: 25 }] }, _genesis: 0, _start: 255000 },
-          { config: { phases: [{ duration: 98, arrivalRate: 25 }, { duration: 22, arrivalRate: 25, rampTo: 20}] }, _genesis: 0, _start: 255000 },
+          { config: { phases: [{ duration: 98, arrivalRate: 25 }, { duration: 22, arrivalRate: 25, rampTo: 20 }] }, _genesis: 0, _start: 255000 },
           { config: { phases: [{ duration: 98, arrivalRate: 22, rampTo: 1 }, { pause: 22 }] }, _genesis: 0, _start: 255000 },
         ]
         // Split #3
@@ -1345,10 +1345,43 @@ describe('./lib/lambda/taskPlan.js', () => {
           { config: { phases: [{ duration: 120, arrivalRate: 25 }] }, _genesis: 0, _start: 375000 },
           { config: { phases: [{ duration: 120, arrivalRate: 25 }] }, _genesis: 0, _start: 375000 },
           { config: { phases: [{ duration: 120, arrivalRate: 25 }] }, _genesis: 0, _start: 375000 },
-          { config: { phases: [{ duration: 92, arrivalRate: 25 }, { duration: 28, arrivalRate: 25, rampTo: 19}] }, _genesis: 0, _start: 375000 },
+          { config: { phases: [{ duration: 92, arrivalRate: 25 }, { duration: 28, arrivalRate: 25, rampTo: 19 }] }, _genesis: 0, _start: 375000 },
           { config: { phases: [{ duration: 92, arrivalRate: 20, rampTo: 1 }, { pause: 28 }] }, _genesis: 0, _start: 375000 },
         ]
         // Split #4
+        result = task.plan.impl.planTask(result[1]._start, result[0], defaultSettings)
+        expect(result).to.be.eql(expected)
+        expected = [
+          { config: { phases: [{ duration: 300, arrivalRate: 67, rampTo: 1 }] }, _genesis: 0, _start: 615000 },
+          { config: { phases: [{ duration: 120, arrivalRate: 25 }] }, _genesis: 0, _start: 495000 },
+          { config: { phases: [{ duration: 120, arrivalRate: 25 }] }, _genesis: 0, _start: 495000 },
+          { config: { phases: [{ duration: 84, arrivalRate: 25 }, { duration: 36, arrivalRate: 25, rampTo: 17 }] }, _genesis: 0, _start: 495000 },
+          { config: { phases: [{ duration: 84, arrivalRate: 19, rampTo: 1 }, { pause: 36 }] }, _genesis: 0, _start: 495000 },
+        ]
+        // Split #5
+        result = task.plan.impl.planTask(result[1]._start, result[0], defaultSettings)
+        expect(result).to.be.eql(expected)
+        expected = [
+          { config: { phases: [{ duration: 180, arrivalRate: 41, rampTo: 1 }] }, _genesis: 0, _start: 735000 },
+          { config: { phases: [{ duration: 120, arrivalRate: 25 }] }, _genesis: 0, _start: 615000 },
+          { config: { phases: [{ duration: 78, arrivalRate: 25 }, { duration: 42, arrivalRate: 25, rampTo: 16 }] }, _genesis: 0, _start: 615000 },
+          { config: { phases: [{ duration: 78, arrivalRate: 17, rampTo: 1 }, { pause: 42 }] }, _genesis: 0, _start: 615000 },
+        ]
+        // Split #6
+        result = task.plan.impl.planTask(result[1]._start, result[0], defaultSettings)
+        expect(result).to.be.eql(expected)
+        expected = [
+          { config: { phases: [{ duration: 60, arrivalRate: 14, rampTo: 1 }] }, _genesis: 0, _start: 855000 },
+          { config: { phases: [{ duration: 71, arrivalRate: 25 }, { duration: 49, arrivalRate: 25, rampTo: 14 }] }, _genesis: 0, _start: 735000 },
+          { config: { phases: [{ duration: 71, arrivalRate: 16, rampTo: 1 }, { pause: 49 }] }, _genesis: 0, _start: 735000 },
+        ]
+        // Split #7
+        result = task.plan.impl.planTask(result[1]._start, result[0], defaultSettings)
+        expect(result).to.be.eql(expected)
+        expected = [
+          { config: { phases: [{ duration: 60, arrivalRate: 14, rampTo: 1 }] }, _genesis: 0, _start: 855000 },
+        ]
+        // Split #8
         result = task.plan.impl.planTask(result[1]._start, result[0], defaultSettings)
         expect(result).to.be.eql(expected)
       })
