@@ -202,19 +202,18 @@ $ slsart invoke -p trafficSpike.yml
 
 ### Killing a Runaway Performance Test
 
-To stop an already invoked test:
+Stop a running load test:
 ```
 $ slsart kill
 ```
 
-Kill first sets the concurrency level of the function to zero and then deletes the stack. The effect of this is to suppress any further load production though current load generation will proceed for up to 2 minutes.  You will want to wait approximately 5 minutes before redeploying to avoid load being produced again.
+Kill first sets the concurrency level of the function to zero and then deletes the stack. The effect of this is to suppress any further function invocations. Currently executing invocations will complete their load generation workload (by default, up to 2 minutes will remain). You will want to wait approximately 5 minutes before redeploying to avoid load being produced again.
 
-Behind the scenes, AWS creates a queue for lambda invocations, so if the code is deployed before 5 minutes there will be
-a chance that the previous tests will run with the deployment. This is why we recommend not deploying the code for 5 minutes after a test is killed.
+Behind the scenes, AWS creates a queue for lambda invocations. If a function is not available at the time of processing the invocation request from the queue then that message will be placed back onto the queue for further attempts. As a result, redeploying your function can allow those re-queued messages to be used to invoke your re-deployed function. In our observation based on a limited set of tests, messages will be permanently failed out of the queues after 5 minutes. That is the basis of our recommendation.
 
-The consequences of this are removal of lambda, Cloudwatch logs, and IAM role. Cloudwatch metrics will remain.
+The consequences of running `slsart kill` are removal of lambda, CloudWatch logs, and IAM role. CloudWatch metrics will remain.
 
-The default maximum duration of a script chunk is 2 minutes (maxChunkDurationInSeconds). As a result of this, on average load will not be produced after 1 minute but this could continue for up to the full 2 minutes. To lower the wait times after killing, this value can be overridden in your artillery script within the _split attribute, as shown [here](#script-splitting-customization). This value can be as low as 15 seconds and using this value causes each script chunk to run for a maximum duration of 15 seconds. Theoretically, this means that you’d only have to wait 7.5 seconds on average for tests to stop running after killing your function (in practice we have observed roughly 20 seconds lag between killing a function and termination of invocations).
+The default maximum duration of a script chunk is 2 minutes (maxChunkDurationInSeconds). As a result of this, on average load will not be produced after 1 minute but this could continue for up to the full 2 minutes. To lower the wait times after killing, this value can be overridden in your artillery script within the \_split attribute, as shown [here](#script-splitting-customization). This value can be as low as 15 seconds and using this value causes each script chunk to run for a maximum duration of 15 seconds. Theoretically, this means that you’d only have to wait 7.5 seconds on average for tests to stop running after killing your function (in practice we have observed roughly 20 seconds lag between killing a function and termination of invocations).
 
 
 ## Acceptance Mode
