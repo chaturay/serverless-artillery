@@ -200,6 +200,23 @@ Update the load spec...  Then invoke it!
 $ slsart invoke -p trafficSpike.yml
 ```
 
+### Killing a Runaway Performance Test
+
+To stop an already invoked test:
+```
+$ slsart kill
+```
+
+Kill first sets the concurrency level of the function to zero and then deletes the stack. The effect of this is to suppress any further load production though current load generation will proceed for up to 2 minutes.  You will want to wait approximately 5 minutes before redeploying to avoid load being produced again.
+
+Behind the scenes, AWS creates a queue for lambda invocations, so if the code is deployed before 5 minutes there will be
+a chance that the previous tests will run with the deployment. This is why we recommend not deploying the code for 5 minutes after a test is killed.
+
+The consequences of this are removal of lambda, Cloudwatch logs, and IAM role. Cloudwatch metrics will remain.
+
+The default maximum duration of a script chunk is 2 minutes (maxChunkDurationInSeconds). As a result of this, on average load will not be produced after 1 minute but this could continue for up to the full 2 minutes. To lower the wait times after killing, this value can be overridden in your artillery script within the _split attribute, as shown [here](#script-splitting-customization). This value can be as low as 15 seconds and using this value causes each script chunk to run for a maximum duration of 15 seconds. Theoretically, this means that you’d only have to wait 7.5 seconds on average for tests to stop running after killing your function (in practice we have observed roughly 20 seconds lag between killing a function and termination of invocations).
+
+
 ## Acceptance Mode
 
 Find defects before performance testing! Acceptance mode runs each flow in your script exactly once and reports the results.
