@@ -419,6 +419,9 @@ Commands:
              the `-a` flag will run the script in "acceptance" mode.  See
              https://serverless.com/framework/docs/providers/aws/cli-reference/invoke/
              for reference.
+  kill       Stop running load test and remove some associated resources. See
+             https://github.com/Nordstrom/serverless-artillery/#performance-mode
+             for reference.
   remove     Remove the function and the associated resources created for or by
              it.  See
              https://serverless.com/framework/docs/providers/aws/cli-reference/remove/
