@@ -3,7 +3,7 @@
   "repository": "n/a",
   "license": "Apache-2.0",
   "dependencies": {
-    "artillery": "^1.6.0-15",
+    "artillery": "git+https://github.com/Nordstrom/artillery.git#script-as-object",
     "lodash.merge": "^4.6.1",
     "lodash.omit": "^4.5.0",
     "util-promisify": "^2.1.0"
