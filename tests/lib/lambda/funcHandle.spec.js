@@ -16,17 +16,17 @@ const func = require(path.join('..', '..', '..', 'lib', 'lambda', 'func.js'))
 
 describe('./lib/lambda/funcHandle.js', () => {
   describe(':impl', () => {
-    describe('#handleUnhandledRejection', () => {
+    describe('#createUnhandledRejectionHandler', () => {
       it('should print to the console', () => {
         const callback = sinon.stub()
         const error = sinon.stub()
-        func.handle.impl.handleUnhandledRejection(callback, error)(new Error('tag'))
+        func.handle.impl.createUnhandledRejectionHandler(callback, error)(new Error('tag'))
         expect(error).to.have.been.calledOnce
       })
       it('should call the callback', () => {
         const callback = sinon.stub()
         const error = sinon.stub()
-        func.handle.impl.handleUnhandledRejection(callback, error)(new Error('tag'))
+        func.handle.impl.createUnhandledRejectionHandler(callback, error)(new Error('tag'))
         expect(callback).to.have.been.calledOnce
       })
     })
@@ -52,7 +52,7 @@ describe('./lib/lambda/funcHandle.js', () => {
         const context = { getRemainingTimeInMillis: () => 60000 }
         setTimeout(() => Promise.reject(unhandledException), 10)
         return new Promise((resolve, reject) => {
-          const handleUnhandledRejection = sinon.stub().callsFake(resolveTask =>
+          const createUnhandledRejectionHandler = sinon.stub().callsFake(resolveTask =>
             (ex) => {
               try {
                 assert.strictEqual(ex, unhandledException)
@@ -62,12 +62,12 @@ describe('./lib/lambda/funcHandle.js', () => {
                 reject(err)
               }
             })
-          const entry = lambdaEntryPoint({ handleUnhandledRejection, handler })()
+          const entry = lambdaEntryPoint({ createUnhandledRejectionHandler, handler })()
           entry({}, context, sinon.stub())
         })
       })
       it('should time out', () => {
-        const handleUnhandledRejection = func.handle.impl.handleUnhandledRejection
+        const createUnhandledRejectionHandler = func.handle.impl.createUnhandledRejectionHandler
         const handler = sinon.stub()
           .returns(new Promise(resolve => setTimeout(resolve, 20)))
         const handleTimeout = sinon.stub().callsFake(resolve =>
@@ -75,7 +75,7 @@ describe('./lib/lambda/funcHandle.js', () => {
         const context = { getRemainingTimeInMillis: () => 20 }
         return new Promise((resolve, reject) => {
           const entry = lambdaEntryPoint(
-            { handleUnhandledRejection, handleTimeout, handler },
+            { createUnhandledRejectionHandler, handleTimeout, handler },
             10
           )()
           const callback = (err, result) => { err ? reject(err) : resolve(result) }
@@ -84,7 +84,7 @@ describe('./lib/lambda/funcHandle.js', () => {
           .then(result => assert.strictEqual(result, 'reasons'))
       })
       it('should invoke the handler', () => {
-        const { handleUnhandledRejection, handleTimeout } = func.handle.impl
+        const { createUnhandledRejectionHandler, handleTimeout } = func.handle.impl
         const answer = {}
         const handler = sinon.stub().returns(Promise.resolve(answer))
         const context = { getRemainingTimeInMillis: () => 60000 }
@@ -92,7 +92,7 @@ describe('./lib/lambda/funcHandle.js', () => {
         const input = {}
         return new Promise((resolve, reject) => {
           const entry = lambdaEntryPoint(
-            { handleUnhandledRejection, handleTimeout, handler }
+            { createUnhandledRejectionHandler, handleTimeout, handler }
           )(taskHandler)
           const callback = (err, result) => { err ? reject(err) : resolve(result) }
           entry(input, context, callback)
@@ -103,14 +103,14 @@ describe('./lib/lambda/funcHandle.js', () => {
           })
       })
       it('should return a message on handler error', () => {
-        const { handleUnhandledRejection, handleTimeout } = func.handle.impl
+        const { createUnhandledRejectionHandler, handleTimeout } = func.handle.impl
         const handler = sinon.stub()
           .returns(Promise.reject(new Error('reasons')))
         const context = { getRemainingTimeInMillis: () => 60000 }
         const input = {}
         return new Promise((resolve, reject) => {
           const entry = lambdaEntryPoint(
-            { handleUnhandledRejection, handleTimeout, handler }
+            { createUnhandledRejectionHandler, handleTimeout, handler }
           )()
           const callback = (err, result) => { err ? reject(err) : resolve(result) }
           entry(input, context, callback)
@@ -180,6 +180,18 @@ describe('./lib/lambda/funcHandle.js', () => {
     })
     describe('#getMergeFilePath', () => {
       const { getMergeFilePath } = func.handle.impl
+      it('should fail for missing path', () =>
+        assert.isRejected(
+          getMergeFilePath(),
+          "'undefined' is not a valid path."
+        )
+      )
+      it('should fail for non-string path', () =>
+        assert.isRejected(
+          getMergeFilePath({ foo: 'bar' }),
+          "'object' is not a valid path."
+        )
+      )
       it('should fail for non-local absolute path', () =>
         assert.isRejected(
           getMergeFilePath('/foo', undefined, '/bar'),
