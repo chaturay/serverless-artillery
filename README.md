@@ -504,6 +504,13 @@ Unsupported Flags:
                     are using it.  Why are you trying this flag in that case?
 ```
 
+#### kill
+```
+$ slsart kill --help
+
+slsart kill
+```
+
 #### remove
 ```
 $ slsart remove --help
