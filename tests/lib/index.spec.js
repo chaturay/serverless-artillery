@@ -242,6 +242,9 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
         expect(res.required).to.equal(28) // 10 + 3 + 15
       })
       it('handles this specific user script', () => {
+        // This test was written to satisfy a specific user who was concerned about the correct treatment
+        // of their script.  As assumptions change due to changes in requirements, please use configuration
+        // to maintain the original intent of the test.
         script = {
           config: {
             phases: [
@@ -261,6 +264,9 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
               },
             ],
           },
+          _split: {
+            maxChunkDurationInSeconds: 240,
+          },
         }
         const res = slsart.impl.scriptConstraints(script)
         expect(res.allowance).to.equal(118) // 120 - 2
@@ -279,11 +285,11 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
       )
       it('adjusts to an increased http timeout that is not above the lambda chunk maximum',
         replaceImpl(
-          180000, // 180 s
+          100000, // 100 s
           () => BbPromise.resolve()
             .then(() => {
               const res = slsart.impl.scriptConstraints(script)
-              expect(res.allowance).to.equal(178) // 180 - 2
+              expect(res.allowance).to.equal(98) // 100 - 2
               expect(res.required).to.equal(13) // 10 + 3
             }) // eslint-disable-line comma-dangle
         ) // eslint-disable-line comma-dangle
@@ -294,7 +300,7 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
           () => BbPromise.resolve()
             .then(() => {
               const res = slsart.impl.scriptConstraints(script)
-              expect(res.allowance).to.equal(238) // 240 - 2
+              expect(res.allowance).to.equal(118) // 120 - 2
               expect(res.required).to.equal(13) // 10 + 3
             }) // eslint-disable-line comma-dangle
         ) // eslint-disable-line comma-dangle
