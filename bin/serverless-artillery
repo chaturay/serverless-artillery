@@ -145,7 +145,7 @@ const yargs = require('yargs')
       }
     } // eslint-disable-line comma-dangle
   )
-  .command('kill', 'Stop a currently running load test and remove the function', {})
+  .command('kill', 'Stop a currently running load test and remove the function.', {})
   .command('remove', 'Remove the function and the associated resources created for or by it.  See ' +
     'https://serverless.com/framework/docs/providers/aws/cli-reference/remove/ for reference.', {})
   .command(
