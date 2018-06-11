@@ -200,6 +200,22 @@ Update the load spec...  Then invoke it!
 $ slsart invoke -p trafficSpike.yml
 ```
 
+### Killing a Runaway Performance Test
+
+Stop a running load test:
+```
+$ slsart kill
+```
+
+Kill first sets the concurrency level of the function to zero and then deletes the stack. The effect of this is to suppress any further function invocations. Currently executing invocations will complete their load generation workload (by default, up to 2 minutes will remain). You will want to wait approximately 5 minutes before redeploying to avoid load being produced again.
+
+Behind the scenes, AWS creates a queue for lambda invocations. If a function is not available at the time of processing the invocation request from the queue then that message will be placed back onto the queue for further attempts. As a result, redeploying your function can allow those re-queued messages to be used to invoke your re-deployed function. In our observation based on a limited set of tests, messages will be permanently failed out of the queues after 5 minutes. That is the basis of our recommendation.
+
+The consequences of running `slsart kill` are removal of lambda, CloudWatch logs, and IAM role. CloudWatch metrics will remain.
+
+The default maximum duration of a script chunk is 2 minutes (maxChunkDurationInSeconds). As a result of this, on average load will not be produced after 1 minute but this could continue for up to the full 2 minutes. To lower the wait times after killing, this value can be overridden in your artillery script within the \_split attribute, as shown [here](#script-splitting-customization). This value can be as low as 15 seconds and using this value causes each script chunk to run for a maximum duration of 15 seconds. Theoretically, this means that you’d only have to wait 7.5 seconds on average for tests to stop running after killing your function (in practice we have observed roughly 20 seconds lag between killing a function and termination of invocations).
+
+
 ## Acceptance Mode
 
 Find defects before performance testing! Acceptance mode runs each flow in your script exactly once and reports the results.
@@ -311,7 +327,7 @@ The following controls are available in the default deployed function.  That sai
 {
   _split: {
     maxScriptDurationInSeconds: 86400,  # Default listed.  Hard-coded max is 518400
-    maxChunkDurationInSeconds: 240,     # Default listed.  Hard-coded max is 285, min is 15
+    maxChunkDurationInSeconds: 120,     # Default listed.  Hard-coded max is 285, min is 15
     maxScriptRequestsPerSecond: 5000,   # Default listed.  Hard-coded max is 50000
     maxChunkRequestsPerSecond: 25,      # Default listed.  Hard-coded max is 500
     timeBufferInMilliseconds: 15000,    # Default listed.  Hard-coded max is 30000
@@ -403,6 +419,9 @@ Commands:
              the `-a` flag will run the script in "acceptance" mode.  See
              https://serverless.com/framework/docs/providers/aws/cli-reference/invoke/
              for reference.
+  kill       Stop running load test and remove some associated resources. See
+             https://github.com/Nordstrom/serverless-artillery/#performance-mode
+             for reference.
   remove     Remove the function and the associated resources created for or by
              it.  See
              https://serverless.com/framework/docs/providers/aws/cli-reference/remove/
@@ -483,6 +502,13 @@ Unsupported Flags:
                     unsupported.  If you have altered the function to accept other
                     data, you probably already know the Serverless Framework and
                     are using it.  Why are you trying this flag in that case?
+```
+
+#### kill
+```
+$ slsart kill --help
+
+slsart kill
 ```
 
 #### remove

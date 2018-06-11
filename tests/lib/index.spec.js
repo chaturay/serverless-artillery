@@ -48,6 +48,17 @@ class ServerlessFake {
     this.pluginManager = {
       plugins: [new AwsInvoke()],
     }
+    this.variables = {
+      populateService: () => BbPromise.resolve(),
+    }
+    this.service = {
+      setFunctionNames: () => {},
+      mergeArrays: () => {},
+      functions: { loadGenerator: { name: 'a-fake-name' } },
+    }
+    this.processedInput = {
+      options: {},
+    }
   }
   init() { return slsFakeInit(this) }
   run() { return Promise.resolve(this).then((that) => { that.pluginManager.plugins[0].log({ Payload }) }) }
@@ -242,6 +253,9 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
         expect(res.required).to.equal(28) // 10 + 3 + 15
       })
       it('handles this specific user script', () => {
+        // This test was written to satisfy a specific user who was concerned about the correct treatment
+        // of their script.  As assumptions change due to changes in requirements, please use configuration
+        // to maintain the original intent of the test.
         script = {
           config: {
             phases: [
@@ -261,6 +275,9 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
               },
             ],
           },
+          _split: {
+            maxChunkDurationInSeconds: 240,
+          },
         }
         const res = slsart.impl.scriptConstraints(script)
         expect(res.allowance).to.equal(118) // 120 - 2
@@ -279,11 +296,11 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
       )
       it('adjusts to an increased http timeout that is not above the lambda chunk maximum',
         replaceImpl(
-          180000, // 180 s
+          100000, // 100 s
           () => BbPromise.resolve()
             .then(() => {
               const res = slsart.impl.scriptConstraints(script)
-              expect(res.allowance).to.equal(178) // 180 - 2
+              expect(res.allowance).to.equal(98) // 100 - 2
               expect(res.required).to.equal(13) // 10 + 3
             }) // eslint-disable-line comma-dangle
         ) // eslint-disable-line comma-dangle
@@ -294,7 +311,7 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
           () => BbPromise.resolve()
             .then(() => {
               const res = slsart.impl.scriptConstraints(script)
-              expect(res.allowance).to.equal(238) // 240 - 2
+              expect(res.allowance).to.equal(118) // 120 - 2
               expect(res.required).to.equal(13) // 10 + 3
             }) // eslint-disable-line comma-dangle
         ) // eslint-disable-line comma-dangle
@@ -1048,6 +1065,41 @@ scenarios:
               }) // eslint-disable-line comma-dangle
           ) // eslint-disable-line comma-dangle
         )
+      })
+    })
+
+    describe('#kill', () => {
+      let awsStub
+      let removeStub
+      beforeEach(() => {
+        awsStub = sinon.stub(aws.Service.prototype, 'makeRequest')
+        removeStub = sinon.stub(slsart, 'remove')
+      })
+      afterEach(() => {
+        awsStub.restore()
+        removeStub.restore()
+        process.argv = argv.slice(0)
+      })
+      it('removes the function after concurrency is set to zero', () => {
+        const afterStub = sinon.stub().returns(BbPromise.resolve())
+        awsStub.returns({
+          promise: () => BbPromise.delay(100).then(afterStub),
+        })
+        removeStub.returns(BbPromise.resolve())
+        return slsart.kill({}).should.be.fulfilled
+          .then(() => {
+            afterStub.should.have.been.calledBefore(removeStub)
+          })
+      })
+
+      it('fails when the function does not exist', () => {
+        awsStub.returns({
+          promise: () => BbPromise()
+            .then(() => BbPromise.reject({
+              code: 'ResourceNotFoundException',
+            })),
+        })
+        return slsart.kill({}).should.be.rejected
       })
     })
 
