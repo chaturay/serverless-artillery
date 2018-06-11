@@ -44,10 +44,10 @@ describe('./lib/lambda/funcHandle.js', () => {
         expect(callback).to.have.been.calledOnce
       })
     })
-    describe('#lambdaEntryPoint', () => {
-      const { lambdaEntryPoint } = func.handle.impl
+    describe('#createHandler', () => {
+      const { createHandler } = func.handle.impl
       it('should capture an unhandled rejection', () => {
-        const handler = sinon.stub().returns(BbPromise.delay(20))
+        const mergeAndInvoke = sinon.stub().returns(BbPromise.delay(20))
         const unhandledException = new Error('reasons')
         const context = { getRemainingTimeInMillis: () => 60000 }
         setTimeout(() => Promise.reject(unhandledException), 10)
@@ -62,20 +62,21 @@ describe('./lib/lambda/funcHandle.js', () => {
                 reject(err)
               }
             })
-          const entry = lambdaEntryPoint({ createUnhandledRejectionHandler, handler })()
+          const entry = createHandler(
+            { createUnhandledRejectionHandler, mergeAndInvoke })()
           entry({}, context, sinon.stub())
         })
       })
       it('should time out', () => {
         const createUnhandledRejectionHandler = func.handle.impl.createUnhandledRejectionHandler
-        const handler = sinon.stub()
+        const mergeAndInvoke = sinon.stub()
           .returns(new Promise(resolve => setTimeout(resolve, 20)))
         const handleTimeout = sinon.stub().callsFake(resolve =>
           resolve('reasons'))
         const context = { getRemainingTimeInMillis: () => 20 }
         return new Promise((resolve, reject) => {
-          const entry = lambdaEntryPoint(
-            { createUnhandledRejectionHandler, handleTimeout, handler },
+          const entry = createHandler(
+            { createUnhandledRejectionHandler, handleTimeout, mergeAndInvoke },
             10
           )()
           const callback = (err, result) => { err ? reject(err) : resolve(result) }
@@ -86,33 +87,35 @@ describe('./lib/lambda/funcHandle.js', () => {
       it('should invoke the handler', () => {
         const { createUnhandledRejectionHandler, handleTimeout } = func.handle.impl
         const answer = {}
-        const handler = sinon.stub().returns(Promise.resolve(answer))
+        const mergeAndInvoke = sinon.stub().returns(Promise.resolve(answer))
         const context = { getRemainingTimeInMillis: () => 60000 }
         const taskHandler = () => {}
         const input = {}
         return new Promise((resolve, reject) => {
-          const entry = lambdaEntryPoint(
-            { createUnhandledRejectionHandler, handleTimeout, handler }
+          const entry = createHandler(
+            { createUnhandledRejectionHandler, handleTimeout, mergeAndInvoke }
           )(taskHandler)
           const callback = (err, result) => { err ? reject(err) : resolve(result) }
           entry(input, context, callback)
         })
           .then((result) => {
             assert.strictEqual(result, answer)
-            assert.isOk(handler.calledWithExactly(taskHandler, input))
+            assert.isOk(mergeAndInvoke.calledWithExactly(taskHandler, input))
           })
       })
       it('should return a message on handler error', () => {
         const { createUnhandledRejectionHandler, handleTimeout } = func.handle.impl
-        const handler = sinon.stub()
+        const mergeAndInvoke = sinon.stub()
           .returns(Promise.reject(new Error('reasons')))
         const context = { getRemainingTimeInMillis: () => 60000 }
         const input = {}
         return new Promise((resolve, reject) => {
-          const entry = lambdaEntryPoint(
-            { createUnhandledRejectionHandler, handleTimeout, handler }
+          const entry = createHandler(
+            { createUnhandledRejectionHandler, handleTimeout, mergeAndInvoke }
           )()
-          const callback = (err, result) => { err ? reject(err) : resolve(result) }
+          const callback = (err, result) => {
+            err ? reject(err) : resolve(result)
+          }
           entry(input, context, callback)
         })
           .then(result =>
@@ -151,13 +154,13 @@ describe('./lib/lambda/funcHandle.js', () => {
           .then(event => assert.deepStrictEqual(event, expected))
       })
     })
-    describe('#handler', () => {
-      const handler = func.handle.impl.handler
+    describe('#mergeAndInvoke', () => {
+      const mergeAndInvoke = func.handle.impl.mergeAndInvoke
       it('should call the given taskHandler with the given event', () => {
         const taskHandler = sinon.stub().returns(Promise.resolve())
         const event = {}
         const mergeIf = () => Promise.resolve(event)
-        return handler(taskHandler, event, mergeIf)
+        return mergeAndInvoke(taskHandler, event, mergeIf)
           .then(() => assert.isOk(taskHandler.calledWithExactly(event)))
       })
       it('should handle exceptions from the task handler and reports an error', () => {
@@ -166,7 +169,7 @@ describe('./lib/lambda/funcHandle.js', () => {
         const event = {}
         const mergeIf = () => Promise.resolve(event)
         const expected = 'Error executing task: reasons'
-        return handler(taskHandler, event, mergeIf, sinon.stub())
+        return mergeAndInvoke(taskHandler, event, mergeIf, sinon.stub())
           .then(result => assert.strictEqual(result, expected))
       })
       it('should handle merge exceptions and reports an error', () => {
@@ -174,7 +177,7 @@ describe('./lib/lambda/funcHandle.js', () => {
         const event = {}
         const mergeIf = () => Promise.reject(new Error('reasons'))
         const expected = 'Error validating event: reasons'
-        return handler(taskHandler, event, mergeIf, sinon.stub())
+        return mergeAndInvoke(taskHandler, event, mergeIf, sinon.stub())
           .then(result => assert.strictEqual(result, expected))
       })
     })
