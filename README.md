@@ -32,7 +32,7 @@ We've created a complete workshop detailing end-to-end usage of serverless-artil
 
 ### Installation
 
-Requires node.js (v4 or better) installed and the serverless framework (v1.0+) either installed globally or available in the local `node_modules`.
+Requires node.js (v6 or better) installed and the serverless framework (v1.0+) either installed globally or available in the local `node_modules`.
 
 ```
 npm install -g serverless
@@ -46,7 +46,7 @@ Depending on the AWS account environment you're working in, you may need to defi
 ### Quick start smoke test
 
 ```
-$ slsart deploy   // deploys serverless artillery with a simple default script
+$ slsart deploy   // creates and invokes serverless artillery with a simple default script
 $ slsart invoke   // runs serverless-artillery using this script, creating traffic against the sample endpoint
 $ slsart remove   // halts serverless-artillery and removes the deployed lambda from your account
 ```
@@ -88,7 +88,7 @@ You can quickly generate a customizable test script from the command line.  In t
 
 ### Advanced customization use cases
 
-If you want to make even more customizations to how serverless-artillery works, you can generate a local copy of the serverless function code that can be edited and redeployed with your changed settings.  This enables more advanced configurations of the function to send [load against VPC hosted services](https://serverless.com/framework/docs/providers/aws/guide/functions/#vpc-configuration), [use CSV files to specify variables in your URLs](https://artillery.io/docs/script-reference.html#Payloads) (hint: put your `csv` in the same directory as your `serverless.yml` and redeploy), or other non-default use cases.  Similarly, you'll want to do this if you need to alter hard-coded limits.  See https://docs.serverless.com for function configuration related documentation.  See https://artillery.io/docs for script configuration related documentation.
+If you want to make even more customizations to how serverless-artillery works, you can generate a local copy of the serverless function code that can be edited and redeployed with your changed settings.  This enables more advanced configurations of the function to send [load against VPC hosted services](https://serverless.com/framework/docs/providers/aws/guide/functions/#vpc-configuration), [use CSV files to specify variables in your URLs](https://artillery.io/docs/script-reference.html#Payloads) (hint: put your `csv` in the same directory as your `serverless.yml` and redeploy), or other non-default use cases.  Similarly, you'll want to do this if you need to alter hard-coded limits.  See [`serverless docs`](https://docs.serverless.com) for function configuration related documentation.  See [`artillery docs`](https://artillery.io/docs) for script configuration related documentation. 
 
 ```
 $ slsart configure
