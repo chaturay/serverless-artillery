@@ -4,6 +4,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "artillery": "git+https://github.com/Nordstrom/artillery.git#0b2bb704b0a877818d429f5a37b0f37c4824153e",
+    "js-yaml": "^3.11.0",
     "lodash.merge": "^4.6.1",
     "lodash.omit": "^4.5.0",
     "util-promisify": "^2.1.0"

@@ -1,157 +1,148 @@
 const BbPromise = require('bluebird')
 const chai = require('chai')
+const chaiAsPromised = require('chai-as-promised')
 const path = require('path')
 const sinon = require('sinon')
 const sinonChai = require('sinon-chai')
 
 BbPromise.longStackTraces()
 chai.use(sinonChai)
+chai.use(chaiAsPromised)
 
-const expect = chai.expect
+const { expect, assert } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
 const func = require(path.join('..', '..', '..', 'lib', 'lambda', 'func.js'))
 
 describe('./lib/lambda/funcHandle.js', () => {
-  const maxTimeoutBufferInMs = func.def.MAX_TIMEOUT_BUFFER_IN_MILLISECONDS
-  let timeoutInMs
-  const context = {
-    getRemainingTimeInMillis: () => timeoutInMs,
-  }
-  beforeEach(() => {
-    timeoutInMs = 300 * 1000
-    func.def.MAX_TIMEOUT_BUFFER_IN_MILLISECONDS = maxTimeoutBufferInMs
-    func.handle.done = false
-  })
-  afterEach(() => {
-    if ('callback' in func.handle) {
-      delete func.handle.callback
-    }
-    if ('context' in func.handle) {
-      delete func.handle.context
-    }
-    if ('done' in func.handle) {
-      delete func.handle.done
-    }
-  })
   describe(':impl', () => {
-    describe('#handleUnhandledRejection', () => {
-      it('prints to the console and calls the callback', () => {
-        const consoleLog = console.error
-        let logCalled = false
-        console.error = () => { logCalled = true }
-        try {
-          let callbackCalled = false
-          func.handle.callback = () => { callbackCalled = true }
-          func.handle.impl.handleUnhandledRejection(new Error('tag'))
-          expect(logCalled).to.be.true
-          expect(callbackCalled).to.be.true
-        } finally {
-          console.error = consoleLog
-        }
-      })
-    })
-    describe('#handleTimeout', () => {
-      it('prints to the console and calls the callback', () => {
-        const consoleLog = console.error
-        let logCalled = false
-        console.error = () => { logCalled = true }
-        try {
-          let callbackCalled = false
-          func.handle.callback = () => { callbackCalled = true }
-          func.handle.impl.handleTimeout()
-          expect(logCalled).to.be.true
-          expect(callbackCalled).to.be.true
-        } finally {
-          console.error = consoleLog
-        }
-      })
-      it('only calls the handler once despite repeated calls', () => {
+    describe('#createUnhandledRejectionHandler', () => {
+      it('should print to the console', () => {
         const callback = sinon.stub()
-        func.handle.callback = callback
-        func.handle.impl.handleTimeout()
-        func.handle.impl.handleTimeout()
+        const error = sinon.stub()
+        func.handle.impl.createUnhandledRejectionHandler(callback, error)(new Error('tag'))
+        expect(error).to.have.been.calledOnce
+      })
+      it('should call the callback', () => {
+        const callback = sinon.stub()
+        const error = sinon.stub()
+        func.handle.impl.createUnhandledRejectionHandler(callback, error)(new Error('tag'))
         expect(callback).to.have.been.calledOnce
       })
     })
-    describe('#handler', () => {
-      it('stores the given context and callback on the module exports', (done) => {
-        const handler = func.handle(() => BbPromise.resolve())
-        const callback = () => { done() }
-        handler({}, context, callback)
-        expect(func.handle.context).to.equal(context)
-        expect(func.handle.callback).to.equal(callback)
+    describe('#handleTimeout', () => {
+      it('should print to the console', () => {
+        const callback = sinon.stub()
+        const error = sinon.stub()
+        func.handle.impl.handleTimeout(callback, error)
+        expect(error).to.have.been.calledOnce
       })
-      it('calls the given taskHandler with the given event', (done) => {
-        const event = {}
-        let observed
-        const handler = func.handle((script) => {
-          observed = script
-          return BbPromise.resolve()
+      it('should call the callback', () => {
+        const callback = sinon.stub()
+        const error = sinon.stub()
+        func.handle.impl.handleTimeout(callback, error)
+        expect(callback).to.have.been.calledOnce
+      })
+    })
+    describe('#createHandler', () => {
+      const { createHandler } = func.handle.impl
+      it('should capture an unhandled rejection', () => {
+        const mergeAndInvoke = sinon.stub().returns(BbPromise.delay(20))
+        const unhandledException = new Error('reasons')
+        const context = { getRemainingTimeInMillis: () => 60000 }
+        setTimeout(() => Promise.reject(unhandledException), 10)
+        return new Promise((resolve, reject) => {
+          const createUnhandledRejectionHandler = sinon.stub().callsFake(resolveTask =>
+            (ex) => {
+              try {
+                assert.strictEqual(ex, unhandledException)
+                resolveTask()
+                resolve()
+              } catch (err) {
+                reject(err)
+              }
+            })
+          const entry = createHandler(
+            { createUnhandledRejectionHandler, mergeAndInvoke })()
+          entry({}, context, sinon.stub())
         })
-        handler(event, context, () => { done() })
-        expect(observed).to.be.equal(event)
       })
-      it('reports the resolved value', (done) => {
-        const value = {}
-        const handler = func.handle(() => BbPromise.resolve(value))
-        const callback = (err, res) => {
-          expect(res).to.equal(value)
-          done()
-        }
-        handler({}, context, callback)
-      })
-      it('handles exceptions from the task handler and reports an error', (done) => {
-        const handler = func.handle(() => BbPromise.resolve())
-        const callback = (err, res) => {
-          expect(res).to.have.string('Error validating event: ')
-          done()
-        }
-        handler({ _split: { maxChunkDurationInSeconds: 'not a number' } }, context, callback)
-      })
-      it('handles exceptions thrown within the task handler promise chain, reporting an error', (done) => {
-        const handler = func.handle(() => BbPromise.resolve().then(() => { throw new Error('rejected') }))
-        const callback = (err, res) => {
-          expect(res).to.have.string('Error executing task: ')
-          done()
-        }
-        handler({}, context, callback)
-      })
-      it('handles promise rejections within the task handler promise chain, reporting an error', (done) => {
-        const handler = func.handle(() => BbPromise.reject(new Error('rejected')))
-        const callback = (err, res) => {
-          expect(res).to.have.string('Error executing task: ')
-          done()
-        }
-        handler({}, context, callback)
-      })
-      it('times out prior to given limits', (done) => {
-        func.def.MAX_TIMEOUT_BUFFER_IN_MILLISECONDS = 1
-        timeoutInMs = 10
-        let promise
-        const handler = func.handle(() => {
-          promise = new BbPromise(resolve => setTimeout(resolve, timeoutInMs * 2))
-          return promise
+      it('should time out', () => {
+        const createUnhandledRejectionHandler = func.handle.impl.createUnhandledRejectionHandler
+        const mergeAndInvoke = sinon.stub()
+          .returns(new Promise(resolve => setTimeout(resolve, 20)))
+        const handleTimeout = sinon.stub().callsFake(resolve =>
+          resolve('reasons'))
+        const context = { getRemainingTimeInMillis: () => 20 }
+        return new Promise((resolve, reject) => {
+          const entry = createHandler(
+            { createUnhandledRejectionHandler, handleTimeout, mergeAndInvoke },
+            10
+          )()
+          const callback = (err, result) => { err ? reject(err) : resolve(result) }
+          entry({}, context, callback)
         })
-        const callback = (err, res) => {
-          expect(res).to.have.string('Error: function timeout')
-          promise.then(done)
-        }
-        handler({}, context, callback)
+          .then(result => assert.strictEqual(result, 'reasons'))
       })
-      it('merges objects with a root merge attribute', (done) => {
+      it('should invoke the handler', () => {
+        const { createUnhandledRejectionHandler, handleTimeout } = func.handle.impl
+        const answer = {}
+        const mergeAndInvoke = sinon.stub().returns(Promise.resolve(answer))
+        const context = { getRemainingTimeInMillis: () => 60000 }
+        const taskHandler = () => {}
+        const input = {}
+        return new Promise((resolve, reject) => {
+          const entry = createHandler(
+            { createUnhandledRejectionHandler, handleTimeout, mergeAndInvoke }
+          )(taskHandler)
+          const callback = (err, result) => { err ? reject(err) : resolve(result) }
+          entry(input, context, callback)
+        })
+          .then((result) => {
+            assert.strictEqual(result, answer)
+            assert.isOk(mergeAndInvoke.calledWithExactly(taskHandler, input))
+          })
+      })
+      it('should return a message on handler error', () => {
+        const { createUnhandledRejectionHandler, handleTimeout } = func.handle.impl
+        const mergeAndInvoke = sinon.stub()
+          .returns(Promise.reject(new Error('reasons')))
+        const context = { getRemainingTimeInMillis: () => 60000 }
+        const input = {}
+        return new Promise((resolve, reject) => {
+          const entry = createHandler(
+            { createUnhandledRejectionHandler, handleTimeout, mergeAndInvoke }
+          )()
+          const callback = (err, result) => {
+            err ? reject(err) : resolve(result)
+          }
+          entry(input, context, callback)
+        })
+          .then(result =>
+            assert.strictEqual(result, 'Error executing handler: reasons'))
+      })
+    })
+    describe('#mergeIf', () => {
+      const mergeIf = func.handle.impl.mergeIf
+      it('should read the designated merge file', () => {
+        const readMergeFile = sinon.stub().returns(Promise.resolve({}))
+        return mergeIf({ '>>': 'foo' }, readMergeFile)
+          .then(() => assert.isOk(readMergeFile.calledWithExactly('foo')))
+      })
+      it('should merge objects with a root merge attribute', () => {
         const input = {
-          '>>': {
-            foo: {
-              bar: '1',
-              baz: '2',
-            },
-          },
+          '>>': './lib/lambda/foo',
           mode: 'mon',
           foo: {
             bar: '3',
           },
         }
+        const readMergeFile = sinon.stub().returns(Promise.resolve({
+          foo: {
+            bar: '1',
+            baz: '2',
+          },
+        }))
         const expected = {
           foo: {
             bar: '3',
@@ -159,11 +150,122 @@ describe('./lib/lambda/funcHandle.js', () => {
           },
           mode: 'mon',
         }
-        const handler = func.handle((event) => {
-          expect(event).to.eql(expected)
-          return BbPromise.resolve()
-        })
-        handler(input, context, () => { done() })
+        return mergeIf(input, readMergeFile)
+          .then(event => assert.deepStrictEqual(event, expected))
+      })
+    })
+    describe('#mergeAndInvoke', () => {
+      const mergeAndInvoke = func.handle.impl.mergeAndInvoke
+      it('should call the given taskHandler with the given event', () => {
+        const taskHandler = sinon.stub().returns(Promise.resolve())
+        const event = {}
+        const mergeIf = () => Promise.resolve(event)
+        return mergeAndInvoke(taskHandler, event, mergeIf)
+          .then(() => assert.isOk(taskHandler.calledWithExactly(event)))
+      })
+      it('should handle exceptions from the task handler and reports an error', () => {
+        const taskHandler = sinon.stub()
+          .returns(Promise.reject(new Error('reasons')))
+        const event = {}
+        const mergeIf = () => Promise.resolve(event)
+        const expected = 'Error executing task: reasons'
+        return mergeAndInvoke(taskHandler, event, mergeIf, sinon.stub())
+          .then(result => assert.strictEqual(result, expected))
+      })
+      it('should handle merge exceptions and reports an error', () => {
+        const taskHandler = sinon.stub().returns(Promise.resolve())
+        const event = {}
+        const mergeIf = () => Promise.reject(new Error('reasons'))
+        const expected = 'Error validating event: reasons'
+        return mergeAndInvoke(taskHandler, event, mergeIf, sinon.stub())
+          .then(result => assert.strictEqual(result, expected))
+      })
+    })
+    describe('#getMergeFilePath', () => {
+      const { getMergeFilePath } = func.handle.impl
+      it('should fail for missing path', () =>
+        assert.isRejected(
+          getMergeFilePath(),
+          "'undefined' is not a valid path."
+        )
+      )
+      it('should fail for non-string path', () =>
+        assert.isRejected(
+          getMergeFilePath({ foo: 'bar' }),
+          "'object' is not a valid path."
+        )
+      )
+      it('should fail for non-local absolute path', () =>
+        assert.isRejected(
+          getMergeFilePath('/foo', undefined, '/bar'),
+          'Merge file /foo is not a local file path.'
+        )
+      )
+      it('should fail for non-local relative path', () =>
+        assert.isRejected(
+          getMergeFilePath('../foo', () => '/foo', '/bar'),
+          'Merge file /foo is not a local file path.'
+        )
+      )
+      it('should succeed for absolute local path', () =>
+        assert.isFulfilled(
+          getMergeFilePath('/foo/bar', undefined, '/foo'),
+          '/foo/bar'
+        )
+      )
+      it('should succeed for relative local path', () =>
+        assert.isFulfilled(
+          getMergeFilePath('bar', p => `/foo/${p}`, '/foo'),
+          '/foo/bar'
+        )
+      )
+    })
+    describe('#readMergeFile', () => {
+      const { readMergeFile } = func.handle.impl
+      const getMergeFilePath = sinon.stub().callsFake(p => Promise.resolve(p))
+      it('should get the merge file path before reading', () => {
+        const readFile = sinon.stub().returns(Promise.resolve('bar'))
+        return readMergeFile('foo', readFile, sinon.stub(), getMergeFilePath)
+          .then(() => getMergeFilePath.calledWithExactly('foo'))
+      })
+      it('should log error with a bad merge file path', () => {
+        const readFile = sinon.stub().returns(Promise.resolve('bar'))
+        const log = sinon.stub()
+        return readMergeFile('../foo', readFile, log)
+          .catch(err => err)
+          .then(err =>
+            log.calledWithExactly(
+              'Failed to read merge file.',
+              '../foo',
+              err.stack
+            )
+          )
+      })
+      it('should log error with a failed read', () => {
+        const readFile = sinon.stub()
+          .callsFake(() => Promise.reject(new Error('reasons')))
+        const log = sinon.stub()
+        return readMergeFile('../foo', readFile, log)
+          .catch(err => err)
+          .then(err =>
+            log.calledWithExactly(
+              'Failed to read merge file.',
+              '../foo',
+              err.stack
+            )
+          )
+      })
+      it('should parse yml', () => {
+        const readFile = sinon.stub().returns(Promise.resolve('bar: baz'))
+        const log = sinon.stub()
+        return readMergeFile('foo', readFile, log, getMergeFilePath)
+          .then(data => assert.deepStrictEqual(data, { bar: 'baz' }))
+      })
+      it('should parse json', () => {
+        const readFile = sinon.stub().returns(Promise.resolve('{"bar": "baz"}'))
+        const log = sinon.stub()
+        return readMergeFile('foo', readFile, log, getMergeFilePath)
+          .then(data => assert.deepStrictEqual(data, { bar: 'baz' }))
       })
     })
   })
