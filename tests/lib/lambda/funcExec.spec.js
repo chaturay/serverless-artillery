@@ -20,6 +20,7 @@ const tagContext = {
 }
 
 const validScript = () => ({
+  _functionName: tagContext.functionName,
   config: {
     phases: [
       {
@@ -38,24 +39,13 @@ describe('./lib/lambda/funcExec.js', () => {
     awsStub.restore()
   })
   describe(':impl', () => {
-    let contextInHandler = 'context' in func.handle
-    let handlerContext = func.handle.context
     beforeEach(() => {
-      // function context
-      contextInHandler = 'context' in func.handle
-      handlerContext = func.handle.context
-      func.handle.context = tagContext
       // lambda invocation stubbing
       awsStub.withArgs('invoke', sinon.match.any, sinon.match.any).callsFake(
         () => ({ promise: () => Promise.resolve({ Payload: '{}' }) }) // eslint-disable-line comma-dangle
       )
     })
     afterEach(() => {
-      if (contextInHandler) {
-        func.handle.context = handlerContext
-      } else {
-        delete func.handle.context
-      }
       awsStub.reset()
     })
     describe('#execute', () => {
