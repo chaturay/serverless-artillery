@@ -1,7 +1,7 @@
 const chai = require('chai')
 const path = require('path')
 
-const expect = chai.expect
+const { expect } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
 const func = require(path.join('..', '..', '..', 'lib', 'lambda', 'func.js'))
@@ -158,7 +158,7 @@ describe('./lib/lambda/taskValid.js', () => {
             expect(() => task.valid(settings, script)).to.throw(task.def.TaskError)
           })
           it('accepts but warns about settings that could exceed a threshold portion of max duration', () => {
-            const warn = console.warn
+            const { warn } = console
             let warned = false
             console.warn = () => { warned = true }
             settings.maxScriptDurationInSeconds = 5

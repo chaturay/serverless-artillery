@@ -1,7 +1,7 @@
 const chai = require('chai')
 const path = require('path')
 
-const expect = chai.expect
+const { expect } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
 const func = require(path.join('..', '..', '..', 'lib', 'lambda', 'func.js'))

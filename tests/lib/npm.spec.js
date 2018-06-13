@@ -8,7 +8,7 @@ const path = require('path')
 BbPromise.longStackTraces()
 chai.use(chaiAsPromised)
 
-const expect = chai.expect
+const { expect } = chai
 
 const packageJson = require(path.join(__dirname, '..', '..', 'lib', 'lambda', 'package.json')) // eslint-disable-line import/no-dynamic-require
 const slsart = require('../../lib/index')
@@ -16,7 +16,7 @@ const npm = require('../../lib/npm')
 
 describe('./lib/npm.js:exports', function npmExports() { // eslint-disable-line prefer-arrow-callback
   describe('#install', function exportsConfigure() { // eslint-disable-line prefer-arrow-callback
-    const cwd = process.cwd
+    const { cwd } = process
     const replaceCwd = (dirToReplace) => {
       process.cwd = () => dirToReplace
     }

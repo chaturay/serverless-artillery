@@ -8,7 +8,7 @@ const sinonChai = require('sinon-chai')
 chai.use(chaiAsPromised)
 chai.use(sinonChai)
 
-const expect = chai.expect
+const { expect } = chai
 
 let awsStub
 

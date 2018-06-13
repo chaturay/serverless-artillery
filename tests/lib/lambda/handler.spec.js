@@ -7,7 +7,7 @@ const sinonChai = require('sinon-chai')
 chai.use(chaiAsPromised)
 chai.use(sinonChai)
 
-const expect = chai.expect
+const { expect } = chai
 
 const func = require(path.join('..', '..', '..', 'lib', 'lambda', 'func.js')) // eslint-disable-line import/no-dynamic-require
 const task = require(path.join('..', '..', '..', 'lib', 'lambda', 'task.js')) // eslint-disable-line import/no-dynamic-require

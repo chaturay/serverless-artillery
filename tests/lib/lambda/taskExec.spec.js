@@ -9,7 +9,7 @@ chai.use(chaiAsPromised)
 chai.use(sinonChai)
 chai.should()
 
-const expect = chai.expect
+const { expect } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
 const taskExec = require(path.join('..', '..', '..', 'lib', 'lambda', 'taskExec.js'))
