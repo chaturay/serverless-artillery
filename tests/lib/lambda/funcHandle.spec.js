@@ -44,12 +44,23 @@ describe('./lib/lambda/funcHandle.js', () => {
         expect(callback).to.have.been.calledOnce
       })
     })
+    describe('#addMetadataToInput', () => {
+      const addMetadataToInput = func.handle.impl.addMetadataToInput
+      it('should return a new object with the function name metadata', () => {
+        const input = { foo: 'bar' }
+        const context = { functionName: 'baz' }
+        const output = addMetadataToInput(input, context)
+        assert.notStrictEqual(input, output)
+        assert.deepStrictEqual(output, { foo: 'bar', _functionName: 'baz' })
+      })
+    })
     describe('#createHandler', () => {
       const { createHandler } = func.handle.impl
       it('should capture an unhandled rejection', () => {
         const mergeAndInvoke = sinon.stub().returns(BbPromise.delay(20))
         const unhandledException = new Error('reasons')
         const context = { getRemainingTimeInMillis: () => 60000 }
+        const addMetadataToInput = input => input
         setTimeout(() => Promise.reject(unhandledException), 10)
         return new Promise((resolve, reject) => {
           const createUnhandledRejectionHandler = sinon.stub().callsFake(resolveTask =>
@@ -63,7 +74,7 @@ describe('./lib/lambda/funcHandle.js', () => {
               }
             })
           const entry = createHandler(
-            { createUnhandledRejectionHandler, mergeAndInvoke })()
+            { createUnhandledRejectionHandler, mergeAndInvoke, addMetadataToInput })()
           entry({}, context, sinon.stub())
         })
       })
@@ -74,9 +85,12 @@ describe('./lib/lambda/funcHandle.js', () => {
         const handleTimeout = sinon.stub().callsFake(resolve =>
           resolve('reasons'))
         const context = { getRemainingTimeInMillis: () => 20 }
+        const addMetadataToInput = input => input
         return new Promise((resolve, reject) => {
           const entry = createHandler(
-            { createUnhandledRejectionHandler, handleTimeout, mergeAndInvoke },
+            {
+              createUnhandledRejectionHandler, handleTimeout, mergeAndInvoke, addMetadataToInput,
+            },
             10
           )()
           const callback = (err, result) => { err ? reject(err) : resolve(result) }
@@ -89,11 +103,14 @@ describe('./lib/lambda/funcHandle.js', () => {
         const answer = {}
         const mergeAndInvoke = sinon.stub().returns(Promise.resolve(answer))
         const context = { getRemainingTimeInMillis: () => 60000 }
+        const addMetadataToInput = input => input
         const taskHandler = () => {}
         const input = {}
         return new Promise((resolve, reject) => {
           const entry = createHandler(
-            { createUnhandledRejectionHandler, handleTimeout, mergeAndInvoke }
+            {
+              createUnhandledRejectionHandler, handleTimeout, mergeAndInvoke, addMetadataToInput,
+            }
           )(taskHandler)
           const callback = (err, result) => { err ? reject(err) : resolve(result) }
           entry(input, context, callback)
@@ -108,10 +125,13 @@ describe('./lib/lambda/funcHandle.js', () => {
         const mergeAndInvoke = sinon.stub()
           .returns(Promise.reject(new Error('reasons')))
         const context = { getRemainingTimeInMillis: () => 60000 }
+        const addMetadataToInput = input => input
         const input = {}
         return new Promise((resolve, reject) => {
           const entry = createHandler(
-            { createUnhandledRejectionHandler, handleTimeout, mergeAndInvoke }
+            {
+              createUnhandledRejectionHandler, handleTimeout, mergeAndInvoke, addMetadataToInput,
+            }
           )()
           const callback = (err, result) => {
             err ? reject(err) : resolve(result)
@@ -120,6 +140,29 @@ describe('./lib/lambda/funcHandle.js', () => {
         })
           .then(result =>
             assert.strictEqual(result, 'Error executing handler: reasons'))
+      })
+      it('should add metadata to input', () => {
+        const { createUnhandledRejectionHandler, handleTimeout } = func.handle.impl
+        const answer = {}
+        const inputWithMetadata = { _functionName: 'foo' }
+        const mergeAndInvoke = sinon.stub().returns(Promise.resolve(answer))
+        const context = { getRemainingTimeInMillis: () => 60000 }
+        const addMetadataToInput = sinon.stub().callsFake(() => inputWithMetadata)
+        const taskHandler = () => {}
+        const input = {}
+        return new Promise((resolve, reject) => {
+          const entry = createHandler(
+            {
+              createUnhandledRejectionHandler, handleTimeout, mergeAndInvoke, addMetadataToInput,
+            }
+          )(taskHandler)
+          const callback = (err, result) => { err ? reject(err) : resolve(result) }
+          entry(input, context, callback)
+        })
+          .then(() => {
+            assert.isOk(addMetadataToInput.calledWithExactly(input, context))
+            assert.isOk(mergeAndInvoke.calledWithExactly(taskHandler, inputWithMetadata))
+          })
       })
     })
     describe('#mergeIf', () => {
