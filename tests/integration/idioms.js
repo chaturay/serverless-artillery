@@ -11,7 +11,7 @@ const slsart = require(path.join('..', '..', 'lib', 'index.js')) // eslint-disab
 
 const stdArgv = ['node', 'slsart']
 
-const cwd = process.cwd
+const { cwd } = process
 
 const util = {
   // UTILITIES
@@ -21,7 +21,7 @@ const util = {
       FunctionName: util.getFunctionName(functionName),
     }).promise(),
   cmdLine: (args, func, options) => {
-    const argv = process.argv
+    const { argv } = process
     process.argv = args
     return func(options || {})
       .then((result) => {

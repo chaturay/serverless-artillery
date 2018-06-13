@@ -5,7 +5,7 @@ const sinonChai = require('sinon-chai')
 
 chai.use(sinonChai)
 
-const expect = chai.expect
+const { expect } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
 const def = require(path.join('..', '..', '..', 'lib', 'lambda', 'taskDef.js'))

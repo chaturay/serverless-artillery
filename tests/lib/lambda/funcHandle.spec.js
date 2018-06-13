@@ -79,7 +79,7 @@ describe('./lib/lambda/funcHandle.js', () => {
         })
       })
       it('should time out', () => {
-        const createUnhandledRejectionHandler = func.handle.impl.createUnhandledRejectionHandler
+        const { createUnhandledRejectionHandler } = func.handle.impl
         const mergeAndInvoke = sinon.stub()
           .returns(new Promise(resolve => setTimeout(resolve, 20)))
         const handleTimeout = sinon.stub().callsFake(resolve =>
@@ -166,7 +166,7 @@ describe('./lib/lambda/funcHandle.js', () => {
       })
     })
     describe('#mergeIf', () => {
-      const mergeIf = func.handle.impl.mergeIf
+      const { mergeIf } = func.handle.impl
       it('should read the designated merge file', () => {
         const readMergeFile = sinon.stub().returns(Promise.resolve({}))
         return mergeIf({ '>>': 'foo' }, readMergeFile)
@@ -198,7 +198,7 @@ describe('./lib/lambda/funcHandle.js', () => {
       })
     })
     describe('#mergeAndInvoke', () => {
-      const mergeAndInvoke = func.handle.impl.mergeAndInvoke
+      const { mergeAndInvoke } = func.handle.impl
       it('should call the given taskHandler with the given event', () => {
         const taskHandler = sinon.stub().returns(Promise.resolve())
         const event = {}

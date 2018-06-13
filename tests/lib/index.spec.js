@@ -18,7 +18,7 @@ chai.use(chaiAsPromised)
 chai.use(sinonChai)
 chai.should()
 
-const expect = chai.expect
+const { expect } = chai
 
 const testJsonScriptPath = path.join(__dirname, 'script.json')
 const testYmlScriptPath = path.join(__dirname, 'dir', 'script.yml')
@@ -101,7 +101,7 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
         expect(slsart.impl.findScriptPath('NOT_A_FILE')).to.be.null
       })
       it('returns an absoute path to the local script.yml if no path was given and one exists', () => {
-        const cwd = process.cwd
+        const { cwd } = process
         process.cwd = () => path.join(__dirname, 'dir')
         try {
           expect(slsart.impl.findScriptPath()).to.eql(testYmlScriptPath)
@@ -216,7 +216,7 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
 
     describe('#scriptConstraints', () => {
       const replaceImpl = (timeout, testFunc) => (() => {
-        const config = aws.config
+        const { config } = aws
         aws.config = { httpOptions: { timeout } }
         return testFunc().then(() => {
           aws.config = config
@@ -693,8 +693,8 @@ scenarios:
     describe('#findServicePath', () => {
       const lambdaPath = path.resolve('lib', 'lambda')
       const replaceImpl = (cwdResult, fileExistsResult, testFunc) => (() => {
-        const cwd = process.cwd
-        const fileExists = slsart.impl.fileExists
+        const { cwd } = process
+        const { fileExists } = slsart.impl
         process.cwd = () => cwdResult
         slsart.impl.fileExists = () => fileExistsResult
         return testFunc().then(() => {
@@ -801,9 +801,9 @@ scenarios:
       }\tYour function has been invoked. The load is scheduled to be completed in ${durationInSeconds} seconds.${os.EOL}`
 
       const replaceImpl = (scriptConstraintsResult, serverlessRunnerResult, testFunc) => (() => {
-        const scriptConstraints = slsart.impl.scriptConstraints
+        const { scriptConstraints } = slsart.impl
         scriptConstraints.task = { sampling: task.def.getSettings() }
-        const serverlessRunner = slsart.impl.serverlessRunner
+        const { serverlessRunner } = slsart.impl
         const replaceInput = slsart.impl.replaceArgv
         slsart.impl.scriptConstraints = () => scriptConstraintsResult
         slsart.impl.serverlessRunner = () => BbPromise.resolve(serverlessRunnerResult)
@@ -818,7 +818,7 @@ scenarios:
       let log
       let logs
       beforeEach(() => {
-        log = console.log
+        ({ log } = console)
         logs = []
         console.log = (...args) => {
           if (args.length === 1) {
@@ -933,7 +933,7 @@ scenarios:
             { errors: 1, reports: [{ errors: 1 }] },
             () => {
               // save/replace process.exit
-              const exit = process.exit
+              const { exit } = process
               let exitCode
               process.exit = (code) => {
                 exitCode = code
@@ -1026,7 +1026,7 @@ scenarios:
             { errors: 5, reports: [{ errors: 5 }] },
             () => {
               // save/replace process.exit
-              const exit = process.exit
+              const { exit } = process
               let exitCode
               process.exit = (code) => {
                 exitCode = code
@@ -1120,7 +1120,7 @@ scenarios:
     })
 
     describe('#script', () => {
-      const generateScript = slsart.impl.generateScript
+      const { generateScript } = slsart.impl
       const notAFile = 'not.a.script.yml'
       it('refuses to overwrite an existing script',
         () => slsart.script({ out: 'README.md' }).should.be.rejected // eslint-disable-line comma-dangle
@@ -1153,7 +1153,7 @@ scenarios:
     })
 
     describe('#configure', function exportsConfigure() { // eslint-disable-line prefer-arrow-callback
-      const cwd = process.cwd
+      const { cwd } = process
       const replaceCwd = (dirToReplace) => {
         process.cwd = () => dirToReplace
       }
