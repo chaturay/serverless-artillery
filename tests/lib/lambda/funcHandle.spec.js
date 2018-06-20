@@ -45,7 +45,7 @@ describe('./lib/lambda/funcHandle.js', () => {
       })
     })
     describe('#addMetadataToInput', () => {
-      const { addMetadataToInput } = func.handle.impl
+      const addMetadataToInput = func.handle.impl.addMetadataToInput
       it('should return a new object with the function name metadata', () => {
         const input = { foo: 'bar' }
         const context = { functionName: 'baz' }
@@ -61,8 +61,6 @@ describe('./lib/lambda/funcHandle.js', () => {
         const unhandledException = new Error('reasons')
         const context = { getRemainingTimeInMillis: () => 60000 }
         const addMetadataToInput = input => input
-        const { exit } = process
-        process.exit = sinon.stub()
         setTimeout(() => Promise.reject(unhandledException), 10)
         return new Promise((resolve, reject) => {
           const createUnhandledRejectionHandler = sinon.stub().callsFake(resolveTask =>
@@ -70,11 +68,7 @@ describe('./lib/lambda/funcHandle.js', () => {
               try {
                 assert.strictEqual(ex, unhandledException)
                 resolveTask()
-                setTimeout(() => {
-                  expect(process.exit).to.have.been.calledOnce
-                  process.exit = exit
-                  resolve()
-                }, 0)
+                resolve()
               } catch (err) {
                 reject(err)
               }
@@ -92,8 +86,6 @@ describe('./lib/lambda/funcHandle.js', () => {
           resolve('reasons'))
         const context = { getRemainingTimeInMillis: () => 20 }
         const addMetadataToInput = input => input
-        const { exit } = process
-        process.exit = sinon.stub()
         return new Promise((resolve, reject) => {
           const entry = createHandler(
             {
@@ -101,17 +93,8 @@ describe('./lib/lambda/funcHandle.js', () => {
             },
             10
           )()
-          entry({}, context, (err, result) => {
-            if (err) {
-              reject(err)
-            } else {
-              setTimeout(() => {
-                expect(process.exit).to.have.been.calledOnce
-                process.exit = exit
-                resolve(result)
-              }, 11)
-            }
-          })
+          const callback = (err, result) => { err ? reject(err) : resolve(result) }
+          entry({}, context, callback)
         })
           .then(result => assert.strictEqual(result, 'reasons'))
       })
@@ -123,25 +106,14 @@ describe('./lib/lambda/funcHandle.js', () => {
         const addMetadataToInput = input => input
         const taskHandler = () => {}
         const input = {}
-        const { exit } = process
-        process.exit = sinon.stub()
         return new Promise((resolve, reject) => {
           const entry = createHandler(
             {
               createUnhandledRejectionHandler, handleTimeout, mergeAndInvoke, addMetadataToInput,
             }
           )(taskHandler)
-          entry(input, context, (err, result) => {
-            if (err) {
-              reject(err)
-            } else {
-              setTimeout(() => {
-                expect(process.exit).to.have.been.calledOnce
-                process.exit = exit
-                resolve(result)
-              }, 5)
-            }
-          })
+          const callback = (err, result) => { err ? reject(err) : resolve(result) }
+          entry(input, context, callback)
         })
           .then((result) => {
             assert.strictEqual(result, answer)
@@ -155,25 +127,16 @@ describe('./lib/lambda/funcHandle.js', () => {
         const context = { getRemainingTimeInMillis: () => 60000 }
         const addMetadataToInput = input => input
         const input = {}
-        const { exit } = process
-        process.exit = sinon.stub()
         return new Promise((resolve, reject) => {
           const entry = createHandler(
             {
               createUnhandledRejectionHandler, handleTimeout, mergeAndInvoke, addMetadataToInput,
             }
           )()
-          entry(input, context, (err, result) => {
-            if (err) {
-              reject(err)
-            } else {
-              setTimeout(() => {
-                expect(process.exit).to.have.been.calledOnce
-                process.exit = exit
-                resolve(result)
-              }, 5)
-            }
-          })
+          const callback = (err, result) => {
+            err ? reject(err) : resolve(result)
+          }
+          entry(input, context, callback)
         })
           .then(result =>
             assert.strictEqual(result, 'Error executing handler: reasons'))
@@ -187,25 +150,14 @@ describe('./lib/lambda/funcHandle.js', () => {
         const addMetadataToInput = sinon.stub().callsFake(() => inputWithMetadata)
         const taskHandler = () => {}
         const input = {}
-        const { exit } = process
-        process.exit = sinon.stub()
         return new Promise((resolve, reject) => {
           const entry = createHandler(
             {
               createUnhandledRejectionHandler, handleTimeout, mergeAndInvoke, addMetadataToInput,
             }
           )(taskHandler)
-          entry(input, context, (err, result) => {
-            if (err) {
-              reject(err)
-            } else {
-              setTimeout(() => {
-                expect(process.exit).to.have.been.calledOnce
-                process.exit = exit
-                resolve(result)
-              }, 5)
-            }
-          })
+          const callback = (err, result) => { err ? reject(err) : resolve(result) }
+          entry(input, context, callback)
         })
           .then(() => {
             assert.isOk(addMetadataToInput.calledWithExactly(input, context))
