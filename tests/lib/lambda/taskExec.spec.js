@@ -1,7 +1,5 @@
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
-const fs = require('fs')
-const os = require('os')
 const path = require('path')
 const sinonChai = require('sinon-chai')
 
@@ -19,22 +17,16 @@ let script
 
 describe('./lib/lambda/taskExec.js', () => {
   describe('#execLoad', () => {
-    const outputPath = path.resolve(os.tmpdir(), 'output.json')
-
     const runnerFailIfCalled = () => {
       throw new Error('run() should not be called.')
     }
 
     const runnerMock = (expectedScript, actualResults, exitCode) =>
-      (aScript) => {
+      (aScript, options) => {
         expect(aScript).to.deep.equal(expectedScript)
-        fs.writeFileSync(outputPath, JSON.stringify(actualResults))
+        if (actualResults) options.output(actualResults)
         process.exit(exitCode)
       }
-
-    afterEach(() => {
-      if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath)
-    })
 
     it('does nothing in simulation mode', () => {
       script = { _trace: true, _simulation: true }
@@ -44,14 +36,10 @@ describe('./lib/lambda/taskExec.js', () => {
 
     it('invokes artillery:run and returns the results', () => {
       script = { _trace: true, _simulation: false }
-      results = { Payload: '{ "errors": 0 }' }
+      results = { Payload: '{ "errors": 1, "reports": [] }' }
 
       return taskExec(runnerMock(script, results, 0))(1, script)
         .should.eventually.eql(results)
-        .then(() => {
-          // Verify files have been cleaned up
-          expect(fs.existsSync(outputPath)).to.be.false
-        })
     })
 
     it('throws for non-zero exit codes', () => {
@@ -60,10 +48,14 @@ describe('./lib/lambda/taskExec.js', () => {
 
       return taskExec(runnerMock(script, results, 1))(1, script)
         .should.be.rejectedWith('Artillery exited with non-zero code: 1')
-        .then(() => {
-          // Files will remain in this case. S/B helpful for troubleshooting.
-          expect(fs.existsSync(outputPath)).to.be.true
-        })
+    })
+
+    it('throws if results not set for 0 exit code', () => {
+      script = { _trace: true, _simulation: false }
+      results = null
+
+      return taskExec(runnerMock(script, results, 1))(1, script)
+        .should.be.rejectedWith('Artillery exited with zero, but test results not set.')
     })
   })
 })

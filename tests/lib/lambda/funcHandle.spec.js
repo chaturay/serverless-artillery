@@ -45,7 +45,7 @@ describe('./lib/lambda/funcHandle.js', () => {
       })
     })
     describe('#addMetadataToInput', () => {
-      const addMetadataToInput = func.handle.impl.addMetadataToInput
+      const { addMetadataToInput } = func.handle.impl
       it('should return a new object with the function name metadata', () => {
         const input = { foo: 'bar' }
         const context = { functionName: 'baz' }
