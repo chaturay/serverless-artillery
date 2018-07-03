@@ -36,7 +36,7 @@ describe('./lib/lambda/taskExec.js', () => {
 
     it('invokes artillery:run and returns the results', () => {
       script = { _trace: true, _simulation: false }
-      results = { Payload: '{ "errors": 1, "reports": [] }' }
+      results = { Payload: '{ "errors": 0 }' }
 
       return taskExec(runnerMock(script, results, 0))(1, script)
         .should.eventually.eql(results)
@@ -54,7 +54,7 @@ describe('./lib/lambda/taskExec.js', () => {
       script = { _trace: true, _simulation: false }
       results = null
 
-      return taskExec(runnerMock(script, results, 1))(1, script)
+      return taskExec(runnerMock(script, results, 0))(1, script)
         .should.be.rejectedWith('Artillery exited with zero, but test results not set.')
     })
   })
