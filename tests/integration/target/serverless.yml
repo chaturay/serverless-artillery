@@ -2,55 +2,15 @@ service: target
 
 provider:
   name: aws
-  runtime: nodejs6.10
-#  iamRoleStatements:
-#    -  Effect: Allow
-#       Action:
-#         - 'dynamodb:UpdateItem'
-#       Resource:
-#        Fn::Join:
-#          - '/'
-#          - - 'arn:aws:dynamodb:${self:provider.region}:${self:custom.private.accountId}:table'
-#            - Ref: ProductCategory
-#    -  Effect: Allow
-#       Action:
-#         - 'dynamodb:UpdateItem'
-#       Resource:
-#        Fn::Join:
-#          - '/'
-#          - - 'arn:aws:dynamodb:${self:provider.region}:${self:custom.private.accountId}:table'
-#            - Ref: ProductCatalog
+  runtime: nodejs8.10
 
 functions:
-  get:
-    handler: handler.get
+  root:
+    handler: handler.handler
     events:
-      - http:
-          path: /
-          method: get
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
+      - http: ANY /
 
-resources:
-#  Resources:
-#    ActivityRecord:
-#      Type: AWS::DynamoDB::Table
-#      Properties:
-#        AttributeDefinitions:
-#          - AttributeName: category
-#            AttributeType: S
-#        KeySchema:
-#          - AttributeName: category
-#            KeyType: HASH
-#        ProvisionedThroughput:
-#          ReadCapacityUnits: 1
-#          WriteCapacityUnits: 1
-#        TableName: ${self:custom.stage}-ProductCategory-${self:custom.productCatalogBuilderVersion}
-  Outputs:
-     GetApi:
-       Description: The URL of the ApiGateway at which to invoke the get function
-       Value:
-        Ref: ApiGatewayRestApi
-       Export:
-        Name: ${self:service}-get-api
+  proxy:
+    handler: handler.handler
+    events:
+      - http: ANY /{proxy+}

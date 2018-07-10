@@ -1,9 +1,7 @@
-module.exports.get = (event, context, callback) => {
-  const response = {
-    statusCode: 200,
-    body: JSON.stringify({
-      message: process.env.MESSAGE || 'success',
-    }),
-  }
-  callback(null, response)
-}
+const awsServerlessExpress = require('aws-serverless-express')
+const app = require('./app')
+
+const server = awsServerlessExpress.createServer(app)
+
+exports.handler = (event, context) =>
+  awsServerlessExpress.proxy(server, event, context)
