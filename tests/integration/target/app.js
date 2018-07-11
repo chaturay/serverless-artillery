@@ -38,12 +38,16 @@ app.get('/reset', (req, res) => {
 
 app.get('/requests', (req, res) => {
   console.log('reporting requests')
-  res.send(theStats.requests())
+  res
+    .type('application/json')
+    .send(JSON.stringify(theStats.requests()))
 })
 
 app.get('/totals', (req, res) => {
   console.log('reporting totals')
-  res.send(theStats.totals())
+  res
+    .type('application/json')
+    .send(JSON.stringify(theStats.totals()))
 })
 
 app.all('/*', (req, res) => {
