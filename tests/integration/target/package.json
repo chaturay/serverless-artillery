@@ -1,0 +1,17 @@
+{
+  "name": "target",
+  "version": "0.0.1",
+  "description": "Express app which can track request made against it.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Nordstrom Technology",
+  "license": "ISC",
+  "dependencies": {
+    "aws-serverless-express": "^3.2.0",
+    "express": "^4.16.3"
+  },
+  "repository": {}
+}
