@@ -52,9 +52,11 @@ app.get('/totals', (req, res) => {
 
 app.get('/', (req, res) => {
   console.log(`waiting for ${process.env.WAIT} ms`)
-  res
-    .type('application/json')
-    .send(JSON.stringify({})
+  setTimeout(() => {
+    res
+      .type('application/json')
+      .send(JSON.stringify({}))
+  }, process.env.WAIT)
 })
 
 app.all('/*', (req, res) => {
