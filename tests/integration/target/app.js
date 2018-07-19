@@ -50,6 +50,13 @@ app.get('/totals', (req, res) => {
     .send(JSON.stringify(theStats.totals()))
 })
 
+app.get('/', (req, res) => {
+  console.log(`waiting for ${process.env.WAIT} ms`)
+  res
+    .type('application/json')
+    .send(JSON.stringify({})
+})
+
 app.all('/*', (req, res) => {
   console.log(req.path)
   theStats.count(req)
@@ -57,4 +64,3 @@ app.all('/*', (req, res) => {
 })
 
 module.exports = app
-
