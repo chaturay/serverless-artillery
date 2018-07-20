@@ -51,7 +51,7 @@ describe('./lib/lambda/funcHandle.js', () => {
         const context = { functionName: 'baz' }
         const output = addMetadataToInput(input, context)
         assert.notStrictEqual(input, output)
-        assert.deepStrictEqual(output, { foo: 'bar', _functionName: 'baz' })
+        assert.deepStrictEqual(output, { foo: 'bar', _funcAws: { functionName: 'baz' } })
       })
     })
     describe('#createHandler', () => {
@@ -144,7 +144,7 @@ describe('./lib/lambda/funcHandle.js', () => {
       it('should add metadata to input', () => {
         const { createUnhandledRejectionHandler, handleTimeout } = func.handle.impl
         const answer = {}
-        const inputWithMetadata = { _functionName: 'foo' }
+        const inputWithMetadata = { _funcAws: { functionName: 'foo' } }
         const mergeAndInvoke = sinon.stub().returns(Promise.resolve(answer))
         const context = { getRemainingTimeInMillis: () => 60000 }
         const addMetadataToInput = sinon.stub().callsFake(() => inputWithMetadata)
