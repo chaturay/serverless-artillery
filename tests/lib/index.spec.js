@@ -834,32 +834,26 @@ scenarios:
       })
       describe('error handling', () => {
         let implParseInputStub
-        let processExitStub
         beforeEach(() => {
           implParseInputStub = sinon.stub(slsart.impl, 'parseInput')
-          processExitStub = sinon.stub(process, 'exit').returns()
         })
         afterEach(() => {
           implParseInputStub.restore()
-          processExitStub.restore()
         })
         it('handles and reports validation errors from the function plugin, exiting the process', () => {
           implParseInputStub.throws(new func.def.FunctionError('func.error'))
           return slsart.invoke({ d: testJsonScriptStringified })
-            .then(() => expect(processExitStub).to.have.been.calledWithExactly(1))
-            .should.be.fulfilled
+            .should.be.rejectedWith(func.def.FunctionError, 'func.error')
         })
         it('handles and reports validation errors from the task plugin, exiting the process', () => {
           implParseInputStub.throws(new task.def.TaskError('task.error'))
           return slsart.invoke({ d: testJsonScriptStringified })
-            .then(() => expect(processExitStub).to.have.been.calledWithExactly(1))
-            .should.be.fulfilled
+            .should.be.rejectedWith(task.def.TaskError, 'task.error')
         })
         it('handles and reports unexpected errors, exiting the process', () => {
           implParseInputStub.throws(new Error('error'))
           return slsart.invoke({ d: testJsonScriptStringified })
-            .then(() => expect(processExitStub).to.have.been.calledWithExactly(1))
-            .should.be.fulfilled
+            .should.be.rejectedWith(task.def.Error, 'error')
         })
       })
       describe('performance mode', () => {
