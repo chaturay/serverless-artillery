@@ -8,6 +8,9 @@ Sequence of events when running the test:
 
 Each integration test will create a random string at start of test. This random string will be included in each payload so that results will be meaningful even with concurrent tests.
 
+Start an integration test by running the command:
+`npm run integration`
+
 ## Target
 The target includes an API gateway, lambda and either an S3 bucket. The lambda will:
 1. Save the call details, and payload in the bucket (file names include the unique test run ID).
