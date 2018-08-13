@@ -35,7 +35,7 @@ const modifyService = () => idioms.loadAndMerge(path.join(__dirname, 'serverless
   },
 })
 
-module.exports = () => idioms.runIn(__dirname, BbPromise.all(
+module.exports = () => idioms.runIn(__dirname, () => BbPromise.all(
   [
     idioms.functionDoesNotExist(),
     idioms.scriptDoesNotExist(),

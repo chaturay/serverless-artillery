@@ -1,6 +1,7 @@
+const BbPromise = require('bluebird')
 const idioms = require('../idioms')
 
-module.exports = () => idioms.runIn(__dirname, Promise.resolve()
+module.exports = () => idioms.runIn(__dirname, () => BbPromise.resolve()
   .then(idioms.functionDoesNotExist())
   .then(idioms.deploy())
   .then(idioms.functionExists())

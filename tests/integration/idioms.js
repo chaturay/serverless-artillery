@@ -98,6 +98,9 @@ const impl = {
   deploy: options => () => util.cmdLine(stdArgv.concat('deploy'), slsart.deploy, options),
   invoke: options => () => util.cmdLine(stdArgv.concat('invoke'), slsart.invoke, options),
   remove: options => () => util.cmdLine(stdArgv.concat('remove'), slsart.remove, options),
+  script: options => () => util.cmdLine(stdArgv.concat('script'), slsart.script, options),
+  configure: options => () => util.cmdLine(stdArgv.concat('configure'), slsart.configure, options),
+  monitor: options => () => util.cmdLine(stdArgv.concat('monitor'), slsart.monitor, options),
   // FACTS
   functionExists: functionName => () => util.getFunctionConfiguration(functionName),
   functionDoesNotExist: functionName => () => util.getFunctionConfiguration(functionName)
