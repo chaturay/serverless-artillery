@@ -2,12 +2,10 @@ const AWS = require('aws-sdk')
 const yaml = require('js-yaml')
 const fs = require('fs')
 
-// FIX: we'll be getting these asynchronously, so they can't be constants.
-const defaultBucket = ''
-const defaultKeyPrefix = ''
+const impl = module.exports = {}
 
 const pure = {
-  readFile: (readFile = fs.readFile) =>
+  readFile: ({ readFile } = fs) =>
     (path, options) =>
       new Promise((resolve, reject) =>
         readFile(
@@ -19,21 +17,32 @@ const pure = {
 
   parseYaml: yaml.safeLoad,
 
+  readConfig: ({ readFile, parseYaml } = impl) =>
+    readFile('../../config.yml')
+      .then(parseYaml),
+
+  createParams: ({ config } = impl) =>
+    (key, options) =>
+      config
+        .then(({ target: bucket }) =>
+          Object.assign({}, options, { Bucket: bucket, Key: key })),
+
   s3: (
     s3 = new AWS.S3(),
-    bucket = defaultBucket,
-    keyPrefix = defaultKeyPrefix
+    { createParams } = impl
   ) => ({
-    writeFile: (bucket, key, data) =>
-      s3.putObject(),
+    writeFile: (key, data) =>
+      createParams(key)
+        .then(params => Object.assign({}, params, { Body: data }))
+        .then(params => s3.putObject(params).promise()),
     listFiles: () => {},
     readFile: () => {},
   }),
 }
 
-module.exports = {
-  pure,
-  readFile: pure.readFile(),
-  readYamlFile: pure.readYamlFile(),
-  s3: pure.s3(),
-}
+impl.pure = pure
+impl.readFile = pure.readFile()
+impl.parseYaml = pure.parseYaml
+impl.config = pure.readConfig()
+impl.createParams = pure.createParams()
+impl.s3 = pure.s3()
