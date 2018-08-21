@@ -2,7 +2,7 @@ const AWS = require('aws-sdk')
 const yaml = require('js-yaml')
 const fs = require('fs')
 
-const impl = module.exports = {}
+const { memoize } = require('./fn')
 
 const pure = {
   readFile: ({ readFile } = fs) =>
@@ -17,19 +17,19 @@ const pure = {
 
   parseYaml: yaml.safeLoad,
 
-  readConfig: ({ readFile, parseYaml } = impl) =>
-    readFile('../../config.yml')
-      .then(parseYaml),
+  readConfig: (readFile = pure.readFile(), parseYaml = pure.parseYaml) =>
+    memoize(() => readFile('../../config.yml')
+      .then(parseYaml)),
 
-  createParams: ({ config } = impl) =>
+  createParams: (readConfig = pure.readConfig) =>
     (key, options) =>
-      config
+      readConfig()
         .then(({ target: bucket }) =>
           Object.assign({}, options, { Bucket: bucket, Key: key })),
 
   s3: (
     s3 = new AWS.S3(),
-    { createParams } = impl
+    createParams = pure.createParams()
   ) => ({
     writeFile: (key, data) =>
       createParams(key)
@@ -40,9 +40,11 @@ const pure = {
   }),
 }
 
-impl.pure = pure
-impl.readFile = pure.readFile()
-impl.parseYaml = pure.parseYaml
-impl.config = pure.readConfig()
-impl.createParams = pure.createParams()
-impl.s3 = pure.s3()
+module.exports = {
+  pure,
+  readFile: pure.readFile(),
+  parseYaml: pure.parseYaml,
+  readConfig: pure.readConfig,
+  createParams: pure.createParams(),
+  s3: pure.s3(),
+}

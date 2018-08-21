@@ -7,10 +7,26 @@ chai.use(sinonChai)
 chai.use(chaiAsPromised)
 
 const { assert } = chai
-const { stub } = sinon
+const { stub, match: { func, has } } = sinon
 
 const {
   pure: {
-    // todo
+    readFile,
   },
 } = require('./persistence')
+
+describe.only('./tests/integration/idioms/persistence', () => {
+  describe('pure', () => {
+    describe('#readFile', () => {
+      it('should pass through path, options and callback', () => {
+        const readFileStub = stub()
+        const path = 'foo'
+        const options = {}
+        const result = readFile({ readFile: readFileStub })(path, options)
+        assert(readFileStub.calledOnce, 'should be called once')
+        assert(readFileStub.calledWith(path, options, func),
+          'should be called with path, options and callback')
+      })
+    })
+  })
+})
