@@ -17,7 +17,7 @@ if (!aws.config.region) {
 }
 
 const introWorkflow = require('./intro/intro')
-const monitoringWorkflow = require('./monitor/monitor')
+const monitoringWorkflow = require('./monitoring-workflow')
 
 BbPromise.resolve()
   // ## !! PRIORITY 1 !! ##
