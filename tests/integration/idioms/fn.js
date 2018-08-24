@@ -21,7 +21,24 @@ const memoize = (fn, arity) => {
   )
 }
 
+const flatten = values =>
+  values.reduce((flattened, value) =>
+    (Array.isArray(value)
+      ? flattened.concat(flatten(value))
+      : flattened.concat([value])), [])
+
+const isThennable = value =>
+  value && value.then && (typeof value.then === 'function')
+
+const pipe = (...steps) => initialValue =>
+  flatten(steps).reduce((value, step) => (step
+    ? isThennable(value)
+      ? value.then(step)
+      : step(value)
+    : value), initialValue)
+
 module.exports = {
   curry,
   memoize,
+  pipe,
 }

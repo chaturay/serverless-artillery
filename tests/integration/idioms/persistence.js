@@ -2,7 +2,7 @@ const AWS = require('aws-sdk')
 const yaml = require('js-yaml')
 const fs = require('fs')
 
-const { memoize } = require('./fn')
+const { memoize, pipe } = require('./fn')
 
 const configPath = '../../config.yml'
 
@@ -26,21 +26,43 @@ const pure = {
       .then(parseYaml),
 
   createParams: (readConfig = memoize(pure.readConfig())) =>
-    (key, options) =>
-      readConfig()
-        .then(({ target: { bucket } }) =>
-          Object.assign({}, options, { Bucket: bucket, Key: key })),
+    pipe(
+      (options = {}) => Object.keys(options)
+        .filter(key => options[key] !== undefined)
+        .reduce((result, key) => {
+          result[key] = options[key]
+          return result
+        }, {}),
+      options =>
+        readConfig().then(config => ({ config, options })),
+      ({ config: { target: { bucket } }, options }) =>
+        Object.assign({}, options, { Bucket: bucket })
+    ),
 
   s3: (
     s3 = new AWS.S3(),
-    createParams = pure.createParams()
-  ) => ({
-    writeFile: (key, data) =>
-      createParams(key, { Body: data })
-        .then(params => s3.putObject(params).promise()),
-    listFiles: () => {},
-    readFile: () => {},
-  }),
+    createParams = memoize(pure.createParams())
+  ) => {
+    const impl = {
+      writeFile: (key, data) =>
+        createParams({ Key: key, Body: data })
+          .then(params => s3.putObject(params).promise())
+          .then(() => true),
+
+      listFiles: (prefix, continuationToken) =>
+        createParams({ Prefix: prefix, ContinuationToken: continuationToken })
+          .then(params => s3.listObjectsV2(params).promise())
+          .then(({ Contents, IsTruncated, NextContinuationToken }) => ({
+            keys: Contents.map(({ Key }) => Key),
+            next: IsTruncated
+              ? () => impl.listFiles(prefix, NextContinuationToken)
+              : undefined,
+          })),
+
+      readFile: () => {},
+    }
+    return impl
+  },
 }
 
 module.exports = {

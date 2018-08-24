@@ -58,10 +58,12 @@ describe.only('./tests/integration/idioms/persistence', () => {
         return assert.isRejected(readFile({ readFile: readFileStub })(), error)
       })
     })
+
     describe('#parseYaml', () => {
       it('should parse yaml', () =>
         assert.deepStrictEqual(parseYaml('foo: bar'), { foo: 'bar' }))
     })
+
     describe('#readConfig', () => {
       it('should read config.yml', () => {
         const readFileStub = stub()
@@ -74,29 +76,31 @@ describe.only('./tests/integration/idioms/persistence', () => {
         readConfig(stub().returns(Promise.resolve('foo: bar')))()
           .then(config => assert.deepStrictEqual(config, { foo: 'bar' })))
     })
+
     describe('#createParams', () => {
       const bucketName = 'foo-bucket'
       const readConfigStub = stub()
         .returns(Promise.resolve({ target: { bucket: bucketName } }))
-      it('should set Bucket and Key', () =>
-        createParams(readConfigStub)('foo')
+      it('should set Bucket', () =>
+        createParams(readConfigStub)()
           .then(params =>
-            assert.deepStrictEqual(params, { Bucket: bucketName, Key: 'foo' })))
+            assert.deepStrictEqual(params, { Bucket: bucketName })))
       it('should incorporate options', () =>
-        createParams(readConfigStub)('foo', { Bar: 'baz' })
+        createParams(readConfigStub)({ Bar: 'baz' })
           .then(params =>
             assert.deepStrictEqual(
               params,
-              { Bucket: bucketName, Key: 'foo', Bar: 'baz' }
+              { Bucket: bucketName, Bar: 'baz' }
             )))
-      it('should not override bucket or key', () =>
-        createParams(readConfigStub)('foo', { Bucket: 'wrong!', Key: 'wrong!' })
+      it('should not override bucket', () =>
+        createParams(readConfigStub)({ Bucket: 'wrong!' })
           .then(params =>
-            assert.deepStrictEqual(params, { Bucket: bucketName, Key: 'foo' })))
+            assert.deepStrictEqual(params, { Bucket: bucketName })))
     })
+
     describe('s3', () => {
       describe('#writeFile', () => {
-        it('puts the object', () => {
+        it('should put the object', () => {
           const putObjectStub = stub().returns({ promise: () => {} })
           const params = {}
           const createParamsStub = stub().returns(Promise.resolve(params))
@@ -106,11 +110,69 @@ describe.only('./tests/integration/idioms/persistence', () => {
                 putObjectStub.calledWithExactly(params)))
         })
       })
+
       describe('#listFiles', () => {
-        it('')
+        it('should list the files', () => {
+          const listObjectsV2Stub = stub().returns({
+            promise: () => Promise.resolve({ Contents: [{ Key: 'foo' }, { Key: 'bar' }] }),
+          })
+          const createParamsStub = stub().returns(Promise.resolve({}))
+          return s3({ listObjectsV2: listObjectsV2Stub }, createParamsStub)
+            .listFiles()
+            .then(({ keys }) =>
+              assert.deepStrictEqual(keys, ['foo', 'bar']))
+        })
+        it('should not provide a next function when there are no more files', () => {
+          const listObjectsV2Stub = stub().returns({
+            promise: () => Promise.resolve({ Contents: [{ Key: 'foo' }, { Key: 'bar' }] }),
+          })
+          const createParamsStub = stub().returns(Promise.resolve({}))
+          return s3({ listObjectsV2: listObjectsV2Stub }, createParamsStub)
+            .listFiles()
+            .then(({ next }) => assert(!next))
+        })
+        it('should provide a next function when there are more files to list', () => {
+          const continuationToken = {}
+          const listObjectsV2Stub = stub().returns({
+            promise: () => Promise.resolve({
+              Contents: [{ Key: 'foo' }, { Key: 'bar' }],
+              IsTruncated: true,
+              NextContinuationToken: continuationToken,
+            }),
+          })
+          const createParamsStub = stub().returns(Promise.resolve({}))
+          return s3({ listObjectsV2: listObjectsV2Stub }, createParamsStub)
+            .listFiles()
+            .then(({ next }) => assert(next && (typeof next === 'function')))
+        })
+        it('should list remaining files when calling next', () => {
+          const continuationToken = {}
+          const listObjectsV2Stub = stub()
+            .onFirstCall().returns({
+              promise: () => Promise.resolve({
+                Contents: [{ Key: 'foo' }, { Key: 'bar' }],
+                IsTruncated: true,
+                NextContinuationToken: continuationToken,
+              }),
+            })
+            .onSecondCall().returns({
+              promise: () => Promise.resolve({
+                Contents: [{ Key: 'baz' }, { Key: 'biz' }],
+              }),
+            })
+          const createParamsStub = stub().returns(Promise.resolve({}))
+          return s3({ listObjectsV2: listObjectsV2Stub }, createParamsStub)
+            .listFiles()
+            .then(({ next }) => next())
+            .then(({ keys, next }) => {
+              assert(!next)
+              assert.deepStrictEqual(keys, ['baz', 'biz'])
+            })
+        })
       })
+
       describe('#readFile', () => {
-        it('')
+        it('should read the file')
       })
     })
   })
