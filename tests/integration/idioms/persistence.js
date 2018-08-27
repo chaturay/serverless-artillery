@@ -59,9 +59,16 @@ const pure = {
               : undefined,
           })),
 
-      readFile: () => {},
+      readFile: key =>
+        s3.getObject(createParams({ Key: key })).promise()
+          .then(({ Body }) => Body.toString()),
     }
-    return impl
+    return Object.assign({
+      readObject: pipe(impl.readFile, JSON.parse),
+
+      writeObject: (key, object) =>
+        impl.writeFile(key, JSON.stringify(object)),
+    }, impl)
   },
 }
 

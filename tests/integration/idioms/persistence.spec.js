@@ -20,7 +20,7 @@ const {
   },
 } = require('./persistence')
 
-describe.only('./tests/integration/idioms/persistence', () => {
+describe('./tests/integration/idioms/persistence', () => {
   describe('pure', () => {
     describe('#readFile', () => {
       it('should pass through path, options and callback', () => {
@@ -155,7 +155,8 @@ describe.only('./tests/integration/idioms/persistence', () => {
                 NextContinuationToken: continuationToken,
               }),
             })
-            .onSecondCall().returns({
+            .onSecondCall()
+            .returns({
               promise: () => Promise.resolve({
                 Contents: [{ Key: 'baz' }, { Key: 'biz' }],
               }),
@@ -172,7 +173,19 @@ describe.only('./tests/integration/idioms/persistence', () => {
       })
 
       describe('#readFile', () => {
-        it('should read the file')
+        it('should get the object', () => {
+          const expected = 'foo'
+          const getObjectStub = stub()
+            .returns({
+              promise: () =>
+                Promise.resolve({ Body: Buffer.from(expected) }),
+            })
+          const params = {}
+          const createParamsStub = stub().returns(Promise.resolve(params))
+          return s3({ getObject: getObjectStub }, createParamsStub).readFile()
+            .then(data =>
+              assert.strictEqual(data, expected))
+        })
       })
     })
   })
