@@ -20,7 +20,9 @@ const tagContext = {
 }
 
 const validScript = () => ({
-  _functionName: tagContext.functionName,
+  _funcAws: {
+    functionName: tagContext.functionName,
+  },
   config: {
     phases: [
       {
