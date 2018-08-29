@@ -17,10 +17,12 @@ const {
     readConfig,
     createParams,
     s3,
+    readObject,
+    writeObject,
   },
 } = require('./persistence')
 
-describe('./tests/integration/idioms/persistence', () => {
+describe.only('./tests/integration/idioms/persistence', () => {
   describe('pure', () => {
     describe('#readFile', () => {
       it('should pass through path, options and callback', () => {
@@ -187,6 +189,31 @@ describe('./tests/integration/idioms/persistence', () => {
               assert.strictEqual(data, expected))
         })
       })
+    })
+
+    describe('#readObject', () => {
+      it('should read json', () =>
+        assert.eventually.deepStrictEqual(
+          readObject(key =>
+            (key === 'my-object'
+              ? Promise.resolve('{"foo":"bar"}')
+              : Promise.reject('not found'))
+          )('my-object'),
+          { foo: 'bar' }
+        ))
+    })
+
+    describe('#writeObject', () => {
+      it('should write json', () => {
+        const writeFileStub = stub()
+        const key = 'my-object'
+        writeObject(writeFileStub)(key, { foo: 'bar' })
+        assert.ok(writeFileStub.calledWithExactly(key, '{"foo":"bar"}'))
+      })
+    })
+
+    describe('#streamObjects', () => {
+      // todo
     })
   })
 })
