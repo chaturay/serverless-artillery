@@ -80,7 +80,10 @@ const pure = {
         isComplete: false,
         objectsStreamed: 0,
         objectsQueued: 0,
+        lastError: undefined,
       }
+      const mutateState = newState =>
+        Object.assign(mutableState, newState)
       const state = {
         maxConcurrentDownloads: maxConcurrentDownloads > 16
           ? 16
@@ -92,10 +95,12 @@ const pure = {
       const readAndReport = key =>
         readObject(key)
           .then(state.callback)
+          .catch(lastError => mutateState({ lastError, isCancelled: true }))
           .then(() => mutableState.objectsStreamed += 1)
           .then(() => mutableState.objectsQueued -= 1)
       const readObjects = keys =>
-        ((mutableState.objectsQueued = keys.length) &&
+        (!mutableState.isCancelled &&
+          (mutableState.objectsQueued = keys.length) &&
           keys.length > state.maxConcurrentDownloads
           ? Promise.all(downloadIndexes.map(i => readAndReport(keys[i])))
             .then(() => readObjects(keys.slice(state.maxConcurrentDownloads)))
@@ -106,7 +111,7 @@ const pure = {
             (mutableState.objectsQueued += keys.length) && readObjects(keys)
               .then(() => (next ? downloadAll(next) : undefined)))
           .then(() => ((mutableState.isComplete = true) && state.callback()))
-      downloadAll(listFiles(prefix))
+      downloadAll(() => listFiles(prefix))
       return {
         cancel: () => mutableState.isCancelled = true,
         getCurrentState: () => Object.assign({}, mutableState, state),

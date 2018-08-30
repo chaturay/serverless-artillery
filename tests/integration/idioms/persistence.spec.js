@@ -19,10 +19,11 @@ const {
     s3,
     readObject,
     writeObject,
+    streamObjects,
   },
 } = require('./persistence')
 
-describe.only('./tests/integration/idioms/persistence', () => {
+describe('./tests/integration/idioms/persistence', () => {
   describe('pure', () => {
     describe('#readFile', () => {
       it('should pass through path, options and callback', () => {
@@ -212,8 +213,39 @@ describe.only('./tests/integration/idioms/persistence', () => {
       })
     })
 
-    describe('#streamObjects', () => {
-      // todo
+    describe.only('#streamObjects', () => {
+      it('should stream objects', () => {
+        const keys1 = ['foo', 'bar']
+        const keys2 = ['baz', 'biz']
+        const listFilesStub = stub().returns(Promise.resolve({
+          keys: keys1,
+          next: () => Promise.resolve({ keys: keys2 }),
+        }))
+        const expected = {
+          foo: { i: 1 },
+          bar: { i: 2 },
+          baz: { i: 3 },
+          biz: { i: 4 },
+        }
+        const readObjectsStub = stub().callsFake(key =>
+          Promise.resolve(expected[key]))
+        const prefix = 'dir/'
+        return new Promise((resolve, reject) => {
+          const streamed = []
+          streamObjects(listFilesStub, readObjectsStub)(prefix, (o) => {
+            o
+              ? streamed.push(o)
+              : resolve(streamed)
+          })
+        })
+          .then((objects) => {
+            assert.ok(listFilesStub.calledWithExactly(prefix))
+            assert.deepStrictEqual(
+              objects,
+              Object.keys(expected).map(k => expected[k])
+            )
+          })
+      })
     })
   })
 })
