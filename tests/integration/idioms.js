@@ -11,8 +11,6 @@ const slsart = require(path.join('..', '..', 'lib', 'index.js')) // eslint-disab
 
 const stdArgv = ['node', 'slsart']
 
-const { cwd } = process
-
 const util = {
   // UTILITIES
   getFunctionName: functionName => functionName || 'serverless-artillery-dev-loadGenerator',
@@ -56,20 +54,10 @@ const util = {
         }
       })
   },
-  replaceCwd: (dirToReplace) => {
-    process.cwd = () => dirToReplace
-  },
-  restoreCwd: () => {
-    process.cwd = cwd
-  },
   fileExists: filePath =>
-    fs.lstat(filePath, (stats) => {
-      try {
-        return stats.isFile()
-      } catch (ex) {
-        return false
-      }
-    }),
+    fs.lstatAsync(filePath)
+      .then(stats => stats.isFile())
+      .catch(() => false),
   scriptExists: script => util.fileExists(script || 'script.yml'),
   scriptDoesNotExist: script => util.scriptExists(script).then(exists => !exists),
   slsYmlExists: slsPath => util.fileExists(slsPath || 'serverless.yml'),
@@ -78,9 +66,10 @@ const util = {
 
 const impl = {
   runIn: (dir, action) => {
-    util.replaceCwd(dir)
+    const cwd = process.cwd()
+    process.chdir(dir)
     action()
-      .finally(util.restoreCwd)
+      .finally(() => process.chdir(cwd))
   },
   loadAndMerge: (file, modifier) =>
     fs.readFileAsync(file)
@@ -88,7 +77,8 @@ const impl = {
         const base = yaml.safeLoad(content)
         return merge(base, modifier)
       }),
-  cleanupAll: () => BbPromise.all(impl.cleanupService().concat(impl.cleanupScript())),
+  callAll: fns => BbPromise.all(fns.map(fn => fn())),
+  cleanupAll: () => BbPromise.all([impl.cleanupService(), impl.cleanupScript()]),
   cleanupService: () => BbPromise.all(slsart.constants.ServerlessFiles.map(file => fs.unlinkAsync(file))),
   cleanupScript: () => fs.unlinkAsync(slsart.constants.DefaultScriptName),
   // TARGET SERVICE
