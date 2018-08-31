@@ -1,56 +1,63 @@
-service: target
+service: slsart-integration-target
 
 provider:
   name: aws
   runtime: nodejs6.10
-#  iamRoleStatements:
-#    -  Effect: Allow
-#       Action:
-#         - 'dynamodb:UpdateItem'
-#       Resource:
-#        Fn::Join:
-#          - '/'
-#          - - 'arn:aws:dynamodb:${self:provider.region}:${self:custom.private.accountId}:table'
-#            - Ref: ProductCategory
-#    -  Effect: Allow
-#       Action:
-#         - 'dynamodb:UpdateItem'
-#       Resource:
-#        Fn::Join:
-#          - '/'
-#          - - 'arn:aws:dynamodb:${self:provider.region}:${self:custom.private.accountId}:table'
-#            - Ref: ProductCatalog
+  endpointType: private
+  iamRoleStatements:
+    -  Effect: "Allow"
+       Action:
+         - "s3:ListBucket"
+         - "s3:PutObject"
+         - "s3:GetObject"
+         - "s3:DeleteObject"
+       Resource: "arn:aws:s3:::slsart-integration-target-requests*"
 
 functions:
-  get:
-    handler: handler.get
+  test:
+    handler: handler.test
     events:
       - http:
-          path: /
+          path: test/{id}
           method: get
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
+  list:
+    handler: handler.list
+    events:
+      - http:
+          path: list/{id}
+          method: get
+
+  deleteList:
+    handler: handler.deleteList
+    events:
+      - http:
+          path: deletelist/{id}
+          method: delete
 
 resources:
-#  Resources:
-#    ActivityRecord:
-#      Type: AWS::DynamoDB::Table
-#      Properties:
-#        AttributeDefinitions:
-#          - AttributeName: category
-#            AttributeType: S
-#        KeySchema:
-#          - AttributeName: category
-#            KeyType: HASH
-#        ProvisionedThroughput:
-#          ReadCapacityUnits: 1
-#          WriteCapacityUnits: 1
-#        TableName: ${self:custom.stage}-ProductCategory-${self:custom.productCatalogBuilderVersion}
+  Resources:
+
+    TestBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: slsart-integration-target-requests
+
   Outputs:
-     GetApi:
+     TestApi:
        Description: The URL of the ApiGateway at which to invoke the get function
        Value:
         Ref: ApiGatewayRestApi
        Export:
-        Name: ${self:service}-get-api
+        Name: ${self:service}-test-api
+     ListApi:
+       Description: The URL of the ApiGateway at which to invoke the get function
+       Value:
+        Ref: ApiGatewayRestApi
+       Export:
+        Name: ${self:service}-list-api
+     DeleteListApi:
+       Description: The URL of the ApiGateway at which to invoke the get function
+       Value:
+        Ref: ApiGatewayRestApi
+       Export:
+        Name: ${self:service}-deletelist-api

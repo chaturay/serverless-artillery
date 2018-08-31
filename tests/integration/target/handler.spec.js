@@ -11,7 +11,7 @@ const { stub } = sinon
 
 const {
   pure: {
-    randomString, createEventId, handler, get,
+    randomString, createEventId, handler, test,
   },
 } = require('./handler')
 
@@ -67,7 +67,7 @@ describe('./tests/integration/target/handler.js', () => {
           .then(result => assert.strictEqual(result, expected))
       })
     })
-    describe('#get', () => {
+    describe('#test', () => {
       it('should return defaults', () => {
         const eventId = 'foo'
         const expected = {
@@ -77,7 +77,7 @@ describe('./tests/integration/target/handler.js', () => {
             eventId,
           }),
         }
-        assert.deepStrictEqual(get(stub().returns(eventId))(), expected)
+        assert.deepStrictEqual(test(stub().returns(eventId))(), expected)
       })
       it('should override defaults', () => {
         const eventId = 'foo'
@@ -89,7 +89,7 @@ describe('./tests/integration/target/handler.js', () => {
           }),
         }
         const event = { statusCode: 418 }
-        assert.deepStrictEqual(get(stub().returns(eventId))(event), expected)
+        assert.deepStrictEqual(test(stub().returns(eventId))(event), expected)
       })
       it('should pass values through', () => {
         const eventId = 'foo'
@@ -99,7 +99,7 @@ describe('./tests/integration/target/handler.js', () => {
           baz: 'biz',
         }
         const event = { statusCode: 418, body: 'bar', baz: 'biz' }
-        assert.deepStrictEqual(get(stub().returns(eventId))(event), expected)
+        assert.deepStrictEqual(test(stub().returns(eventId))(event), expected)
       })
     })
   })

@@ -1,57 +1,35 @@
 const AWS = require('aws-sdk')
-const yaml = require('js-yaml')
-const fs = require('fs')
 
-const { memoize, pipe } = require('./fn')
+const { memoize, pipe, flatten } = require('./fn')
 
-const configPath = '../../config.yml'
+const bucket = 'slsart-integration-target-requests'
 
 const pure = {
-  readFile: ({ readFile } = fs) =>
-    (path, options) =>
-      new Promise((resolve, reject) =>
-        readFile(
-          path,
-          options,
-          (err, data) => (err ? reject(err) : resolve(data.toString()))
-        )
-      ),
-
-  parseYaml: yaml.safeLoad,
-
-  configPath,
-
-  readConfig: (readFile = pure.readFile(), parseYaml = pure.parseYaml) =>
-    () => readFile(configPath)
-      .then(parseYaml),
-
-  createParams: (readConfig = memoize(pure.readConfig())) =>
-    pipe(
-      (options = {}) => Object.keys(options)
-        .filter(key => options[key] !== undefined)
-        .reduce((result, key) => {
-          result[key] = options[key]
-          return result
-        }, {}),
-      options =>
-        readConfig().then(config => ({ config, options })),
-      ({ config: { target: { bucket } }, options }) =>
-        Object.assign({}, options, { Bucket: bucket })
-    ),
+  createParams: pipe(
+    (options = {}) => Object.keys(options)
+      .filter(key => options[key] !== undefined)
+      .reduce((result, key) => {
+        result[key] = options[key]
+        return result
+      }, {}),
+    options =>
+      Object.assign({}, options, { Bucket: bucket })
+  ),
 
   s3: (
     s3 = new AWS.S3(),
-    createParams = memoize(pure.createParams())
+    createParams = memoize(pure.createParams)
   ) => {
     const s3Impl = {
       writeFile: (key, data) =>
-        createParams({ Key: key, Body: data })
-          .then(params => s3.putObject(params).promise())
+        s3.putObject(createParams({ Key: key, Body: data })).promise()
           .then(() => true),
 
       listFiles: (prefix, continuationToken) =>
-        createParams({ Prefix: prefix, ContinuationToken: continuationToken })
-          .then(params => s3.listObjectsV2(params).promise())
+        s3.listObjectsV2(createParams({
+          Prefix: prefix,
+          ContinuationToken: continuationToken,
+        })).promise()
           .then(({ Contents, IsTruncated, NextContinuationToken }) => ({
             keys: Contents.map(({ Key }) => Key),
             next: IsTruncated
@@ -62,6 +40,22 @@ const pure = {
       readFile: key =>
         s3.getObject(createParams({ Key: key })).promise()
           .then(({ Body }) => Body.toString()),
+
+      deleteFiles: (...keys) =>
+        s3.deleteObjects(
+          createParams(
+            {
+              Delete: {
+                Quiet: true,
+                Objects: flatten(keys).map(key => ({ Key: key })),
+              },
+            })
+        ).promise()
+          .then(({ Errors }) => ({
+            ok: !Errors.length,
+            errors: Errors.map(({ Key, Message }) =>
+              ({ key: Key, error: Message })),
+          })),
     }
     return s3Impl
   },
@@ -72,6 +66,22 @@ const pure = {
   writeObject: writeFile =>
     (key, object) =>
       writeFile(key, JSON.stringify(object)),
+
+  deleteObjects: (deleteFiles, listFiles) =>
+    (prefix) => {
+      const deleteNext = (next, count) =>
+        (next
+          ? next()
+            .then(({ keys, next }) =>
+              deleteFiles(keys)
+                .then(({ ok, errors }) => {
+                  if (ok) return
+                  throw new Error(`Failed to delete files: ${JSON.stringify(errors)}`)
+                })
+                .then(() => deleteNext(next, count + keys.length)))
+          : count)
+      deleteNext(() => listFiles(prefix), 0)
+    },
 
   streamObjects: (listFiles, readObject) =>
     (prefix, callback, { maxConcurrentDownloads = 4 } = {}) => {
@@ -124,12 +134,10 @@ const readObject = pure.readObject(s3.readFile)
 
 module.exports = {
   pure,
-  readFile: pure.readFile(),
-  parseYaml: pure.parseYaml,
-  readConfig: memoize(pure.readConfig()),
   createParams: pure.createParams(),
   s3,
   readObject,
   writeObject: pure.writeObject(s3.writeFile),
-  streamObjects: pure.streamObjects(s3.listObjects, readObject),
+  streamObjects: pure.streamObjects(s3.listFiles, readObject),
+  deleteObjects: pure.deleteObjects(s3.deleteFiles, s3.listFiles),
 }

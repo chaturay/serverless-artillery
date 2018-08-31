@@ -38,6 +38,7 @@ const pipe = (...steps) => initialValue =>
     : value), initialValue)
 
 module.exports = {
+  flatten,
   curry,
   memoize,
   pipe,
