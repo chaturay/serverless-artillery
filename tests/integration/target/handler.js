@@ -13,13 +13,11 @@ const pure = {
   // abstract implementation of the aws lambda handler logic
   handler: impl =>
     (event, context, callback) => {
-      console.log('ENTERING HANDLER')
       try {
         Promise.resolve(impl(event))
-          .then(result => console.log('HANDLER COMPLETE', result) || callback(undefined, result))
-          .catch(err => console.log('ERROR:', err.stack) || callback(err))
+          .then(result => callback(undefined, result))
+          .catch(callback)
       } catch (err) {
-        console.log('ERROR:', err.stack)
         callback(err)
       }
     },
@@ -35,12 +33,10 @@ const pure = {
       const eventId =
         `tests/${event.pathParameters.id}/${timestamp}.${randomString(8)}`
       const data = { timestamp, eventId } // todo: add other payload data
-      const response = Object.assign(
-        {
-          statusCode: 200,
-          body: JSON.stringify(data),
-        },
-        event)
+      const response = {
+        statusCode: 200,
+        body: JSON.stringify(data),
+      }
       return writeObject(eventId, data)
         .then(() => response)
     },

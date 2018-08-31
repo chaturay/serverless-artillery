@@ -11,7 +11,7 @@ const { stub } = sinon
 
 const {
   pure: {
-    randomString, createEventId, handler, test,
+    randomString, handler, test,
   },
 } = require('./handler')
 
@@ -26,14 +26,6 @@ describe('./tests/integration/target/handler.js', () => {
           )
         assert.strictEqual(randomString(5, random), '07isz')
       })
-    })
-    describe('#createEventId', () => {
-      it('should use a timestamp and a random string', () =>
-        assert.strictEqual(
-          createEventId(stub().returns('foo'), stub().returns('bar')),
-          'foo.bar'
-        )
-      )
     })
     describe('#handler', () => {
       const handlerAsync = (impl, createEventId) =>
@@ -69,37 +61,20 @@ describe('./tests/integration/target/handler.js', () => {
     })
     describe('#test', () => {
       it('should return defaults', () => {
-        const eventId = 'foo'
+        const writeObjectStub = stub().returns(Promise.resolve())
+        const now = stub().returns(12345)
+        const randomStringStub = stub().returns('abcde')
+        const testStub = test(writeObjectStub, now, randomStringStub)
+        const id = 42
         const expected = {
           statusCode: 200,
           body: JSON.stringify({
-            message: 'success',
-            eventId,
+            timestamp: 12345,
+            eventId: 'tests/42/12345.abcde',
           }),
         }
-        assert.deepStrictEqual(test(stub().returns(eventId))(), expected)
-      })
-      it('should override defaults', () => {
-        const eventId = 'foo'
-        const expected = {
-          statusCode: 418,
-          body: JSON.stringify({
-            message: 'success',
-            eventId,
-          }),
-        }
-        const event = { statusCode: 418 }
-        assert.deepStrictEqual(test(stub().returns(eventId))(event), expected)
-      })
-      it('should pass values through', () => {
-        const eventId = 'foo'
-        const expected = {
-          statusCode: 418,
-          body: 'bar',
-          baz: 'biz',
-        }
-        const event = { statusCode: 418, body: 'bar', baz: 'biz' }
-        assert.deepStrictEqual(test(stub().returns(eventId))(event), expected)
+        return testStub({ pathParameters: { id } })
+          .then(actual => assert.deepStrictEqual(actual, expected))
       })
     })
   })

@@ -2,5 +2,3 @@ monitor:
   subscription:
     - Endpoint: you@host.com
       Protocol: email
-target:
-  bucket: slsart-integration-target
