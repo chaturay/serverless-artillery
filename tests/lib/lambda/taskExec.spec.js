@@ -36,9 +36,10 @@ describe('./lib/lambda/taskExec.js', () => {
 
     it('invokes artillery:run and returns the results', () => {
       script = { _trace: true, _simulation: false }
+      const artilleryResults = { aggregate: { Payload: '{ "errors": 0 }' } }
       results = { Payload: '{ "errors": 0 }' }
 
-      return taskExec(runnerMock(script, results, 0))(1, script)
+      return taskExec(runnerMock(script, artilleryResults, 0))(1, script)
         .should.eventually.eql(results)
     })
 
