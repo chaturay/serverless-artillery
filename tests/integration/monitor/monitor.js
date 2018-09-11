@@ -1,4 +1,3 @@
-const BbPromise = require('bluebird')
 const path = require('path')
 
 const idioms = require('../idioms')
@@ -35,18 +34,18 @@ const modifyService = () => idioms.loadAndMerge(path.join(__dirname, 'serverless
   },
 })
 
-module.exports = () => idioms.runIn(__dirname, BbPromise.all(
+module.exports = () => idioms.runIn(__dirname, () => idioms.callAll(
   [
     idioms.functionDoesNotExist(),
     idioms.scriptDoesNotExist(),
     idioms.slsYmlDoesNotExist(),
   ])
   .then(idioms.monitor())
-  .then(() => BbPromise.all([
+  .then(() => idioms.callAll([
     idioms.scriptExists(),
     idioms.slsYmlExists(),
   ]))
-  .then(() => BbPromise.all([
+  .then(() => idioms.callAll([
     modifyScript,
     modifyService,
   ]))

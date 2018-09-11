@@ -11,8 +11,6 @@ const slsart = require(path.join('..', '..', 'lib', 'index.js')) // eslint-disab
 
 const stdArgv = ['node', 'slsart']
 
-const { cwd } = process
-
 const util = {
   // UTILITIES
   getFunctionName: functionName => functionName || 'serverless-artillery-dev-loadGenerator',
@@ -56,20 +54,10 @@ const util = {
         }
       })
   },
-  replaceCwd: (dirToReplace) => {
-    process.cwd = () => dirToReplace
-  },
-  restoreCwd: () => {
-    process.cwd = cwd
-  },
   fileExists: filePath =>
-    fs.lstat(filePath, (stats) => {
-      try {
-        return stats.isFile()
-      } catch (ex) {
-        return false
-      }
-    }),
+    fs.lstatAsync(filePath)
+      .then(stats => stats.isFile())
+      .catch(() => false),
   scriptExists: script => util.fileExists(script || 'script.yml'),
   scriptDoesNotExist: script => util.scriptExists(script).then(exists => !exists),
   slsYmlExists: slsPath => util.fileExists(slsPath || 'serverless.yml'),
@@ -78,9 +66,9 @@ const util = {
 
 const impl = {
   runIn: (dir, action) => {
-    util.replaceCwd(dir)
+    const cwd = process.cwd()
     action()
-      .finally(util.restoreCwd)
+      .finally(() => process.chdir(cwd))
   },
   loadAndMerge: (file, modifier) =>
     fs.readFileAsync(file)
@@ -88,6 +76,22 @@ const impl = {
         const base = yaml.safeLoad(content)
         return merge(base, modifier)
       }),
+  parseInput: (filePath) => {
+    try {
+      const script = yaml.safeLoad(fs.readFileSync(path.resolve(filePath), 'utf8'))
+      return script
+    } catch (e) {
+      console.log('Could not parse ', filePath)
+      throw e
+    }
+  },
+  phaseUpdate: (script, phaseControls) => {
+    const result = JSON.parse(JSON.stringify(script)) // create a deep copy of script
+    Object.keys(phaseControls).forEach((key) => {
+      result.config.phases[0][key] = phaseControls[key] // eslint-disable-line consistent-return
+    })
+    return result
+  },
   cleanupAll: () => BbPromise.all(impl.cleanupService().concat(impl.cleanupScript())),
   cleanupService: () => BbPromise.all(slsart.constants.ServerlessFiles.map(file => fs.unlinkAsync(file))),
   cleanupScript: () => fs.unlinkAsync(slsart.constants.DefaultScriptName),
@@ -98,6 +102,9 @@ const impl = {
   deploy: options => () => util.cmdLine(stdArgv.concat('deploy'), slsart.deploy, options),
   invoke: options => () => util.cmdLine(stdArgv.concat('invoke'), slsart.invoke, options),
   remove: options => () => util.cmdLine(stdArgv.concat('remove'), slsart.remove, options),
+  script: options => () => util.cmdLine(stdArgv.concat('script'), slsart.script, options),
+  configure: options => () => util.cmdLine(stdArgv.concat('configure'), slsart.configure, options),
+  monitor: options => () => util.cmdLine(stdArgv.concat('monitor'), slsart.monitor, options),
   // FACTS
   functionExists: functionName => () => util.getFunctionConfiguration(functionName),
   functionDoesNotExist: functionName => () => util.getFunctionConfiguration(functionName)
