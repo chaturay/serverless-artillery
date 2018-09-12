@@ -67,6 +67,7 @@ const util = {
 const impl = {
   runIn: (dir, action) => {
     const cwd = process.cwd()
+    process.chdir(dir)
     action()
       .finally(() => process.chdir(cwd))
   },
@@ -92,7 +93,8 @@ const impl = {
     })
     return result
   },
-  cleanupAll: () => BbPromise.all(impl.cleanupService().concat(impl.cleanupScript())),
+  callAll: fns => BbPromise.all(fns.map(fn => fn())),
+  cleanupAll: () => BbPromise.all([impl.cleanupService(), impl.cleanupScript()]),
   cleanupService: () => BbPromise.all(slsart.constants.ServerlessFiles.map(file => fs.unlinkAsync(file))),
   cleanupScript: () => fs.unlinkAsync(slsart.constants.DefaultScriptName),
   // TARGET SERVICE

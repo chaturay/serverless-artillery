@@ -36,7 +36,7 @@ const modifyService = () => idioms.loadAndMerge(path.join(__dirname, 'serverless
 
 module.exports = () => idioms.runIn(__dirname, () => idioms.callAll(
   [
-    idioms.functionDoesNotExist(),
+    idioms.functionDoesNotExist(), // serverless function name should be passed as argument
     idioms.scriptDoesNotExist(),
     idioms.slsYmlDoesNotExist(),
   ])
@@ -50,9 +50,9 @@ module.exports = () => idioms.runIn(__dirname, () => idioms.callAll(
     modifyService,
   ]))
   .then(idioms.deploy())
-  .then(idioms.functionExists())
+  .then(idioms.functionExists()) // serverless function name should be passed as argument
   // TODO check for monitoring activity
   // TODO validate behavior during failure state
   .then(idioms.remove())
-  .then(idioms.functionDoesNotExist())
+  .then(idioms.functionDoesNotExist()) // serverless function name should be passed as argument
   .then(idioms.cleanupAll))

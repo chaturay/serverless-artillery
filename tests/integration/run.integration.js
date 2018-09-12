@@ -16,13 +16,13 @@ if (!aws.config.region) {
   aws.config.region = 'us-east-1'
 }
 
-// const introWorkflow = require('./intro/intro')
+const introWorkflow = require('./intro/intro')
 const loadWorkflow = require('./load/load')
-// const monitoringWorkflow = require('./monitor/monitor')
+const monitoringWorkflow = require('./monitor/monitor')
 
 BbPromise.resolve()
   // ## !! PRIORITY 1 !! ##
   // The "intro" to the tool workflow
-  // .then(introWorkflow)
+  // .then(introWorkflow) // https://github.com/Nordstrom/serverless-artillery/issues/179
   .then(loadWorkflow)
   // .then(monitoringWorkflow)
