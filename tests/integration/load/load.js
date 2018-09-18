@@ -1,32 +1,33 @@
 const BbPromise = require('bluebird')
-const idioms = require('../idioms')
 const path = require('path')
 
-const scriptPath = path.join(__dirname, '/load_script.yml')
+const idioms = require(path.join('..', 'idioms.js')) // eslint-disable-line import/no-dynamic-require
+const scriptPath = path.join(__dirname, 'load_script.yml')
 
-const baseScript = idioms.parseInput(scriptPath)
-const basic = idioms.phaseUpdate(baseScript, {})
-const horizontalTest = idioms.phaseUpdate(baseScript, { duration: 15, arrivalRate: 1 })
-const verticalTest = idioms.phaseUpdate(baseScript, { duration: 1, arrivalRate: 3 })
-const horizontalAndVertical = idioms.phaseUpdate(baseScript, { duration: 15, arrivalRate: 3 })
+const baseScript = idioms.parseYaml(scriptPath)
+const basic = idioms.overwritePhases(baseScript, [])
+// const horizontalTest = idioms.overwritePhases(baseScript, [{ duration: 16, arrivalRate: 1 }])
+// const verticalTest = idioms.overwritePhases(baseScript, [{ duration: 1, arrivalRate: 2 }])
+// const horizontalAndVertical = idioms.overwritePhases(baseScript, [{ duration: 16, arrivalRate: 2 }])
 
 module.exports = () =>
   idioms.runIn(__dirname, () =>
     ([
-      { testType: basic, scenarioCount: 1 },
-      { testType: horizontalTest, scenarioCount: 15 },
-      { testType: verticalTest, scenarioCount: 3 },
-      { testType: horizontalAndVertical, scenarioCount: 45 },
+      { test: basic, expectedCount: 1 },
+      // { test: basic, expectedCount: 1 },
+      // { test: horizontalTest, expectedCount: 16 },
+      // { test: verticalTest, expectedCount: 2 },
+      // { test: horizontalAndVertical, expectedCount: 32 },
     ])
       .reduce(
-        (promise, { testType, scenarioCount }) => promise
+        (promise, { test, expectedCount }) => promise
           .then(idioms.functionDoesNotExist())
           .then(() => BbPromise.resolve()
             .then(idioms.deploy())
             .then(idioms.functionExists())
-            .then(idioms.invoke({ data: JSON.stringify(testType) }))
-            .then(idioms.expect({ scenariosCreated: scenarioCount }))
-            .then(idioms.remove(), idioms.remove())
+            .then(idioms.invoke({ data: JSON.stringify(test) }))
+            .then(idioms.expect({ scenariosCreated: expectedCount }))
+            .finally(idioms.remove())
             .then(idioms.functionDoesNotExist())),
         BbPromise.resolve())
   )

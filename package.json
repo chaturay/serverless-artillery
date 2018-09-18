@@ -9,8 +9,8 @@
   },
   "scripts": {
     "test": "./node_modules/.bin/nyc ./node_modules/.bin/_mocha -r aws-sdk \"./tests/**/*.spec.js\"",
-    "test:integration": "node ./tests/integration/run.integration.js",
     "light": "./node_modules/.bin/nyc ./node_modules/.bin/_mocha -r aws-sdk \"./tests/**/!(serverless-artillery|npm).spec.js\"",
+    "integration": "node ./tests/integration/run.integration.js",
     "coverage": "./node_modules/.bin/nyc report --reporter=text-lcov | coveralls",
     "lint": "./node_modules/.bin/eslint . bin/serverless-artillery",
     "postinstall": "node ./postinstall.js",

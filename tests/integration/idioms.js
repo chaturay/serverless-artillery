@@ -77,20 +77,25 @@ const impl = {
         const base = yaml.safeLoad(content)
         return merge(base, modifier)
       }),
-  parseInput: (filePath) => {
+  parseYaml: (filePath) => {
     try {
-      const script = yaml.safeLoad(fs.readFileSync(path.resolve(filePath), 'utf8'))
+      const content = fs.readFileSync(path.resolve(filePath), 'utf8')
+      const script = yaml.safeLoad(content)
       return script
     } catch (e) {
       console.log('Could not parse ', filePath)
       throw e
     }
   },
-  phaseUpdate: (script, phaseControls) => {
-    const result = JSON.parse(JSON.stringify(script)) // create a deep copy of script
-    Object.keys(phaseControls).forEach((key) => {
-      result.config.phases[0][key] = phaseControls[key] // eslint-disable-line consistent-return
-    })
+  overwritePhases: (script, phaseControls) => {
+    for (let phase = 0; phase < phaseControls.length; phase++) {
+      if (!('duration' in phaseControls[phase] && 'arrivalRate' in phaseControls[phase])) {
+        throw new Error('Each phase must contain duration and arrivalRate ', phaseControls)
+      }
+    }
+
+    const result = Object.assign({}, script)
+    result.config.phases = phaseControls
     return result
   },
   callAll: fns => BbPromise.all(fns.map(fn => fn())),
