@@ -237,45 +237,36 @@ sampling:
 
 Detect outages quickly.  Don't wait for a sufficiently motivated customer to work their way you.  No... don't obssess.  Automate!
 
-To use:
+To use it:
 
-Run the `monitor` command:
-```
-$ slsart monitor [-p <path-to-script>] [-t <threshold>]
-```
+0. If you haven't already, use the `slsart configure` command to obtain customizable function assets.
+1. Double check that the script referenced under `input` via the `>>` attribute is the one you want use for monitoring.
+2. Ensure that you have `match` clauses defined for each request in your script's flows to validate responses.
+3. Modify your `monitoringAlerts` SNS topic to add subscriptions.
+4. Deploy your service with these new settins using `slsart deploy`.
+5. \[As appropriate] verify the subscriptions to the SNS topic.
 
-This will add configuration for scheduling the function and alerting on failure to the `serverless.yml` in the CWD (a copy of the default `serverless.yml` will first be created if one isn't present).
-
-**!! Please note that this modified or generated `serverless.yml` will need to be deployed !!**
-
-The script with which the function will be scheduled to execute with will be the given script or a script.yml in the local directory if that argument is not provided.
-
-Consequences:
-1. a scheduled event will be added
-1. an SNS topic will be added
-1. a policy allowing the function to publish to the created SNS topic will be added to iamRoleStatements
-1. an environment variable will be added to the `loadGenerator` function containing the ARN for the created SNS topic
-
-Tasks for you:
-1. modify your `serverless.yml` to enable subscriptions to any alerts raised by the monitoring function.  (What good is monitoring if no one is listening?)
-1. deploy your project by running `slsart deploy`
-
-To run the script in monitoring mode a single time for testing purposes (as opposed to scheduling it):
+To try it:
 
 Add `-m` to the `invoke` command:
 ```
 $ slsart invoke -m
 ```
 
-Scripts running in monitoring mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via the `-a` flag) and have them anyway.
-
 To run exclusively in monitoring mode, hard code the mode into your script:
 ```
 mode: monitoring
 ...
 ```
+*note: 'monitoring' may be abbreviated to 'mon' in the script*
 
-*note: 'monitor' may be abbreviated to 'mon' in the script*
+To use on a continuous basis:
+
+1. Find `enabled: false` in your `serverless.yml`.  Set it to true.
+2. Deploy your service using `slsart deploy`.
+
+
+Scripts running in monitoring mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via schdule or with the `-m` flag) and have them anyway.
 
 To control sampling and alerting, you may supply the following (default values listed):
 ```
@@ -417,9 +408,6 @@ Commands:
              documentation.
   configure  Create a local copy of the deployment assets for modification and
              deployment.  See https://docs.serverless.com for documentation.
-  monitor    Modify or create a local copy of the deployment assets with
-             declarations of a schedule upon which monitoring requests will
-             occur as well as an SNS topic for sending alert notifications.
 
 Options:
   --help         Show help                                             [boolean]
@@ -530,18 +518,6 @@ $ slsart configure
 slsart configure
 ```
 
-#### monitor
-```
-$ slsart monitor --help
-
-slsart monitor
-
-Options:
-  -p, --path       The path of the script to schedule the function with.[string]
-  -t, --threshold  The minimum number of errors the system must observe prior to
-                   sending an alert notification                        [number]
-```
-
 ## External References
 1. [artillery.io](https://artillery.io) for documentation about how to define your load shape, volume, targets, inputs, et cetera
 2. [serverless.com](https://docs.serverless.com/framework/docs/) for documentation about how to create a custom function configuration
@@ -552,7 +528,7 @@ Options:
 
 We were motivated to create this project in order to facilitate moving performance testing earlier and more frequently into our CI/CD pipelines such that the question wasn't '`whether...`' but '`why wouldn't...`' '`...you automatically (acceptance and) perf test your system every time you check in?`'.
 
-With acceptance testing in pocket we asked, '`why wouldn't you schedule that to sample and thereby monitor your service?`'.  So we added monitoring mode.
+With acceptance testing in pocket we asked, '`why wouldn't you schedule that to sample and thereby update your service?`'.  So we added monitoring mode.
 
 ## The future of serverless-artillery
 
