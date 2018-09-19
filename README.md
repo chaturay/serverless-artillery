@@ -208,6 +208,8 @@ Find defects before performance testing! Acceptance mode runs each flow in your 
 
 To use:
 
+Ensure that you have `match` clauses defined for each request in your script's flows to validate responses. (["official" docs](https://github.com/shoreditch-ops/artillery/blob/master/core/lib/engine_util.js#L318), see [#116](https://github.com/Nordstrom/serverless-artillery/issues/116)).  Then...
+
 Add `-a` to the `invoke` command:
 ```
 $ slsart invoke -a
@@ -237,14 +239,13 @@ sampling:
 
 Detect outages quickly.  Don't wait for a sufficiently motivated customer to work their way you.  No... don't obssess.  Automate!
 
-To use it:
+To use:
 
 0. If you haven't already, use the `slsart configure` command to obtain customizable function assets.
-1. Double check that the script referenced under `input` via the `>>` attribute is the one you want use for monitoring.
-2. Ensure that you have `match` clauses defined for each request in your script's flows to validate responses.
-3. Modify your `monitoringAlerts` SNS topic to add subscriptions.
-4. Deploy your service with these new settins using `slsart deploy`.
-5. \[As appropriate] verify the subscriptions to the SNS topic.
+1. Uncomment the Subscription section of your serverless.yml and add at least one subscription.
+2. Ensure that you have `match` clauses defined for each request in your script's flows to validate responses. (["official" docs](https://github.com/shoreditch-ops/artillery/blob/master/core/lib/engine_util.js#L318), see [#116](https://github.com/Nordstrom/serverless-artillery/issues/116)).
+
+Then...
 
 To try it:
 
@@ -253,18 +254,17 @@ Add `-m` to the `invoke` command:
 $ slsart invoke -m
 ```
 
+To use on a continuous basis:
+
+1. Find `enabled: false` in your `serverless.yml`.  Set it to `true`.  (that's an attribute of a `schedule` event on the `loadGenerator` function)
+2. Deploy your service using `slsart deploy`.
+
 To run exclusively in monitoring mode, hard code the mode into your script:
 ```
 mode: monitoring
 ...
 ```
 *note: 'monitoring' may be abbreviated to 'mon' in the script*
-
-To use on a continuous basis:
-
-1. Find `enabled: false` in your `serverless.yml`.  Set it to true.
-2. Deploy your service using `slsart deploy`.
-
 
 Scripts running in monitoring mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via schdule or with the `-m` flag) and have them anyway.
 
