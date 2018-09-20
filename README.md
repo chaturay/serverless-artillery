@@ -34,7 +34,7 @@ We've created a complete workshop detailing end-to-end usage of serverless-artil
 
 Requires node.js (v6 or better) installed and the serverless framework (v1.0+) either installed globally or available in the local `node_modules`.
 
-If you are installing into a node_modules owned by root, you should [read this first](root-owns-node-modules.md).
+**If you are installing into a node_modules owned by root**, you should [read this first](root-owns-node-modules.md).
 
 ```
 npm install -g serverless
