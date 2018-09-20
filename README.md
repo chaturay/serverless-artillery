@@ -12,6 +12,15 @@ We assume you have node.js (v4 or better) installed.  Likewise you should have t
 npm install -g serverless-artillery
 ```
 
+### Docker Installation
+The post installation causes permission issues when installing in a Docker image.  To successfully install in Docker make sure to 
+add the following to your Dockerfile before the serverless and serverless-artillery install.  Refer to the [sample Dockerfile](Dockerfile).
+
+```
+ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
+ENV PATH=$PATH:/home/node/.npm-global/bin
+```
+
 ## Quick Start & Finish
 
 ```
