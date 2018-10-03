@@ -88,13 +88,7 @@ const impl = {
     }
   },
   overwritePhases: (script, phaseControls) => {
-    for (let phase = 0; phase < phaseControls.length; phase++) {
-      if (!('duration' in phaseControls[phase] && 'arrivalRate' in phaseControls[phase])) {
-        throw new Error('Each phase must contain duration and arrivalRate ', phaseControls)
-      }
-    }
-
-    const result = Object.assign({}, script)
+    const result = JSON.parse(JSON.stringify(script))
     result.config.phases = phaseControls
     return result
   },

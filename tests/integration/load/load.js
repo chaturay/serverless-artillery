@@ -5,7 +5,6 @@ const idioms = require(path.join('..', 'idioms.js')) // eslint-disable-line impo
 const scriptPath = path.join(__dirname, 'load_script.yml')
 
 const baseScript = idioms.parseYaml(scriptPath)
-const basic = idioms.overwritePhases(baseScript, [])
 // const horizontalTest = idioms.overwritePhases(baseScript, [{ duration: 16, arrivalRate: 1 }])
 // const verticalTest = idioms.overwritePhases(baseScript, [{ duration: 1, arrivalRate: 2 }])
 // const horizontalAndVertical = idioms.overwritePhases(baseScript, [{ duration: 16, arrivalRate: 2 }])
@@ -13,8 +12,7 @@ const basic = idioms.overwritePhases(baseScript, [])
 module.exports = () =>
   idioms.runIn(__dirname, () =>
     ([
-      { test: basic, expectedCount: 1 },
-      // { test: basic, expectedCount: 1 },
+      { test: baseScript, expectedCount: 1 },
       // { test: horizontalTest, expectedCount: 16 },
       // { test: verticalTest, expectedCount: 2 },
       // { test: horizontalAndVertical, expectedCount: 32 },
