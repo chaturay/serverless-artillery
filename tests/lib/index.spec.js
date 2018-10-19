@@ -966,7 +966,7 @@ scenarios:
           })
           .finally(() => {
             slsart.impl.generateScript = generateScript
-            fs.unlink('script.yml')
+            fs.unlinkAsync('script.yml')
           }) // eslint-disable-line comma-dangle
       )
       it('write default values to a new file with debug and trace',
@@ -977,7 +977,7 @@ scenarios:
           })
           .finally(() => {
             slsart.impl.generateScript = generateScript
-            fs.unlink(notAFile)
+            fs.unlinkAsync(notAFile)
           }) // eslint-disable-line comma-dangle
       )
     })
