@@ -6,5 +6,5 @@ node_js:
   - "10"
 before_script:
   - 'npm --version'
-  - 'npm i -g --ignore-scripts serverless'
+  - 'npm i -g serverless'
 after_success: npm run coverage
