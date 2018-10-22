@@ -450,6 +450,118 @@ scenarios:
       return service
     }
 
+    describe('#validateServiceForUpdate', () => {
+      const aString = 'some value'
+      let service
+      // service config
+      it('rejects falsy service configurations', () => {
+        service = undefined
+        expect(() => slsart.impl.validateServiceForUpdate(service)).to.throw()
+      })
+      it('rejects non-object service configurations', () => {
+        service = aString
+        expect(() => slsart.impl.validateServiceForUpdate(service)).to.throw()
+      })
+      // provider.iamRoleStatements
+      it('rejects falsy provider', () => {
+        service = validService()
+        service.provider = false
+        expect(() => slsart.impl.validateServiceForUpdate(service)).to.throw()
+      })
+      it('rejects falsy provider.iamRoleStatements', () => {
+        service = validService()
+        service.provider.iamRoleStatements = false
+        expect(() => slsart.impl.validateServiceForUpdate(service)).to.throw()
+      })
+      it('rejects non-array provider.iamRoleStatements', () => {
+        service = validService()
+        service.provider.iamRoleStatements = aString
+        expect(() => slsart.impl.validateServiceForUpdate(service)).to.throw()
+      })
+      // functions[constants.TestFunctionName]
+      it('rejects falsy functions', () => {
+        service = validService()
+        service.functions = false
+        expect(() => slsart.impl.validateServiceForUpdate(service)).to.throw()
+      })
+      it('rejects falsy functions[constants.TestFunctionName]', () => {
+        service = validService()
+        service.functions[slsart.constants.TestFunctionName] = false
+        expect(() => slsart.impl.validateServiceForUpdate(service)).to.throw()
+      })
+      it('rejects non-object functions[constants.TestFunctionName]', () => {
+        service = validService()
+        service.functions[slsart.constants.TestFunctionName] = aString
+        expect(() => slsart.impl.validateServiceForUpdate(service)).to.throw()
+      })
+      // functions[constants.TestFunctionName].environment['TOPIC_ARN' || 'TOPIC_NAME']
+      it('accepts undefined functions[constants.TestFunctionName].environment', () => {
+        service = validService()
+        delete service.functions[slsart.constants.TestFunctionName].environment
+        expect(() => slsart.impl.validateServiceForUpdate(service)).to.not.throw()
+      })
+      it('accepts functions[constants.TestFunctionName].environment without TOPIC_ARN or TOPIC_NAME', () => {
+        service = validService()
+        service.functions[slsart.constants.TestFunctionName].environment = { NOT_TOPIC_ARN_OR_TOPIC_NAME: aString }
+        expect(() => slsart.impl.validateServiceForUpdate(service)).to.not.throw()
+      })
+      it('rejects functions[constants.TestFunctionName].environment with TOPIC_ARN', () => {
+        service = validService()
+        service.functions[slsart.constants.TestFunctionName].environment = { TOPIC_ARN: aString }
+        expect(() => slsart.impl.validateServiceForUpdate(service)).to.throw()
+      })
+      it('rejects functions[constants.TestFunctionName].environment with TOPIC_NAME', () => {
+        service = validService()
+        service.functions[slsart.constants.TestFunctionName].environment = { TOPIC_NAME: aString }
+        expect(() => slsart.impl.validateServiceForUpdate(service)).to.throw()
+      })
+      // functions[constants.TestFunctionName].events
+      it('accepts an undefined functions[constants.TestFunctionName].events', () => {
+        service = validService()
+        delete service.functions[slsart.constants.TestFunctionName].events
+        expect(() => slsart.impl.validateServiceForUpdate(service)).to.not.throw()
+      })
+      it('rejects non-array functions[constants.TestFunctionName].events', () => {
+        service = validService()
+        service.functions[slsart.constants.TestFunctionName].events = aString
+        expect(() => slsart.impl.validateServiceForUpdate(service)).to.throw()
+      })
+      it('rejects functions[constants.TestFunctionName].events with a schedule event named constants.ScheduleName', () => {
+        service = validService()
+        service.functions[slsart.constants.TestFunctionName].events = [{ schedule: { name: slsart.constants.ScheduleName } }]
+        expect(() => slsart.impl.validateServiceForUpdate(service)).to.throw()
+      })
+      // resources.Resources[constants.AlertingName]
+      it('accepts an undefined resources.Resources[constants.AlertingName]', () => {
+        service = validService()
+        delete service.resources
+        expect(() => slsart.impl.validateServiceForUpdate(service)).to.not.throw()
+      })
+      it('accepts an undefined resources.Resources[constants.AlertingName]', () => {
+        service = validService()
+        if (service.resources) {
+          delete service.resources.Resources
+        }
+        expect(() => slsart.impl.validateServiceForUpdate(service)).to.not.throw()
+      })
+      it('accepts an undefined resources.Resources[constants.AlertingName]', () => {
+        service = validService()
+        if (service.resources && service.resources.Resources) {
+          delete service.resources.Resources[slsart.constants.AlertingName]
+        }
+        expect(() => slsart.impl.validateServiceForUpdate(service)).to.not.throw()
+      })
+      it('reject a defined resources.Resources[constants.AlertingName]', () => {
+        service = validService()
+        service.resources = {
+          Resources: {
+            [slsart.constants.AlertingName]: aString,
+          },
+        }
+        expect(() => slsart.impl.validateServiceForUpdate(service)).to.throw()
+      })
+    })
+
     describe('#validateServiceForDeployment', () => {
       let service
       it('ignores undefined services', () => {
@@ -515,6 +627,175 @@ scenarios:
       it('succeeds with a minimally valid service', () => {
         service = validServiceWithAssets()
         expect(() => slsart.impl.validateServiceForDeployment(service)).to.not.throw()
+      })
+    })
+
+    describe('#addAssets', () => {
+      let service
+      it('adds the expected assets to the given service', () => {
+        service = validService()
+        slsart.impl.addAssets(service, { threshold: 1, p: 'foo.yml' })
+        expect(service.provider.iamRoleStatements.length).to.equal(1)
+        expect(service.functions[slsart.constants.TestFunctionName].environment.TOPIC_ARN)
+          .to.eql({ Ref: slsart.constants.AlertingName })
+        expect(service.functions[slsart.constants.TestFunctionName].environment.TOPIC_NAME)
+          .to.eql({ 'Fn::GetAtt': [slsart.constants.AlertingName, 'TopicName'] })
+        expect(service.functions[slsart.constants.TestFunctionName].events[0].schedule).to.be.a('object')
+        expect(service.functions[slsart.constants.TestFunctionName].events[0].schedule.name).to.have.string(slsart.constants.ScheduleName)
+        expect(service.resources.Resources[`${slsart.constants.AlertingName}${slsart.constants.yamlComments.doNotEditKey}`]).to.be.an('object')
+      })
+      it('retains existing environment variables', () => {
+        service = validService()
+        service.functions[slsart.constants.TestFunctionName].environment = { VAR: 'VAL' }
+        expect(slsart.impl.addAssets(service, {}).functions[slsart.constants.TestFunctionName].environment.VAR).to.equal('VAL')
+      })
+      it('retains existing events', () => {
+        service = validService()
+        service.functions[slsart.constants.TestFunctionName].events = ['foo']
+        expect(service.functions[slsart.constants.TestFunctionName].events[0]).to.equal('foo')
+      })
+      it('retains existing resources', () => {
+        service = validService()
+        service.resources = { foo: 'bar' }
+        expect(service.resources).to.have.property('foo', 'bar')
+      })
+      it('retains existing resources.Resources', () => {
+        service = validService()
+        service.resources = { Resources: { foo: 'bar' } }
+        expect(service.resources.Resources).to.have.property('foo', 'bar')
+      })
+    })
+
+    describe('#splitIgnore', () => {
+      let str
+      it('splits strings by newlines', () => {
+        str = 'a\nb\nc'
+        expect(slsart.impl.splitIgnore(str)).to.eql(['a', 'b', 'c'])
+      })
+      it('converts `-\n  -` to `-  -` and splits', () => {
+        str = 'a\n-\n  -\n    b'
+        expect(slsart.impl.splitIgnore(str)).to.eql(['a', '- -', '    b'])
+      })
+      it('removes leading and trailing whitespace', () => {
+        str = ' \ta\t \n \tb \t'
+        expect(slsart.impl.splitIgnore(str)).to.eql(['a\t ', ' \tb'])
+      })
+      it('removes single and double quotes', () => {
+        str = '\'a\'\n"b"\nc'
+        expect(slsart.impl.splitIgnore(str)).to.eql(['a', 'b', 'c'])
+      })
+    })
+
+    describe('#splitExcept', () => {
+      let str
+      it('splits strings by newlines', () => {
+        str = 'a\nb\nc'
+        expect(slsart.impl.splitExcept(str)).to.eql(['a', 'b', 'c'])
+      })
+      it('ignores newlines within array equivalencies', () => {
+        str = 'a\n-\n  - b\nc'
+        expect(slsart.impl.splitExcept(str)).to.eql(['a', '-\n  - b', 'c'])
+      })
+      it('ignores newlines within larger array equivalencies', () => {
+        str = 'a\n  -\n    - b\nc'
+        expect(slsart.impl.splitExcept(str)).to.eql(['a', '  -\n    - b', 'c'])
+      })
+      it('ignores many newlines within array equivalencies', () => {
+        str = 'a\n-\n\n\n\n\n\n\n\n\n\n\n\n\n  - b\nc'
+        expect(slsart.impl.splitExcept(str)).to.eql(['a', '-\n\n\n\n\n\n\n\n\n\n\n\n\n  - b', 'c'])
+      })
+    })
+
+    describe('#compareRestore', () => {
+      let existing
+      let augmented
+      let expected
+      it('leaves unchanged strings alone', () => {
+        existing = 'a string'
+        augmented = existing
+        expected = existing
+        expect(slsart.impl.compareRestore(existing, augmented)).to.equal(existing)
+      })
+      it('leaves additive only augmentations alone', () => {
+        existing = 'a string\n'
+        augmented = `${existing}\nanother string\n`
+        expected = augmented
+        expect(slsart.impl.compareRestore(existing, augmented)).to.equal(expected)
+      })
+      it('restores removed comments', () => {
+        existing = 'foo: # an object\n  bar: "biz"\n'
+        augmented = 'foo:\n  bar: "biz"\n  gar: "giz"\n'
+        expected = 'foo: # an object\n  bar: "biz"\n  gar: "giz"\n'
+        expect(slsart.impl.compareRestore(existing, augmented)).to.equal(expected)
+      })
+      // TODO too few cases?
+    })
+
+    describe('#replaceCommentKeys', () => {
+      let input
+      let result
+      it('replaces the known keys', () => {
+        input = `${
+          slsart.constants.yamlComments.doNotEditKey}\n${
+          slsart.constants.yamlComments.mustMatchKey}\n${
+          slsart.constants.yamlComments.snsSubscriptionsKey}\nEffect: Allow`
+        result = slsart.impl.replaceCommentKeys(input)
+        expect(result).to.not.have.string(slsart.constants.yamlComments.doNotEditKey)
+        expect(result).to.not.have.string(slsart.constants.yamlComments.mustMatchKey)
+        expect(result).to.not.have.string(slsart.constants.yamlComments.snsSubscriptionsKey)
+        expect(result).to.not.have.string('Effect: Allow')
+      })
+    })
+
+    describe('#writeBackup', () => {
+      const err = { code: 'EEXIST' }
+      const content = 'content'
+      let fsWriteFileAsyncStub
+      beforeEach(() => {
+        fsWriteFileAsyncStub = sinon.stub(fs, 'writeFileAsync')
+      })
+      afterEach(() => {
+        fsWriteFileAsyncStub.restore()
+      })
+      it('writes content to serverless.yml.bak', () => {
+        fsWriteFileAsyncStub.returns(BbPromise.resolve())
+        return slsart.impl.writeBackup(content).should.be.fulfilled
+          .then(() => {
+            fsWriteFileAsyncStub.should.have.been.calledOnce
+            expect(fsWriteFileAsyncStub.args[0][0]).to.eql(`${slsart.constants.ServerlessFile}.bak`)
+          })
+      })
+      it('tries writing to subsequent serverless.yml.N.bak files until succeeding', () => {
+        fsWriteFileAsyncStub.onCall(0).rejects(err)
+        fsWriteFileAsyncStub.onCall(1).rejects(err)
+        fsWriteFileAsyncStub.onCall(2).rejects(err)
+        fsWriteFileAsyncStub.onCall(3).rejects(err)
+        fsWriteFileAsyncStub.onCall(4).resolves()
+        return slsart.impl.writeBackup(content).should.be.fulfilled
+          .then(() => {
+            fsWriteFileAsyncStub.should.have.callCount(5)
+            expect(fsWriteFileAsyncStub.args[0][0]).to.eql(`${slsart.constants.ServerlessFile}.bak`)
+            expect(fsWriteFileAsyncStub.args[1][0]).to.eql(`${slsart.constants.ServerlessFile}.1.bak`)
+            expect(fsWriteFileAsyncStub.args[2][0]).to.eql(`${slsart.constants.ServerlessFile}.2.bak`)
+            expect(fsWriteFileAsyncStub.args[3][0]).to.eql(`${slsart.constants.ServerlessFile}.3.bak`)
+            expect(fsWriteFileAsyncStub.args[4][0]).to.eql(`${slsart.constants.ServerlessFile}.4.bak`)
+          })
+      })
+      it('gives up writing after 100 attempts', () => {
+        fsWriteFileAsyncStub.returns(BbPromise.reject(err))
+        return slsart.impl.writeBackup(content).should.be.rejected
+          .then(() => {
+            fsWriteFileAsyncStub.should.have.callCount(slsart.constants.backupAttempts)
+          })
+      })
+      it('throws errors without `code = \'EEXIST\'`', () => {
+        const anotherErr = new Error('not eexist')
+        anotherErr.code = 'NOT_EEXIST'
+        fsWriteFileAsyncStub.returns(BbPromise.reject(anotherErr))
+        return slsart.impl.writeBackup(content).should.be.rejectedWith(anotherErr)
+          .then(() => {
+            fsWriteFileAsyncStub.should.have.callCount(1)
+          })
       })
     })
 
@@ -1051,6 +1332,69 @@ scenarios:
           return slsart.configure({}).should.be.rejected
         } // eslint-disable-line comma-dangle
       )
+    })
+
+    describe('#update', () => {
+      let scriptStub
+      let configureStub
+      let fileExistsStub
+      let writeBackupStub
+      let fsReadFileAsyncStub
+      let fsWriteFileAsyncStub
+      beforeEach(() => {
+        scriptStub = sinon.stub(slsart, 'script').resolves()
+        configureStub = sinon.stub(slsart, 'configure').resolves()
+        fileExistsStub = sinon.stub(slsart.impl, 'fileExists').returns(true)
+        writeBackupStub = sinon.stub(slsart.impl, 'writeBackup').resolves()
+        fsReadFileAsyncStub = sinon.stub(fs, 'readFileAsync').resolves(JSON.stringify({
+          provider: {
+            iamRoleStatements: [],
+          },
+          functions: {
+            [slsart.constants.TestFunctionName]: {},
+          },
+        }))
+        fsWriteFileAsyncStub = sinon.stub(fs, 'writeFileAsync').resolves()
+      })
+      afterEach(() => {
+        scriptStub.restore()
+        configureStub.restore()
+        fileExistsStub.restore()
+        writeBackupStub.restore()
+        fsReadFileAsyncStub.restore()
+        fsWriteFileAsyncStub.restore()
+      })
+      it('modifies and writes the service', () => slsart.update({}).should.be.fulfilled
+        .then(() => fsWriteFileAsyncStub.should.have.been.called))
+      it('writes a backup if serverless.yml is present', () => slsart.update({}).should.be.fulfilled
+        .then(() => {
+          scriptStub.should.not.have.been.called
+          configureStub.should.not.have.been.called
+          writeBackupStub.should.have.been.calledOnce
+        }))
+      it('generates script, configures, and does not write a backup if no script.yml or serverless.yml', () => {
+        fileExistsStub.returns(false)
+        return slsart.update({}).should.be.fulfilled
+          .then(() => {
+            scriptStub.should.have.been.calledOnce
+            configureStub.should.have.been.calledOnce
+            writeBackupStub.should.not.have.been.called
+          })
+      })
+      it('rejects the update command if running script fails', () => {
+        fileExistsStub.returns(false)
+        scriptStub.returns(BbPromise.reject(new Error('reasons')))
+        return slsart.update({}).should.be.rejected
+      })
+      it('rejects the update command if running configure fails', () => {
+        fileExistsStub.returns(false)
+        configureStub.returns(BbPromise.reject(new Error('reasons')))
+        return slsart.update({}).should.be.rejected
+      })
+      it('rejects the update command if reading serverless.yml fails', () => {
+        fsReadFileAsyncStub.returns(BbPromise.reject(new Error('reasons')))
+        return slsart.update({}).should.be.rejected
+      })
     })
   })
 })

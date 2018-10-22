@@ -528,7 +528,7 @@ slsart configure
 
 We were motivated to create this project in order to facilitate moving performance testing earlier and more frequently into our CI/CD pipelines such that the question wasn't '`whether...`' but '`why wouldn't...`' '`...you automatically (acceptance and) perf test your system every time you check in?`'.
 
-With acceptance testing in pocket we asked, '`why wouldn't you schedule that to sample and thereby update your service?`'.  So we added monitoring mode.
+With acceptance testing in pocket we asked, '`why wouldn't you schedule that to sample and thereby monitor your service?`'.  So we added monitoring mode.
 
 ## The future of serverless-artillery
 
