@@ -11,6 +11,7 @@ From a single test script and without deploying or maintaining any servers or in
 * Monitoring Mode: regularly validate system behavior and health with small bursts of synthetic traffic
 
 1. [Installation](#installation)
+1. [Docker Installation](#docker-installation)
 1. [Quick Start & Finish](#quick-start--finish)
 1. Understand `serverless-artillery`
    1. [So what is it?](#so-what-is-it)
@@ -39,6 +40,15 @@ Requires node.js (v6 or better) installed and the serverless framework (v1.0+) e
 ```
 npm install -g serverless
 npm install -g serverless-artillery
+```
+
+### Docker Installation
+Post installation causes permission issues when installing in a Docker image.  To successfully install in Docker make sure to 
+add the following to your Dockerfile before the serverless and serverless-artillery install.  Refer to the [example Dockerfile](Dockerfile).
+
+```
+ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
+ENV PATH=$PATH:/home/node/.npm-global/bin
 ```
 
 ### Permissions and proxy settings
