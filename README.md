@@ -210,23 +210,34 @@ Find defects before performance testing! Acceptance mode runs each flow in your 
 
 Ensure that you have `match` clauses defined for each request in your script's flows to validate responses. (["official" docs](https://github.com/shoreditch-ops/artillery/blob/master/core/lib/engine_util.js#L318), see [#116](https://github.com/Nordstrom/serverless-artillery/issues/116)).  Then...
 
+### Try it:
+
 Add `-a` to the `invoke` command:
 ```
 $ slsart invoke -a
 ```
 
-### To run exclusively in acceptance mode, hard code the mode into your script:
+Expect a non-zero exit code if a match clause fails.
+
+### Run exclusively in acceptance mode:
+
+Hard code the mode into your script:
+
 ```
 mode: acceptance
 ...
 ```
+
 *note: 'acceptance' may be abbreviated to 'acc' in the script*
 
 Scripts running in acceptance mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via the `-a` flag) and have them anyway.
 
 For the purposes of facilitating the use of this tool in a CI/CD pipeline, if any of the acceptance tests fail to successfully complete, the process will exit with a non-zero exit code.
 
-### To control the number of [samples](glossary.md#sampling) taken and constituting success, you may supply the following (default values listed):
+### To configure acceptance behavior:
+
+You may configure [sampling](glossary.md#sampling) behavior.  To control the number of samples taken, the time before taking a sample, or the number of errors constituting a failure, you may supply the following (default values listed):
+
 ```
 sampling:
   size: 1            # The size of sample set
@@ -248,7 +259,7 @@ Detect outages quickly.  Use synthetic customer activity to continously validate
 
 Then...
 
-### To try it:
+### Try it:
 
 Add `-m` to the `invoke` command:
 ```
@@ -257,21 +268,28 @@ $ slsart invoke -m
 
 Given default configuration, expect that five requests will be made for each flow.  If all five of them fail (we try to avoid notifying you about blips) then you should receive a notification via the configured mechanism.  
 
-### To use on a continuous basis:
+### Monitor continuously:
 
-1. Find `enabled: false` in your `serverless.yml`.  Set it to `true`.  (that's an attribute of a `schedule` event on the `loadGenerator` function)
+1. Find `enabled: false` in your `serverless.yml`.  Set it to `true` and follow "BEFORE ENABLING..." instructions.  (that's an attribute of a `schedule` event on the `loadGenerator` function)
 1. Deploy your service using `slsart deploy`.
 
-### To run exclusively in monitoring mode, hard code the mode into your script:
+### Run exclusively in monitoring mode:
+
+Hard code the mode into your script:
+
 ```
 mode: monitoring
 ...
 ```
+
 *note: 'monitoring' may be abbreviated to 'mon' in the script*
 
 Scripts running in monitoring mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via a schedule event or with the `-m` flag) and have them anyway.
 
-### To control [sampling](glossary.md#sampling) and alerting, you may supply the following (default values listed):
+### To configure monitoring behavior:
+
+You may configure [sampling](glossary.md#sampling) behavior.  To control the number of samples taken, the time before taking a sample, or the number of errors constituting a failure, you may supply the following (default values listed):
+
 ```
 sampling:
   size: 5            # The size of sample set
