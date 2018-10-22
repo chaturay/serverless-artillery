@@ -206,7 +206,7 @@ The default maximum duration of a script chunk is 2 minutes (maxChunkDurationInS
 
 Find defects before performance testing! Acceptance mode runs each flow in your script exactly once and reports the results.
 
-To use:
+### To use:
 
 Ensure that you have `match` clauses defined for each request in your script's flows to validate responses. (["official" docs](https://github.com/shoreditch-ops/artillery/blob/master/core/lib/engine_util.js#L318), see [#116](https://github.com/Nordstrom/serverless-artillery/issues/116)).  Then...
 
@@ -215,7 +215,7 @@ Add `-a` to the `invoke` command:
 $ slsart invoke -a
 ```
 
-To run exclusively in acceptance mode, hard code the mode into your script:
+### To run exclusively in acceptance mode, hard code the mode into your script:
 ```
 mode: acceptance
 ...
@@ -226,55 +226,58 @@ Scripts running in acceptance mode do not require a `phases` array in the `confi
 
 For the purposes of facilitating the use of this tool in a CI/CD pipeline, if any of the acceptance tests fail to successfully complete, the process will exit with a non-zero exit code.
 
-To control the number of samples taken and constituting success, you may supply the following (default values listed):
+### To control the number of [samples](glossary.md#sampling) taken and constituting success, you may supply the following (default values listed):
 ```
 sampling:
-  size: 1           # The size of sample set
-  averagePause: 5   # The average number of seconds to pause between samples
-  pauseVariance: 2  # The maximum difference of the actual pause from the average pause (in either direction)
-  errorBudget: 0    # The number of observed errors to accept before alerting
+  size: 1            # The size of sample set
+  averagePause: 0.2  # The average number of seconds to pause between samples
+  pauseVariance: 0.1 # The maximum difference of the actual pause from the average pause (in either direction)
+  errorBudget: 0     # The number of observed errors to accept before alerting
 ```
 
 ## Monitoring Mode
 
-Detect outages quickly.  Don't wait for a sufficiently motivated customer to work their way you.  No... don't obssess.  Automate!
+Detect outages quickly.  Use synthetic customer activity to continously validate expected system behavior and alert you immediately if your users will be impacted.
 
-To use:
+### To use:
 
-0. If you haven't already, use the `slsart configure` command to obtain customizable function assets.
-1. Uncomment the Subscription section of your serverless.yml and add at least one subscription.
-2. Ensure that you have `match` clauses defined for each request in your script's flows to validate responses. (["official" docs](https://github.com/shoreditch-ops/artillery/blob/master/core/lib/engine_util.js#L318), see [#116](https://github.com/Nordstrom/serverless-artillery/issues/116)).
+1. If you haven't already, use the `slsart configure` command to obtain customizable function assets
+1. Uncomment the Subscription section of your serverless.yml, add at least one subscription
+1. \[Re]deploy your service (`slsart deploy`)
+1. To receive alerts when errors occur, ensure you have `match` clauses defined on each request in your script (to validate service responses - see ["official" docs](https://github.com/shoreditch-ops/artillery/blob/master/core/lib/engine_util.js#L318) - see also [#116](https://github.com/Nordstrom/serverless-artillery/issues/116))
 
 Then...
 
-To try it:
+### To try it:
 
 Add `-m` to the `invoke` command:
 ```
 $ slsart invoke -m
 ```
 
-To use on a continuous basis:
+Given default configuration, expect that five requests will be made for each flow.  If all five of them fail (we try to avoid notifying you about blips) then you should receive a notification via the configured mechanism.  
+
+### To use on a continuous basis:
 
 1. Find `enabled: false` in your `serverless.yml`.  Set it to `true`.  (that's an attribute of a `schedule` event on the `loadGenerator` function)
-2. Deploy your service using `slsart deploy`.
+1. Deploy your service using `slsart deploy`.
 
-To run exclusively in monitoring mode, hard code the mode into your script:
+### To run exclusively in monitoring mode, hard code the mode into your script:
 ```
 mode: monitoring
 ...
 ```
 *note: 'monitoring' may be abbreviated to 'mon' in the script*
 
-Scripts running in monitoring mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via schdule or with the `-m` flag) and have them anyway.
+Scripts running in monitoring mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via a schedule event or with the `-m` flag) and have them anyway.
 
-To control sampling and alerting, you may supply the following (default values listed):
+### To control [sampling](glossary.md#sampling) and alerting, you may supply the following (default values listed):
 ```
 sampling:
-  size: 5           # The size of sample set
-  averagePause: 5   # The average number of seconds to pause between samples
-  pauseVariance: 2  # The maximum difference of the actual pause from the average pause (in either direction)
-  errorBudget: 4    # The number of observed errors to accept before alerting
+  size: 5            # The size of sample set
+  averagePause: 0.2  # The average number of seconds to pause between samples
+  pauseVariance: 0.1 # The maximum difference of the actual pause from the average pause (in either direction)
+  errorBudget: 4     # The number of observed errors to accept before alerting
 ```
 
 ## Function Customization
