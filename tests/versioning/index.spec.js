@@ -109,6 +109,164 @@ describe('versioning module', () => {
       })
     })
 
+    describe('validateServiceDefinition', () => {
+      it('reads form the serverless.yml', () => {
+        const fs = fsSpies()
+        fs.readFileSync.withArgs('target-project/serverless.yml').returns('')
+
+        expect(() => versioning(fs).validateServiceDefinition('target-project'))
+          .to.throw()
+
+        expect(fs.readFileSync.calledOnce).to.be.true
+        expect(fs.readFileSync.firstCall.args[0]).to.equal('target-project/serverless.yml')
+      })
+
+      const validateScriptConfig = (
+        config,
+        message,
+        errorType
+      ) => {
+        const fs = fsSpies()
+        fs.readFileSync.withArgs('target-project/serverless.yml').returns(config)
+
+        let exceptionThrown = false;
+
+        try {
+          versioning(fs).validateServiceDefinition('target-project')
+        } catch(ex) {
+          exceptionThrown = true
+          expect(ex.message).to.equal(message)
+          expect(ex.constructor.name).to.equal(errorType)
+        }
+        expect(exceptionThrown).to.be.true
+      }
+
+      it('checks if the script is an object', () => {
+        validateScriptConfig(
+          '',
+          'The given service must be an object',
+          'UpdatePreconditionError'
+        )
+      })
+
+      it('checks if the given service must have "provider.iamRoleStatements" defined as an array', () => {
+        validateScriptConfig(
+          'provider:\n' +
+          '  name: aws',
+          'The given service must have "provider.iamRoleStatements" defined as an array',
+          'UpdatePreconditionError'
+        )
+      })
+
+      it('checks if the given service must have a function with the name "loadGenerator"', () => {
+        validateScriptConfig(
+          'provider:\n' +
+          '  iamRoleStatements: []',
+
+          'The given service must have a function with the name "loadGenerator"',
+          'UpdatePreconditionError'
+        )
+      })
+
+      it('checks if the given service has function "loadGenerator" that already has environment variable "TOPIC_ARN" defined.', () => {
+        validateScriptConfig(
+          'provider:\n' +
+          '  iamRoleStatements: []\n' +
+          'functions:\n' +
+          '  loadGenerator:\n' +
+          '    environment:\n' +
+          '      TOPIC_ARN: arn\n',
+
+          'The given service has function "loadGenerator" that already has environment variable "TOPIC_ARN" defined.',
+          'UpdateConflictError'
+        )
+      })
+
+      it('checks if the given service has function "loadGenerator" that already has environment variable "TOPIC_NAME" defined.', () => {
+        validateScriptConfig(
+          'provider:\n' +
+          '  iamRoleStatements: []\n' +
+          'functions:\n' +
+          '  loadGenerator:\n' +
+          '    environment:\n' +
+          '      TOPIC_NAME: aTopic',
+
+          'The given service has function "loadGenerator" that already has environment variable "TOPIC_NAME" defined.',
+          'UpdateConflictError'
+        )
+      })
+
+      it('checks if defined, that the events attribute of the "loadGenerator" function must be an array.', () => {
+        validateScriptConfig(
+          'provider:\n' +
+          '  iamRoleStatements: []\n' +
+          'functions:\n' +
+          '  loadGenerator:\n' +
+          '    events: one',
+
+          'If defined, the events attribute of the "loadGenerator" function must be an array.',
+          'UpdatePreconditionError'
+        )
+      })
+
+      it('checks if "loadGenerator" function already has a schedule event named "${self:service}-${opt:stage, self:provider.stage}-monitoring"', () => {
+        validateScriptConfig(
+          'provider:\n' +
+          '  iamRoleStatements: []\n' +
+          'functions:\n' +
+          '  loadGenerator:\n' +
+          '    events:\n' +
+          '      - schedule:\n' +
+          '          name: ${self:service}-${opt:stage, self:provider.stage}-monitoring\n',
+
+          'The "loadGenerator" function already has a schedule event named "${self:service}-${opt:stage, self:provider.stage}-monitoring"',
+          'UpdateConflictError'
+        )
+      })
+
+      it('checks if a resource with logical ID monitoringAlerts already exists', () => {
+        validateScriptConfig(
+          'provider:\n' +
+          '  iamRoleStatements: []\n' +
+          'functions:\n' +
+          '  loadGenerator:\n' +
+          '    events:\n' +
+          '      - schedule:\n' +
+          '          name: scheduleName\n' +
+          'resources:\n' +
+          '  Resources:\n' +
+          '    monitoringAlerts:\n' +
+          '      Type: \'AWS::SNS::Topic\'\n',
+
+          'A resource with logical ID monitoringAlerts already exists',
+          'UpdateConflictError'
+        )
+      })
+
+      it('validates a valid service configuration script', () => {
+        const fs = fsSpies()
+        fs.readFileSync.withArgs('target-project/serverless.yml').returns(
+          'provider:\n' +
+          '  iamRoleStatements: []\n' +
+          'functions:\n' +
+          '  loadGenerator:\n' +
+          '    events:\n' +
+          '      - schedule:\n' +
+          '          name: scheduleName\n' +
+          'resources:\n' +
+          '  Resources:\n' +
+          '    anotherTopic:\n' +
+          '      Type: \'AWS::SNS::Topic\'\n',
+
+          'A resource with logical ID monitoringAlerts already exists',
+          'UpdateConflictError'
+        )
+
+        expect(() => versioning(fs).validateServiceDefinition('target-project'))
+          .to.not.throw()
+      })
+    })
+
     describe('functionAssetFiles', () => {
       it('generates a correct list for v0.0.0', () => {
         const fs = fsSpies()
