@@ -255,8 +255,8 @@ Detect outages quickly.  Use synthetic customer activity to continously validate
 1. If you don't have a script, create one (see [Script Customization](#script-customization))
 1. To receive alerts when errors occur...
    1. If you haven't already, use the `slsart configure` command to obtain customizable function assets (see [Function Customization](#function-customization))
-   1. Uncomment the Subscription section of your serverless.yml, add at least one subscription
-   1. Ensure you have `match` clauses defined on each request in your script (to validate service responses - see ["official" docs](https://github.com/shoreditch-ops/artillery/blob/master/core/lib/engine_util.js#L318) - see also [#116](https://github.com/Nordstrom/serverless-artillery/issues/116))
+   1. Uncomment the Subscription section of your serverless.yml and add at least one subscription
+   1. Ensure you have `match` clauses defined on each request in your script (to validate service responses - see ["official" docs](https://github.com/shoreditch-ops/artillery/blob/1ca5f66e16ec1b2d952e3e7af1573f36a8a175f8/core/lib/engine_util.js#L318) - see also [#116](https://github.com/Nordstrom/serverless-artillery/issues/116))
 1. \[Re]deploy your service (`slsart deploy`)
 
 Then...

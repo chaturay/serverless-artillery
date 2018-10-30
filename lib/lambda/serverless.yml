@@ -65,9 +65,9 @@ functions:
           ###    ii. Modify the `monitoringAlerts` SNS Topic below, uncommenting `Subscription` and providing subscriptions for any
           ###        alerts that might be raised by the monitoring function.  (To help you out, we've provided commented-out examples)
           ###        (After all, what good is monitoring if noone is listening?)
-          ### 4. Deploy your new assets/updated service using `slsart deploy`
-          ### 5. [As appropriate] approve the subscription verifications for the SNS topic that will be sent following its creation
-          ### 6. Re-deploy whenever you update your monitoring script
+          ### 3. Deploy your new assets/updated service using `slsart deploy`
+          ### 4. [As appropriate] approve the subscription verifications for the SNS topic that will be sent following its creation
+          ### 5. Re-deploy whenever you update your monitoring script
           ########################################################################################################################
           enabled: false
           input:
