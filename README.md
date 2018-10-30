@@ -252,10 +252,12 @@ Detect outages quickly.  Use synthetic customer activity to continously validate
 
 ### To use:
 
-1. If you haven't already, use the `slsart configure` command to obtain customizable function assets
-1. Uncomment the Subscription section of your serverless.yml, add at least one subscription
+1. If you don't have a script, create one (see [Script Customization](#script-customization))
+1. To receive alerts when errors occur...
+   1. If you haven't already, use the `slsart configure` command to obtain customizable function assets (see [Function Customization](#function-customization))
+   1. Uncomment the Subscription section of your serverless.yml, add at least one subscription
+   1. Ensure you have `match` clauses defined on each request in your script (to validate service responses - see ["official" docs](https://github.com/shoreditch-ops/artillery/blob/master/core/lib/engine_util.js#L318) - see also [#116](https://github.com/Nordstrom/serverless-artillery/issues/116))
 1. \[Re]deploy your service (`slsart deploy`)
-1. To receive alerts when errors occur, ensure you have `match` clauses defined on each request in your script (to validate service responses - see ["official" docs](https://github.com/shoreditch-ops/artillery/blob/master/core/lib/engine_util.js#L318) - see also [#116](https://github.com/Nordstrom/serverless-artillery/issues/116))
 
 Then...
 
@@ -266,12 +268,15 @@ Add `-m` to the `invoke` command:
 $ slsart invoke -m
 ```
 
-Given default configuration, expect that five requests will be made for each flow.  If all five of them fail (we try to avoid notifying you about blips) then you should receive a notification via the configured mechanism.  
+Given default configuration, expect that each scenario/flow in your script will be executed five times.  If all five of them fail (we try to avoid notifying you about blips) then you should receive a notification via the configured mechanism.  
 
 ### Monitor continuously:
 
+1. If you haven't already, use the `slsart configure` command to obtain customizable function assets (see [Function Customization](#function-customization))
 1. Find `enabled: false` in your `serverless.yml`.  Set it to `true` and follow "BEFORE ENABLING..." instructions.  (that's an attribute of a `schedule` event on the `loadGenerator` function)
 1. Deploy your service using `slsart deploy`.
+
+**WARNING**: Unlike other modes, monitoring mode script changes require redeployment of your service
 
 ### Run exclusively in monitoring mode:
 
