@@ -11,6 +11,7 @@ From a single test script and without deploying or maintaining any servers or in
 * Monitoring Mode: regularly validate system behavior and health with small bursts of synthetic traffic
 
 1. [Installation](#installation)
+1. [Docker Installation](#docker-installation)
 1. [Quick Start & Finish](#quick-start--finish)
 1. Understand `serverless-artillery`
    1. [So what is it?](#so-what-is-it)
@@ -34,9 +35,20 @@ We've created a complete workshop detailing end-to-end usage of serverless-artil
 
 Requires node.js (v6 or better) installed and the serverless framework (v1.0+) either installed globally or available in the local `node_modules`.
 
+**If you are installing into a node_modules owned by root**, you should [read this first](root-owns-node-modules.md).
+
 ```
 npm install -g serverless
 npm install -g serverless-artillery
+```
+
+### Docker Installation
+Post installation causes permission issues when installing in a Docker image.  To successfully install in Docker make sure to 
+add the following to your Dockerfile before the serverless and serverless-artillery install.  Refer to the [example Dockerfile](Dockerfile).
+
+```
+ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
+ENV PATH=$PATH:/home/node/.npm-global/bin
 ```
 
 ### Permissions and proxy settings
@@ -206,75 +218,101 @@ The default maximum duration of a script chunk is 2 minutes (maxChunkDurationInS
 
 Find defects before performance testing! Acceptance mode runs each flow in your script exactly once and reports the results.
 
-To use:
+### To use:
+
+Ensure that you have `match` clauses defined for each request in your script's flows to validate responses. (["official" docs](https://github.com/shoreditch-ops/artillery/blob/master/core/lib/engine_util.js#L318), see [#116](https://github.com/Nordstrom/serverless-artillery/issues/116)).  Then...
+
+### Try it:
 
 Add `-a` to the `invoke` command:
 ```
 $ slsart invoke -a
 ```
 
-To run exclusively in acceptance mode, hard code the mode into your script:
+Expect a non-zero exit code if a match clause fails.
+
+### Run exclusively in acceptance mode:
+
+Hard code the mode into your script:
+
 ```
 mode: acceptance
 ...
 ```
+
 *note: 'acceptance' may be abbreviated to 'acc' in the script*
 
 Scripts running in acceptance mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via the `-a` flag) and have them anyway.
 
 For the purposes of facilitating the use of this tool in a CI/CD pipeline, if any of the acceptance tests fail to successfully complete, the process will exit with a non-zero exit code.
 
-To control the number of samples taken and constituting success, you may supply the following (default values listed):
+### To configure acceptance behavior:
+
+You may configure [sampling](glossary.md#sampling) behavior.  To control the number of samples taken, the time before taking a sample, or the number of errors constituting a failure, you may supply the following (default values listed):
+
 ```
 sampling:
-  size: 1           # The size of sample set
-  averagePause: 5   # The average number of seconds to pause between samples
-  pauseVariance: 2  # The maximum difference of the actual pause from the average pause (in either direction)
-  errorBudget: 0    # The number of observed errors to accept before alerting
+  size: 1            # The size of sample set
+  averagePause: 0.2  # The average number of seconds to pause between samples
+  pauseVariance: 0.1 # The maximum difference of the actual pause from the average pause (in either direction)
+  errorBudget: 0     # The number of observed errors to accept before alerting
 ```
 
 ## Monitoring Mode
 
-Detect outages quickly.  Don't wait for a sufficiently motivated customer to work their way you.  No... don't obssess.  Automate!
+Detect outages quickly.  Use synthetic customer activity to continously validate expected system behavior and alert you immediately if your users will be impacted.
 
-To use it:
+### To use:
 
-0. If you haven't already, use the `slsart configure` command to obtain customizable function assets.
-1. Double check that the script referenced under `input` via the `>>` attribute is the one you want use for monitoring.
-2. Ensure that you have `match` clauses defined for each request in your script's flows to validate responses.
-3. Modify your `monitoringAlerts` SNS topic to add subscriptions.
-4. Deploy your service with these new settins using `slsart deploy`.
-5. \[As appropriate] verify the subscriptions to the SNS topic.
+1. If you don't have a script, create one (see [Script Customization](#script-customization))
+1. To receive alerts when errors occur...
+   1. If you haven't already, use the `slsart configure` command to obtain customizable function assets (see [Function Customization](#function-customization))
+   1. Uncomment the Subscription section of your serverless.yml and add at least one subscription
+   1. Ensure you have `match` clauses defined on each request in your script (to validate service responses - see ["official" docs](https://github.com/shoreditch-ops/artillery/blob/1ca5f66e16ec1b2d952e3e7af1573f36a8a175f8/core/lib/engine_util.js#L318) - see also [#116](https://github.com/Nordstrom/serverless-artillery/issues/116))
+1. \[Re]deploy your service (`slsart deploy`)
 
-To try it:
+Then...
+
+### Try it:
 
 Add `-m` to the `invoke` command:
 ```
 $ slsart invoke -m
 ```
 
-To run exclusively in monitoring mode, hard code the mode into your script:
+Given default configuration, expect that each scenario/flow in your script will be executed five times.  If all five of them fail (we try to avoid notifying you about blips) then you should receive a notification via the configured mechanism.  
+
+### Monitor continuously:
+
+1. If you haven't already, use the `slsart configure` command to obtain customizable function assets (see [Function Customization](#function-customization))
+1. Find `enabled: false` in your `serverless.yml`.  Set it to `true` and follow "BEFORE ENABLING..." instructions.  (that's an attribute of a `schedule` event on the `loadGenerator` function)
+1. Deploy your service using `slsart deploy`.
+
+**WARNING**: Unlike other modes, monitoring mode script changes require redeployment of your service
+
+### Run exclusively in monitoring mode:
+
+Hard code the mode into your script:
+
 ```
 mode: monitoring
 ...
 ```
+
 *note: 'monitoring' may be abbreviated to 'mon' in the script*
 
-To use on a continuous basis:
+Scripts running in monitoring mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via a schedule event or with the `-m` flag) and have them anyway.
 
-1. Find `enabled: false` in your `serverless.yml`.  Set it to true.
-2. Deploy your service using `slsart deploy`.
+### To configure monitoring behavior:
 
+You may configure [sampling](glossary.md#sampling) behavior.  To control the number of samples taken, the time before taking a sample, or the number of errors constituting a failure, you may supply the following (default values listed):
 
-Scripts running in monitoring mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via schdule or with the `-m` flag) and have them anyway.
-
-To control sampling and alerting, you may supply the following (default values listed):
 ```
 sampling:
-  size: 5           # The size of sample set
-  averagePause: 5   # The average number of seconds to pause between samples
-  pauseVariance: 2  # The maximum difference of the actual pause from the average pause (in either direction)
-  errorBudget: 4    # The number of observed errors to accept before alerting
+  size: 5            # The size of sample set
+  averagePause: 0.2  # The average number of seconds to pause between samples
+  pauseVariance: 0.1 # The maximum difference of the actual pause from the average pause (in either direction)
+  errorBudget: 4     # The number of observed errors to accept before alerting
 ```
 
 ## Function Customization

@@ -10,7 +10,6 @@
       -
         duration: 5
         arrivalRate: 1
-        rampTo: 5
   scenarios:
     -
       flow:

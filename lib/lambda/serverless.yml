@@ -53,15 +53,21 @@ functions:
           description: The scheduled event for running the function in monitoring mode
           rate: rate(1 minute)
           ########################################################################################################################
-          ### BEFORE MODIFYING ENABLED...
-          ### 0. Change `'>>': script.yml` below to reference the script you want to use for monitoring if that is not its name
-          ### 1. Modify your 'script.yml' to provide the details of invoking your service, as per https://artillery.io/docs
-          ### 2. Add a `match` clause to your requests, specifying your expectations of a successful request
-          ### 3. Modify the `monitoringAlerts` SNS Topic below and provide subscriptions to any alerts raised by the monitoring function.
-          ###    (To help you out, we've provided commented-out examples)
-          ###    (After all, what good is monitoring if noone is listening?)
-          ### 4. Deploy your new assets/updated service using 'slsart deploy'
-          ### 5. [As appropriate] verify the subscriptions to the SNS topic
+          ### !! BEFORE ENABLING... !!!
+          ### 0. Change `'>>': script.yml` below to reference the script you want to use for monitoring if that is not its name.
+          ###    The script must be in this directory or a subdirectory.
+          ### 1. Modify your `script.yml` to provide the details of invoking every important surface of your service, as per
+          ###    https://artillery.io/docs
+          ### 2. To receive alerts when errors exceed the budget:
+          ###    i.  Add a `match` clause to your requests, specifying your expectations of a successful request.  This relatively
+          ###        undocumented feature is implemented at: https://github.com/shoreditch-ops/artillery/blob/82bdcdfc32ce4407bb197deff2cee13b4ecbab3b/core/lib/engine_util.js#L318
+          ###        We would welcome the contribution of a plugin replacing this as discussed in https://github.com/Nordstrom/serverless-artillery/issues/116
+          ###    ii. Modify the `monitoringAlerts` SNS Topic below, uncommenting `Subscription` and providing subscriptions for any
+          ###        alerts that might be raised by the monitoring function.  (To help you out, we've provided commented-out examples)
+          ###        (After all, what good is monitoring if noone is listening?)
+          ### 3. Deploy your new assets/updated service using `slsart deploy`
+          ### 4. [As appropriate] approve the subscription verifications for the SNS topic that will be sent following its creation
+          ### 5. Re-deploy whenever you update your monitoring script
           ########################################################################################################################
           enabled: false
           input:
