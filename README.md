@@ -218,84 +218,101 @@ The default maximum duration of a script chunk is 2 minutes (maxChunkDurationInS
 
 Find defects before performance testing! Acceptance mode runs each flow in your script exactly once and reports the results.
 
-To use:
+### To use:
+
+Ensure that you have `match` clauses defined for each request in your script's flows to validate responses. (["official" docs](https://github.com/shoreditch-ops/artillery/blob/master/core/lib/engine_util.js#L318), see [#116](https://github.com/Nordstrom/serverless-artillery/issues/116)).  Then...
+
+### Try it:
 
 Add `-a` to the `invoke` command:
 ```
 $ slsart invoke -a
 ```
 
-To run exclusively in acceptance mode, hard code the mode into your script:
+Expect a non-zero exit code if a match clause fails.
+
+### Run exclusively in acceptance mode:
+
+Hard code the mode into your script:
+
 ```
 mode: acceptance
 ...
 ```
+
 *note: 'acceptance' may be abbreviated to 'acc' in the script*
 
 Scripts running in acceptance mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via the `-a` flag) and have them anyway.
 
 For the purposes of facilitating the use of this tool in a CI/CD pipeline, if any of the acceptance tests fail to successfully complete, the process will exit with a non-zero exit code.
 
-To control the number of samples taken and constituting success, you may supply the following (default values listed):
+### To configure acceptance behavior:
+
+You may configure [sampling](glossary.md#sampling) behavior.  To control the number of samples taken, the time before taking a sample, or the number of errors constituting a failure, you may supply the following (default values listed):
+
 ```
 sampling:
-  size: 1           # The size of sample set
-  averagePause: 5   # The average number of seconds to pause between samples
-  pauseVariance: 2  # The maximum difference of the actual pause from the average pause (in either direction)
-  errorBudget: 0    # The number of observed errors to accept before alerting
+  size: 1            # The size of sample set
+  averagePause: 0.2  # The average number of seconds to pause between samples
+  pauseVariance: 0.1 # The maximum difference of the actual pause from the average pause (in either direction)
+  errorBudget: 0     # The number of observed errors to accept before alerting
 ```
 
 ## Monitoring Mode
 
-Detect outages quickly.  Don't wait for a sufficiently motivated customer to work their way you.  No... don't obssess.  Automate!
+Detect outages quickly.  Use synthetic customer activity to continously validate expected system behavior and alert you immediately if your users will be impacted.
 
-To use:
+### To use:
 
-Run the `monitor` command:
-```
-$ slsart monitor [-p <path-to-script>] [-t <threshold>]
-```
+1. If you don't have a script, create one (see [Script Customization](#script-customization))
+1. To receive alerts when errors occur...
+   1. If you haven't already, use the `slsart configure` command to obtain customizable function assets (see [Function Customization](#function-customization))
+   1. Uncomment the Subscription section of your serverless.yml and add at least one subscription
+   1. Ensure you have `match` clauses defined on each request in your script (to validate service responses - see ["official" docs](https://github.com/shoreditch-ops/artillery/blob/1ca5f66e16ec1b2d952e3e7af1573f36a8a175f8/core/lib/engine_util.js#L318) - see also [#116](https://github.com/Nordstrom/serverless-artillery/issues/116))
+1. \[Re]deploy your service (`slsart deploy`)
 
-This will add configuration for scheduling the function and alerting on failure to the `serverless.yml` in the CWD (a copy of the default `serverless.yml` will first be created if one isn't present).
+Then...
 
-**!! Please note that this modified or generated `serverless.yml` will need to be deployed !!**
-
-The script with which the function will be scheduled to execute with will be the given script or a script.yml in the local directory if that argument is not provided.
-
-Consequences:
-1. a scheduled event will be added
-1. an SNS topic will be added
-1. a policy allowing the function to publish to the created SNS topic will be added to iamRoleStatements
-1. an environment variable will be added to the `loadGenerator` function containing the ARN for the created SNS topic
-
-Tasks for you:
-1. modify your `serverless.yml` to enable subscriptions to any alerts raised by the monitoring function.  (What good is monitoring if no one is listening?)
-1. deploy your project by running `slsart deploy`
-
-To run the script in monitoring mode a single time for testing purposes (as opposed to scheduling it):
+### Try it:
 
 Add `-m` to the `invoke` command:
 ```
 $ slsart invoke -m
 ```
 
-Scripts running in monitoring mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via the `-a` flag) and have them anyway.
+Given default configuration, expect that each scenario/flow in your script will be executed five times.  If all five of them fail (we try to avoid notifying you about blips) then you should receive a notification via the configured mechanism.  
 
-To run exclusively in monitoring mode, hard code the mode into your script:
+### Monitor continuously:
+
+1. If you haven't already, use the `slsart configure` command to obtain customizable function assets (see [Function Customization](#function-customization))
+1. Find `enabled: false` in your `serverless.yml`.  Set it to `true` and follow "BEFORE ENABLING..." instructions.  (that's an attribute of a `schedule` event on the `loadGenerator` function)
+1. Deploy your service using `slsart deploy`.
+
+**WARNING**: Unlike other modes, monitoring mode script changes require redeployment of your service
+
+### Run exclusively in monitoring mode:
+
+Hard code the mode into your script:
+
 ```
 mode: monitoring
 ...
 ```
 
-*note: 'monitor' may be abbreviated to 'mon' in the script*
+*note: 'monitoring' may be abbreviated to 'mon' in the script*
 
-To control sampling and alerting, you may supply the following (default values listed):
+Scripts running in monitoring mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via a schedule event or with the `-m` flag) and have them anyway.
+
+### To configure monitoring behavior:
+
+You may configure [sampling](glossary.md#sampling) behavior.  To control the number of samples taken, the time before taking a sample, or the number of errors constituting a failure, you may supply the following (default values listed):
+
 ```
 sampling:
-  size: 5           # The size of sample set
-  averagePause: 5   # The average number of seconds to pause between samples
-  pauseVariance: 2  # The maximum difference of the actual pause from the average pause (in either direction)
-  errorBudget: 4    # The number of observed errors to accept before alerting
+  size: 5            # The size of sample set
+  averagePause: 0.2  # The average number of seconds to pause between samples
+  pauseVariance: 0.1 # The maximum difference of the actual pause from the average pause (in either direction)
+  errorBudget: 4     # The number of observed errors to accept before alerting
 ```
 
 ## Function Customization
@@ -429,9 +446,6 @@ Commands:
              documentation.
   configure  Create a local copy of the deployment assets for modification and
              deployment.  See https://docs.serverless.com for documentation.
-  monitor    Modify or create a local copy of the deployment assets with
-             declarations of a schedule upon which monitoring requests will
-             occur as well as an SNS topic for sending alert notifications.
 
 Options:
   --help         Show help                                             [boolean]
@@ -542,18 +556,6 @@ $ slsart configure
 slsart configure
 ```
 
-#### monitor
-```
-$ slsart monitor --help
-
-slsart monitor
-
-Options:
-  -p, --path       The path of the script to schedule the function with.[string]
-  -t, --threshold  The minimum number of errors the system must observe prior to
-                   sending an alert notification                        [number]
-```
-
 ## External References
 1. [artillery.io](https://artillery.io) for documentation about how to define your load shape, volume, targets, inputs, et cetera
 2. [serverless.com](https://docs.serverless.com/framework/docs/) for documentation about how to create a custom function configuration
@@ -564,7 +566,7 @@ Options:
 
 We were motivated to create this project in order to facilitate moving performance testing earlier and more frequently into our CI/CD pipelines such that the question wasn't '`whether...`' but '`why wouldn't...`' '`...you automatically (acceptance and) perf test your system every time you check in?`'.
 
-With acceptance testing in pocket we asked, '`why wouldn't you schedule that to sample and thereby monitor your service?`'.  So we added monitoring mode.
+With acceptance testing in pocket we asked, '`why wouldn't you schedule that to sample and thereby update your service?`'.  So we added monitoring mode.
 
 ## The future of serverless-artillery
 
