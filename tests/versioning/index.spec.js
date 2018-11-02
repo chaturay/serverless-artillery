@@ -20,7 +20,7 @@ describe('versioning module', () => {
       it('checks for .slsart file', () => {
         const fs = fsSpies()
 
-        versioning(fs).readAssetsVersion('target-project')
+        versioning(fs)('target-project').readAssetsVersion()
 
         expect(fs.existsSync.calledOnce).to.be.true
         expect(fs.existsSync.firstCall.args[0]).to.equal('target-project/.slsart')
@@ -31,7 +31,7 @@ describe('versioning module', () => {
         fs.existsSync.returns(true)
         fs.readFileSync.returns('version: 1.2.3')
 
-        const versionRead = versioning(fs).readAssetsVersion('target-project')
+        const versionRead = versioning(fs)('target-project').readAssetsVersion()
 
         expect(fs.existsSync.calledOnce).to.be.true
         expect(fs.existsSync.firstCall.args[0]).to.equal('target-project/.slsart')
@@ -42,7 +42,7 @@ describe('versioning module', () => {
         const fs = fsSpies()
         fs.existsSync.returns(false)
 
-        const versionRead = versioning(fs).readAssetsVersion('target-project')
+        const versionRead = versioning(fs)('target-project').readAssetsVersion()
 
         expect(fs.existsSync.calledOnce).to.be.true
         expect(fs.existsSync.firstCall.args[0]).to.equal('target-project/.slsart')
@@ -56,7 +56,7 @@ describe('versioning module', () => {
         fs.existsSync.withArgs('target-project/.slsart').returns(false)
         fs.readFileSync.withArgs('target-project/package.json').returns('{}')
 
-        expect(versioning(fs).validateProjectDependencies('target-project', {}))
+        expect(versioning(fs)('target-project').validateProjectDependencies({}))
           .to.equal(undefined)
 
         expect(fs.readFileSync.calledOnce).to.be.true
@@ -72,7 +72,7 @@ describe('versioning module', () => {
           }
         }`)
 
-        expect(() => versioning(fs).validateProjectDependencies('target-project', {
+        expect(() => versioning(fs)('target-project').validateProjectDependencies({
           'some-package': '^1.0',
           'another-package': '2.0.4',
         })).to.not.throw()
@@ -85,7 +85,7 @@ describe('versioning module', () => {
           }
         }`)
 
-        expect(() => versioning(fs).validateProjectDependencies('target-project', {
+        expect(() => versioning(fs)('target-project').validateProjectDependencies({
           'some-package': '^1.0',
           'another-package': '2.0.4',
         })).to.throw('Missing package.json dependency: some-package, another-package')
@@ -100,7 +100,7 @@ describe('versioning module', () => {
           }
         }`)
 
-        expect(() => versioning(fs).validateProjectDependencies('target-project', {
+        expect(() => versioning(fs)('target-project').validateProjectDependencies({
           'some-package': '^1.0',
           'another-package': '2.0.4',
         })).to.throw('Invalid package.json dependency package version found:\n' +
@@ -132,100 +132,100 @@ describe('versioning module', () => {
       // service config
       it('rejects falsy service configurations', () => {
         service = undefined
-        expect(() => versioning(fs).validateServiceConfiguration(service, constants)).to.throw()
+        expect(() => versioning(fs)('target-project').validateServiceConfiguration(service, constants)).to.throw()
       })
       it('rejects non-object service configurations', () => {
         service = aString
-        expect(() => versioning(fs).validateServiceConfiguration(service, constants)).to.throw()
+        expect(() => versioning(fs)('target-project').validateServiceConfiguration(service, constants)).to.throw()
       })
       // provider.iamRoleStatements
       it('rejects falsy provider', () => {
         service = validService()
         service.provider = false
-        expect(() => versioning(fs).validateServiceConfiguration(service, constants)).to.throw()
+        expect(() => versioning(fs)('target-project').validateServiceConfiguration(service, constants)).to.throw()
       })
       it('rejects falsy provider.iamRoleStatements', () => {
         service = validService()
         service.provider.iamRoleStatements = false
-        expect(() => versioning(fs).validateServiceConfiguration(service, constants)).to.throw()
+        expect(() => versioning(fs)('target-project').validateServiceConfiguration(service, constants)).to.throw()
       })
       it('rejects non-array provider.iamRoleStatements', () => {
         service = validService()
         service.provider.iamRoleStatements = aString
-        expect(() => versioning(fs).validateServiceConfiguration(service, constants)).to.throw()
+        expect(() => versioning(fs)('target-project').validateServiceConfiguration(service, constants)).to.throw()
       })
       // functions[constants.TestFunctionName]
       it('rejects falsy functions', () => {
         service = validService()
         service.functions = false
-        expect(() => versioning(fs).validateServiceConfiguration(service, constants)).to.throw()
+        expect(() => versioning(fs)('target-project').validateServiceConfiguration(service, constants)).to.throw()
       })
       it('rejects falsy functions[constants.TestFunctionName]', () => {
         service = validService()
         service.functions[constants.TestFunctionName] = false
-        expect(() => versioning(fs).validateServiceConfiguration(service, constants)).to.throw()
+        expect(() => versioning(fs)('target-project').validateServiceConfiguration(service, constants)).to.throw()
       })
       it('rejects non-object functions[constants.TestFunctionName]', () => {
         service = validService()
         service.functions[constants.TestFunctionName] = aString
-        expect(() => versioning(fs).validateServiceConfiguration(service, constants)).to.throw()
+        expect(() => versioning(fs)('target-project').validateServiceConfiguration(service, constants)).to.throw()
       })
       // functions[constants.TestFunctionName].environment['TOPIC_ARN' || 'TOPIC_NAME']
       it('accepts undefined functions[constants.TestFunctionName].environment', () => {
         service = validService()
         delete service.functions[constants.TestFunctionName].environment
-        expect(() => versioning(fs).validateServiceConfiguration(service, constants)).to.not.throw()
+        expect(() => versioning(fs)('target-project').validateServiceConfiguration(service, constants)).to.not.throw()
       })
       it('accepts functions[constants.TestFunctionName].environment without TOPIC_ARN or TOPIC_NAME', () => {
         service = validService()
         service.functions[constants.TestFunctionName].environment = { NOT_TOPIC_ARN_OR_TOPIC_NAME: aString }
-        expect(() => versioning(fs).validateServiceConfiguration(service, constants)).to.not.throw()
+        expect(() => versioning(fs)('target-project').validateServiceConfiguration(service, constants)).to.not.throw()
       })
       it('rejects functions[constants.TestFunctionName].environment with TOPIC_ARN', () => {
         service = validService()
         service.functions[constants.TestFunctionName].environment = { TOPIC_ARN: aString }
-        expect(() => versioning(fs).validateServiceConfiguration(service, constants)).to.throw()
+        expect(() => versioning(fs)('target-project').validateServiceConfiguration(service, constants)).to.throw()
       })
       it('rejects functions[constants.TestFunctionName].environment with TOPIC_NAME', () => {
         service = validService()
         service.functions[constants.TestFunctionName].environment = { TOPIC_NAME: aString }
-        expect(() => versioning(fs).validateServiceConfiguration(service, constants)).to.throw()
+        expect(() => versioning(fs)('target-project').validateServiceConfiguration(service, constants)).to.throw()
       })
       // functions[constants.TestFunctionName].events
       it('accepts an undefined functions[constants.TestFunctionName].events', () => {
         service = validService()
         delete service.functions[constants.TestFunctionName].events
-        expect(() => versioning(fs).validateServiceConfiguration(service, constants)).to.not.throw()
+        expect(() => versioning(fs)('target-project').validateServiceConfiguration(service, constants)).to.not.throw()
       })
       it('rejects non-array functions[constants.TestFunctionName].events', () => {
         service = validService()
         service.functions[constants.TestFunctionName].events = aString
-        expect(() => versioning(fs).validateServiceConfiguration(service, constants)).to.throw()
+        expect(() => versioning(fs)('target-project').validateServiceConfiguration(service, constants)).to.throw()
       })
       it('rejects functions[constants.TestFunctionName].events with a schedule event named constants.ScheduleName', () => {
         service = validService()
         service.functions[constants.TestFunctionName].events = [{ schedule: { name: constants.ScheduleName } }]
-        expect(() => versioning(fs).validateServiceConfiguration(service, constants)).to.throw()
+        expect(() => versioning(fs)('target-project').validateServiceConfiguration(service, constants)).to.throw()
       })
       // resources.Resources[constants.AlertingName]
       it('accepts an undefined resources.Resources[constants.AlertingName]', () => {
         service = validService()
         delete service.resources
-        expect(() => versioning(fs).validateServiceConfiguration(service, constants)).to.not.throw()
+        expect(() => versioning(fs)('target-project').validateServiceConfiguration(service, constants)).to.not.throw()
       })
       it('accepts an undefined resources.Resources[constants.AlertingName]', () => {
         service = validService()
         if (service.resources) {
           delete service.resources.Resources
         }
-        expect(() => versioning(fs).validateServiceConfiguration(service, constants)).to.not.throw()
+        expect(() => versioning(fs)('target-project').validateServiceConfiguration(service, constants)).to.not.throw()
       })
       it('accepts an undefined resources.Resources[constants.AlertingName]', () => {
         service = validService()
         if (service.resources && service.resources.Resources) {
           delete service.resources.Resources[slsart.constants.AlertingName]
         }
-        expect(() => versioning(fs).validateServiceConfiguration(service, constants)).to.not.throw()
+        expect(() => versioning(fs)('target-project').validateServiceConfiguration(service, constants)).to.not.throw()
       })
       it('reject a defined resources.Resources[constants.AlertingName]', () => {
         service = validService()
@@ -234,7 +234,7 @@ describe('versioning module', () => {
             [constants.AlertingName]: aString,
           },
         }
-        expect(() => versioning(fs).validateServiceConfiguration(service, constants)).to.throw()
+        expect(() => versioning(fs)('target-project').validateServiceConfiguration(service, constants)).to.throw()
       })
     })
 
@@ -243,7 +243,7 @@ describe('versioning module', () => {
         const fs = fsSpies()
         fs.readFileSync.withArgs('target-project/serverless.yml').returns('')
 
-        expect(() => versioning(fs).validateServiceDefinition('target-project'))
+        expect(() => versioning(fs)('target-project').validateServiceDefinition('target-project'))
           .to.throw()
 
         expect(fs.readFileSync.calledOnce).to.be.true
@@ -261,7 +261,7 @@ describe('versioning module', () => {
         let exceptionThrown = false;
 
         try {
-          versioning(fs).validateServiceDefinition('target-project')
+          versioning(fs)('target-project').validateServiceDefinition()
         } catch(ex) {
           exceptionThrown = true
           expect(ex.message).to.equal(message)
@@ -391,7 +391,7 @@ describe('versioning module', () => {
           'UpdateConflictError'
         )
 
-        expect(() => versioning(fs).validateServiceDefinition('target-project'))
+        expect(() => versioning(fs)('target-project').validateServiceDefinition())
           .to.not.throw()
       })
     })
@@ -400,7 +400,7 @@ describe('versioning module', () => {
       it('generates a correct list for v0.0.0', () => {
         const fs = fsSpies()
 
-        expect(versioning(fs).determineFunctionAssetFiles('0.0.0'))
+        expect(versioning(fs)('target-project').determineFunctionAssetFiles('0.0.0'))
           .to.deep.equal([
             'handler.js',
             'package.json',
@@ -417,7 +417,7 @@ describe('versioning module', () => {
         fs.existsSync.withArgs('target-project/package.json').returns(true)
         fs.existsSync.withArgs('target-project/serverless.yml').returns(true)
 
-        expect(() => versioning(fs).checkForServiceFiles('target-project'))
+        expect(() => versioning(fs)('target-project').checkForServiceFiles())
           .to.not.throw()
       })
 
@@ -428,7 +428,7 @@ describe('versioning module', () => {
         fs.existsSync.withArgs('target-project/package.json').returns(true)
         fs.existsSync.withArgs('target-project/serverless.yml').returns(true)
 
-        expect(() => versioning(fs).checkForServiceFiles('target-project'))
+        expect(() => versioning(fs)('target-project').checkForServiceFiles())
           .to.throw(/handler\.js/)
       })
 
@@ -439,7 +439,7 @@ describe('versioning module', () => {
         fs.existsSync.withArgs('target-project/package.json').returns(false)
         fs.existsSync.withArgs('target-project/serverless.yml').returns(false)
 
-        expect(() => versioning(fs).checkForServiceFiles('target-project'))
+        expect(() => versioning(fs)('target-project').checkForServiceFiles())
           .to.throw(/target-project\/handler\.js, target-project\/package\.json, target-project\/serverless\.yml/)
       })
     })
