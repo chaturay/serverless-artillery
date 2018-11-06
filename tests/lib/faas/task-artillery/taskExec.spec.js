@@ -10,7 +10,7 @@ chai.should()
 const { expect } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
-const taskExec = require(path.join('..', '..', '..', 'lib', 'faas', 'taskExec.js'))
+const taskExec = require(path.join('..', '..', '..', '..', 'lib', 'faas', 'task-artillery', 'taskExec.js'))
 
 let results
 let script

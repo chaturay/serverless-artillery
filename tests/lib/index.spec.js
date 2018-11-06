@@ -74,7 +74,7 @@ quibble('get-stdin', () => BbPromise.resolve(testJsonScriptStringified))
 quibble('shortid', { generate: () => shortidResult })
 
 const func = require(path.join('..', '..', 'lib', 'faas', 'aws-func')) // eslint-disable-line import/no-dynamic-require
-const task = require(path.join('..', '..', 'lib', 'faas', 'task.js')) // eslint-disable-line import/no-dynamic-require
+const task = require(path.join('..', '..', 'lib', 'faas', 'task-artillery')) // eslint-disable-line import/no-dynamic-require
 const slsart = require(path.join('..', '..', 'lib', 'index.js')) // eslint-disable-line import/no-dynamic-require
 
 describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefer-arrow-callback

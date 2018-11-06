@@ -10,7 +10,7 @@ chai.use(sinonChai)
 const { expect } = chai
 
 const func = require(path.join('..', '..', '..', 'lib', 'faas', 'aws-func')) // eslint-disable-line import/no-dynamic-require
-const task = require(path.join('..', '..', '..', 'lib', 'faas', 'task.js')) // eslint-disable-line import/no-dynamic-require
+const task = require(path.join('..', '..', '..', 'lib', 'faas', 'task-artillery')) // eslint-disable-line import/no-dynamic-require
 const handler = require(path.join('..', '..', '..', 'lib', 'faas', 'handler.js')) // eslint-disable-line import/no-dynamic-require
 
 const defaultSettings = func.define.getSettings()

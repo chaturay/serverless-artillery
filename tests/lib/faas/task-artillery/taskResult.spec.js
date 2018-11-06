@@ -8,9 +8,9 @@ chai.use(sinonChai)
 const { expect } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
-const def = require(path.join('..', '..', '..', 'lib', 'faas', 'taskDef.js'))
+const def = require(path.join('..', '..', '..', '..', 'lib', 'faas', 'task-artillery', 'taskDef.js'))
 // eslint-disable-next-line import/no-dynamic-require
-const taskResult = require(path.join('..', '..', '..', 'lib', 'faas', 'taskResult.js'))
+const taskResult = require(path.join('..', '..', '..', '..', 'lib', 'faas', 'task-artillery', 'taskResult.js'))
 
 let expected
 let result
