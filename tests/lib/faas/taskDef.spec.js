@@ -4,12 +4,12 @@ const path = require('path')
 const { expect } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
-const task = require(path.join('..', '..', '..', 'lib', 'lambda', 'task.js'))
+const task = require(path.join('..', '..', '..', 'lib', 'faas', 'task.js'))
 
 let script
 let expected
 
-describe('./lib/lambda/taskDef.js', () => {
+describe('./lib/faas/taskDef.js', () => {
   describe(':constants', () => {
     // The rest of these cases are covered in other tests.  Adding this for completeness
     describe('#isPerformanceScript', () => {

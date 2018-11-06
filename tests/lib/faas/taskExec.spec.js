@@ -10,12 +10,12 @@ chai.should()
 const { expect } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
-const taskExec = require(path.join('..', '..', '..', 'lib', 'lambda', 'taskExec.js'))
+const taskExec = require(path.join('..', '..', '..', 'lib', 'faas', 'taskExec.js'))
 
 let results
 let script
 
-describe('./lib/lambda/taskExec.js', () => {
+describe('./lib/faas/taskExec.js', () => {
   describe('#execLoad', () => {
     const runnerFailIfCalled = () => {
       throw new Error('run() should not be called.')

@@ -10,9 +10,9 @@ chai.use(sinonChai)
 const { expect } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
-const func = require(path.join('..', '..', '..', 'lib', 'lambda', 'func.js'))
+const func = require(path.join('..', '..', '..', 'lib', 'faas', 'func.js'))
 // eslint-disable-next-line import/no-dynamic-require
-const task = require(path.join('..', '..', '..', 'lib', 'lambda', 'task.js'))
+const task = require(path.join('..', '..', '..', 'lib', 'faas', 'task.js'))
 
 let script
 let phase
@@ -34,7 +34,7 @@ const validScript = () => ({
   },
 })
 
-describe('./lib/lambda/taskPlan.js', () => {
+describe('./lib/faas/taskPlan.js', () => {
   beforeEach(() => {
     defaultSettings = func.def.getSettings({})
   })

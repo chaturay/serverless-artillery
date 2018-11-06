@@ -10,7 +10,7 @@ chai.use(chaiAsPromised)
 
 const { expect } = chai
 
-const packageJson = require(path.join(__dirname, '..', '..', 'lib', 'lambda', 'package.json')) // eslint-disable-line import/no-dynamic-require
+const packageJson = require(path.join(__dirname, '..', '..', 'lib', 'faas', 'package.json')) // eslint-disable-line import/no-dynamic-require
 const slsart = require('../../lib/index')
 const npm = require('../../lib/npm')
 

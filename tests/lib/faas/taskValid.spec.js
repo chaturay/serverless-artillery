@@ -4,9 +4,9 @@ const path = require('path')
 const { expect } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
-const func = require(path.join('..', '..', '..', 'lib', 'lambda', 'func.js'))
+const func = require(path.join('..', '..', '..', 'lib', 'faas', 'func.js'))
 // eslint-disable-next-line import/no-dynamic-require
-const task = require(path.join('..', '..', '..', 'lib', 'lambda', 'task.js'))
+const task = require(path.join('..', '..', '..', 'lib', 'faas', 'task.js'))
 
 const getDefaultSettings = () => {
   const ret = func.def.getSettings()
@@ -28,7 +28,7 @@ const tagScript = () => ({
 
 let script
 
-describe('./lib/lambda/taskValid.js', () => {
+describe('./lib/faas/taskValid.js', () => {
   describe(':impl', () => {
     describe('#validate', () => {
       beforeEach(() => {

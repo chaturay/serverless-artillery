@@ -73,8 +73,8 @@ quibble(path.join('..', '..', 'lib', 'serverless-fx'), ServerlessFake)
 quibble('get-stdin', () => BbPromise.resolve(testJsonScriptStringified))
 quibble('shortid', { generate: () => shortidResult })
 
-const func = require(path.join('..', '..', 'lib', 'lambda', 'func.js')) // eslint-disable-line import/no-dynamic-require
-const task = require(path.join('..', '..', 'lib', 'lambda', 'task.js')) // eslint-disable-line import/no-dynamic-require
+const func = require(path.join('..', '..', 'lib', 'faas', 'func.js')) // eslint-disable-line import/no-dynamic-require
+const task = require(path.join('..', '..', 'lib', 'faas', 'task.js')) // eslint-disable-line import/no-dynamic-require
 const slsart = require(path.join('..', '..', 'lib', 'index.js')) // eslint-disable-line import/no-dynamic-require
 
 describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefer-arrow-callback
@@ -110,7 +110,7 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
         }
       })
       it('returns an absoute path to the global script.yml if no path was given and a local one does not exist', () => {
-        const expected = path.join(path.resolve(path.join(__dirname, '..', '..', 'lib', 'lambda')), 'script.yml')
+        const expected = path.join(path.resolve(path.join(__dirname, '..', '..', 'lib', 'faas')), 'script.yml')
         expect(slsart.impl.findScriptPath()).to.eql(expected)
       })
     })
@@ -294,7 +294,7 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
             }) // eslint-disable-line comma-dangle
         ) // eslint-disable-line comma-dangle
       )
-      it('adjusts to an increased http timeout that is not above the lambda chunk maximum',
+      it('adjusts to an increased http timeout that is not above the function chunk maximum',
         replaceImpl(
           100000, // 100 s
           () => BbPromise.resolve()
@@ -305,7 +305,7 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
             }) // eslint-disable-line comma-dangle
         ) // eslint-disable-line comma-dangle
       )
-      it('uses the lambda maximum defaults if the timeout is sufficiently high',
+      it('uses the function maximum defaults if the timeout is sufficiently high',
         replaceImpl(
           Number.MAX_VALUE,
           () => BbPromise.resolve()
@@ -569,7 +569,7 @@ scenarios:
     })
 
     describe('#findServicePath', () => {
-      const lambdaPath = path.resolve('lib', 'lambda')
+      const faasPath = path.resolve('lib', 'faas')
       const replaceImpl = (cwdResult, fileExistsResult, testFunc) => (() => {
         const { cwd } = process
         const { fileExists } = slsart.impl
@@ -600,7 +600,7 @@ scenarios:
           () => BbPromise.resolve()
             .then(() => {
               const res = slsart.impl.findServicePath()
-              expect(res).to.eql(lambdaPath)
+              expect(res).to.eql(faasPath)
             }) // eslint-disable-line comma-dangle
         ) // eslint-disable-line comma-dangle
       )
@@ -1070,11 +1070,11 @@ scenarios:
         rmdir(tmpdir)
       })
       it(`refuses to overwrite existing ${slsart.constants.ServerlessFiles.join(', ')} files`, () => {
-        replaceCwd(path.join(__dirname, '..', '..', 'lib', 'lambda'))
+        replaceCwd(path.join(__dirname, '..', '..', 'lib', 'faas'))
         return slsart.configure({}).should.be.rejected
       })
       it(`refuses to overwrite existing ${slsart.constants.ServerlessFiles.join(', ')} files with debug and tracing`, () => {
-        replaceCwd(path.join(__dirname, '..', '..', 'lib', 'lambda'))
+        replaceCwd(path.join(__dirname, '..', '..', 'lib', 'faas'))
         return slsart.configure({ debug: true, trace: true }).should.be.rejected
       })
       it('creates unique project artifacts and resolves after mock dependency install', () => {

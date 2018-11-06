@@ -8,14 +8,14 @@ chai.use(sinonChai)
 const { expect } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
-const def = require(path.join('..', '..', '..', 'lib', 'lambda', 'taskDef.js'))
+const def = require(path.join('..', '..', '..', 'lib', 'faas', 'taskDef.js'))
 // eslint-disable-next-line import/no-dynamic-require
-const taskResult = require(path.join('..', '..', '..', 'lib', 'lambda', 'taskResult.js'))
+const taskResult = require(path.join('..', '..', '..', 'lib', 'faas', 'taskResult.js'))
 
 let expected
 let result
 
-describe('./lib/lambda/taskResult.js', () => {
+describe('./lib/faas/taskResult.js', () => {
   describe(':impl', () => {
     describe('#getDisplayReadyMode', () => {
       it('returns the given mode if not among the defined', () => {

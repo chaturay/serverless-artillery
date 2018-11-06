@@ -4,7 +4,7 @@ const path = require('path')
 const { expect } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
-const func = require(path.join('..', '..', '..', 'lib', 'lambda', 'func.js'))
+const func = require(path.join('..', '..', '..', 'lib', 'faas', 'func.js'))
 
 const tagScript = () => ({
   config: {
@@ -16,7 +16,7 @@ const tagScript = () => ({
 
 let script
 
-describe('./lib/lambda/funcValid.js', () => {
+describe('./lib/faas/funcValid.js', () => {
   describe(':impl', () => {
     describe('#validScript', () => {
       /* eslint-disable no-underscore-dangle */

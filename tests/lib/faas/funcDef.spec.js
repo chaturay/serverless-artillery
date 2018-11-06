@@ -4,12 +4,12 @@ const path = require('path')
 const { expect } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
-const func = require(path.join('..', '..', '..', 'lib', 'lambda', 'func.js'))
+const func = require(path.join('..', '..', '..', 'lib', 'faas', 'func.js'))
 
 let script
 let expected
 
-describe('./lib/lambda/funcDef.js', () => {
+describe('./lib/faas/funcDef.js', () => {
   describe(':impl', () => {
     describe('#getSettings', () => {
       const defaultSettings = () => ({

@@ -12,9 +12,9 @@ chai.use(chaiAsPromised)
 const { expect, assert } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
-const func = require(path.join('..', '..', '..', 'lib', 'lambda', 'func.js'))
+const func = require(path.join('..', '..', '..', 'lib', 'faas', 'func.js'))
 
-describe('./lib/lambda/funcHandle.js', () => {
+describe('./lib/faas/funcHandle.js', () => {
   describe(':impl', () => {
     describe('#createUnhandledRejectionHandler', () => {
       it('should print to the console', () => {
@@ -174,7 +174,7 @@ describe('./lib/lambda/funcHandle.js', () => {
       })
       it('should merge objects with a root merge attribute', () => {
         const input = {
-          '>>': './lib/lambda/foo',
+          '>>': './lib/faas/foo',
           mode: 'mon',
           foo: {
             bar: '3',

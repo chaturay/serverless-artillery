@@ -10,14 +10,14 @@ chai.should()
 const { expect } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
-const alert = require(path.join('..', '..', '..', 'lib', 'lambda', 'alert.js'))
+const alert = require(path.join('..', '..', '..', 'lib', 'faas', 'alert.js'))
 // eslint-disable-next-line import/no-dynamic-require
-const task = require(path.join('..', '..', '..', 'lib', 'lambda', 'task.js'))
+const task = require(path.join('..', '..', '..', 'lib', 'faas', 'task.js'))
 
 let analysis
 let result
 
-describe('./lib/lambda/taskResult.js', () => {
+describe('./lib/faas/taskResult.js', () => {
   describe(':', () => {
     describe('#briefAnalysis', () => {
       it('removes latencies from reports before stringifying the analysis', () => {
