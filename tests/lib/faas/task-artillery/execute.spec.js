@@ -10,12 +10,12 @@ chai.should()
 const { expect } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
-const taskExec = require(path.join('..', '..', '..', '..', 'lib', 'faas', 'task-artillery', 'taskExec.js'))
+const execute = require(path.join('..', '..', '..', '..', 'lib', 'faas', 'task-artillery', 'execute.js'))
 
 let results
 let script
 
-describe('./lib/faas/taskExec.js', () => {
+describe('./lib/faas/task-artillery/execute.js', () => {
   describe('#execLoad', () => {
     const runnerFailIfCalled = () => {
       throw new Error('run() should not be called.')
@@ -30,7 +30,7 @@ describe('./lib/faas/taskExec.js', () => {
 
     it('does nothing in simulation mode', () => {
       script = { _trace: true, _simulation: true }
-      return taskExec(runnerFailIfCalled)(1, script)
+      return execute(runnerFailIfCalled)(1, script)
         .should.eventually.eql({ Payload: '{ "errors": 0 }' })
     })
 
@@ -39,7 +39,7 @@ describe('./lib/faas/taskExec.js', () => {
       const artilleryResults = { aggregate: { Payload: '{ "errors": 0 }' } }
       results = { Payload: '{ "errors": 0 }' }
 
-      return taskExec(runnerMock(script, artilleryResults, 0))(1, script)
+      return execute(runnerMock(script, artilleryResults, 0))(1, script)
         .should.eventually.eql(results)
     })
 
@@ -47,7 +47,7 @@ describe('./lib/faas/taskExec.js', () => {
       script = { _trace: true, _simulation: false }
       results = { Payload: '{ "errors": 0 }' }
 
-      return taskExec(runnerMock(script, results, 1))(1, script)
+      return execute(runnerMock(script, results, 1))(1, script)
         .should.be.rejectedWith('Artillery exited with non-zero code: 1')
     })
 
@@ -55,7 +55,7 @@ describe('./lib/faas/taskExec.js', () => {
       script = { _trace: true, _simulation: false }
       results = null
 
-      return taskExec(runnerMock(script, results, 0))(1, script)
+      return execute(runnerMock(script, results, 0))(1, script)
         .should.be.rejectedWith('Artillery exited with zero, but test results not set.')
     })
   })

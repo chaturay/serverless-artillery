@@ -21,7 +21,7 @@ let expected
 let defaultSettings
 
 const runOnceSettings = func.define.getSettings()
-runOnceSettings.task = { sampling: task.def.defaultsToSettings(task.def.acceptance) }
+runOnceSettings.task = { sampling: task.define.defaultsToSettings(task.define.acceptance) }
 
 const validScript = () => ({
   config: {
@@ -34,7 +34,7 @@ const validScript = () => ({
   },
 })
 
-describe('./lib/faas/taskPlan.js', () => {
+describe('./lib/faas/task-artillery/plan.js', () => {
   beforeEach(() => {
     defaultSettings = func.define.getSettings({})
   })
@@ -1256,41 +1256,41 @@ describe('./lib/faas/taskPlan.js', () => {
         expect(planSamplesStub).to.not.have.been.called
         expect(planPerformanceStub).to.have.been.calledOnce
       })
-      it(`detects mode "${task.def.modes.PERF}" and calls planPerformance`, () => {
-        script = { mode: task.def.modes.PERF }
+      it(`detects mode "${task.define.modes.PERF}" and calls planPerformance`, () => {
+        script = { mode: task.define.modes.PERF }
         task.plan.impl.planTask(1, script, defaultSettings)
         expect(planSamplesStub).to.not.have.been.called
         expect(planPerformanceStub).to.have.been.calledOnce
       })
-      it(`detects mode "${task.def.modes.PERFORMANCE}" and calls planPerformance`, () => {
-        script = { mode: task.def.modes.PERFORMANCE }
+      it(`detects mode "${task.define.modes.PERFORMANCE}" and calls planPerformance`, () => {
+        script = { mode: task.define.modes.PERFORMANCE }
         task.plan.impl.planTask(1, script, defaultSettings)
         expect(planSamplesStub).to.not.have.been.called
         expect(planPerformanceStub).to.have.been.calledOnce
       })
-      it(`detects mode "${task.def.modes.ACC}" and calls planSamples with sampleWithAcceptanceDefaults`, () => {
-        script = { mode: task.def.modes.ACC }
+      it(`detects mode "${task.define.modes.ACC}" and calls planSamples with sampleWithAcceptanceDefaults`, () => {
+        script = { mode: task.define.modes.ACC }
         task.plan.impl.planTask(1, script, defaultSettings)
         expect(planSamplesStub).to.have.been.calledOnce
         expect(planSamplesStub.args[0][2]).to.equal(defaultSettings)
         expect(planPerformanceStub).to.not.have.been.called
       })
-      it(`detects mode "${task.def.modes.ACCEPTANCE}" and calls planSamples with sampleWithAcceptanceDefaults`, () => {
-        script = { mode: task.def.modes.ACCEPTANCE }
+      it(`detects mode "${task.define.modes.ACCEPTANCE}" and calls planSamples with sampleWithAcceptanceDefaults`, () => {
+        script = { mode: task.define.modes.ACCEPTANCE }
         task.plan.impl.planTask(1, script, defaultSettings)
         expect(planSamplesStub).to.have.been.calledOnce
         expect(planSamplesStub.args[0][2]).to.equal(defaultSettings)
         expect(planPerformanceStub).to.not.have.been.called
       })
-      it(`detects mode "${task.def.modes.MON}" and calls planSamples with sampleWithMonitoringDefaults`, () => {
-        script = { mode: task.def.modes.MON }
+      it(`detects mode "${task.define.modes.MON}" and calls planSamples with sampleWithMonitoringDefaults`, () => {
+        script = { mode: task.define.modes.MON }
         task.plan.impl.planTask(1, script, defaultSettings)
         expect(planSamplesStub).to.have.been.calledOnce
         expect(planSamplesStub.args[0][2]).to.equal(defaultSettings)
         expect(planPerformanceStub).to.not.have.been.called
       })
-      it(`detects mode "${task.def.modes.MONITORING}" and calls planSamples with sampleWithMonitoringDefaults`, () => {
-        script = { mode: task.def.modes.MONITORING }
+      it(`detects mode "${task.define.modes.MONITORING}" and calls planSamples with sampleWithMonitoringDefaults`, () => {
+        script = { mode: task.define.modes.MONITORING }
         task.plan.impl.planTask(1, script, defaultSettings)
         expect(planSamplesStub).to.have.been.calledOnce
         expect(planSamplesStub.args[0][2]).to.equal(defaultSettings)

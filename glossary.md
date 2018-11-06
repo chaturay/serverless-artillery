@@ -34,7 +34,7 @@ error:
   500: 1
 ```
 
-The error type counts are summed and compared to the configured error budget.  If the number of errors observed exceeds the budget, an alert is sent as per configuration.  (to alter this behavior, you will need to change the logic in `taskResult.js`)
+The error type counts are summed and compared to the configured error budget.  If the number of errors observed exceeds the budget, an alert is sent as per configuration.  (to alter this behavior, you will need to change the logic in `~/task-artillery/result.js`)
 
 If you accept defaults, the actual number of samples depends on the mode that you use.  Acceptance mode has a default of 1 sample.  Monitoring mode, on the other hand, has a default of 5 samples.  Whenever you are taking more than one sample, those samples are spread over time with dither in order to avoid damaging results from harmonic effects.  Each sample is preceeded by a pause.  The amount of time of that pause is determined by an average pause (in seconds) that is augmented with random variance (also in seconds) either before or after the average.
 

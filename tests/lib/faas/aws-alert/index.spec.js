@@ -17,17 +17,17 @@ const task = require(path.join('..', '..', '..', '..', 'lib', 'faas', 'task-arti
 let analysis
 let result
 
-describe('./lib/faas/taskResult.js', () => {
+describe('./lib/faas/aws-alert/index.js', () => {
   describe(':', () => {
     describe('#briefAnalysis', () => {
       it('removes latencies from reports before stringifying the analysis', () => {
         analysis = {
           errors: 1,
-          errorMessage: `sampling test failure: 1/2 exceeded budget of ${task.def.monitoring.DefaultErrorBudget} errors`,
+          errorMessage: `sampling test failure: 1/2 exceeded budget of ${task.define.monitoring.DefaultErrorBudget} errors`,
           reports: [
             {
               errors: {
-                404: task.def.sampling.DefaultErrorBudget + 1,
+                404: task.define.sampling.DefaultErrorBudget + 1,
               },
               latencies: ['stuff', 'we', 'don\'t', 'want'],
             },

@@ -431,7 +431,7 @@ scenarios:
             enabled: true,
             input: {
               '>>': 'script.yml',
-              mode: task.def.modes.MONITORING,
+              mode: task.define.modes.MONITORING,
             },
           },
         },
@@ -530,12 +530,12 @@ scenarios:
         })
         it('rejects if script mode is "mon"', () => {
           expect(() =>
-            slsart.impl.validateServiceForInvocation({}, { mode: task.def.modes.MON }, defaultAssetsCwd)
+            slsart.impl.validateServiceForInvocation({}, { mode: task.define.modes.MON }, defaultAssetsCwd)
           ).to.throw(/does not support invocation with the monitoring flag/)
         })
         it('rejects if script mode is "monitoring"', () => {
           expect(() =>
-            slsart.impl.validateServiceForInvocation({}, { mode: task.def.modes.MONITORING }, defaultAssetsCwd)
+            slsart.impl.validateServiceForInvocation({}, { mode: task.define.modes.MONITORING }, defaultAssetsCwd)
           ).to.throw(/does not support invocation with the monitoring flag/)
         })
         it('does not reject default version otherwise', () => {
@@ -552,12 +552,12 @@ scenarios:
         })
         it('does not reject if script mode is "mon"', () => {
           expect(() =>
-            slsart.impl.validateServiceForInvocation({}, { mode: task.def.modes.MON }, v0_0_1_AssetsCwd)
+            slsart.impl.validateServiceForInvocation({}, { mode: task.define.modes.MON }, v0_0_1_AssetsCwd)
           ).not.to.throw(/does not support invocation with the monitoring flag/)
         })
         it('does not reject if script mode is "monitoring"', () => {
           expect(() =>
-            slsart.impl.validateServiceForInvocation({}, { mode: task.def.modes.MONITORING }, v0_0_1_AssetsCwd)
+            slsart.impl.validateServiceForInvocation({}, { mode: task.define.modes.MONITORING }, v0_0_1_AssetsCwd)
           ).not.to.throw(/does not support invocation with the monitoring flag/)
         })
         it('does not reject default version otherwise', () => {
@@ -688,7 +688,7 @@ scenarios:
 
       const replaceImpl = (scriptConstraintsResult, serverlessRunnerResult, testFunc) => (() => {
         const { scriptConstraints } = slsart.impl
-        scriptConstraints.task = { sampling: task.def.getSettings() }
+        scriptConstraints.task = { sampling: task.define.getSettings() }
         const { serverlessRunner } = slsart.impl
         const replaceInput = slsart.impl.replaceArgv
         slsart.impl.scriptConstraints = () => scriptConstraintsResult
@@ -735,19 +735,19 @@ scenarios:
             .should.be.rejectedWith(func.define.FunctionError, 'func.error')
         })
         it('handles and reports validation errors from the task plugin, exiting the process', () => {
-          implParseInputStub.throws(new task.def.TaskError('task.error'))
+          implParseInputStub.throws(new task.define.TaskError('task.error'))
           return slsart.invoke({ d: testJsonScriptStringified })
-            .should.be.rejectedWith(task.def.TaskError, 'task.error')
+            .should.be.rejectedWith(task.define.TaskError, 'task.error')
         })
         it('handles and reports assets version mismatch errors, exiting the process', () => {
           validateServiceForInvocationStub.throws(new Error('error'))
           return slsart.invoke({ d: testJsonScriptStringified })
-            .should.be.rejectedWith(task.def.Error, 'error')
+            .should.be.rejectedWith(task.define.Error, 'error')
         })
         it('handles and reports unexpected errors, exiting the process', () => {
           implParseInputStub.throws(new Error('error'))
           return slsart.invoke({ d: testJsonScriptStringified })
-            .should.be.rejectedWith(task.def.Error, 'error')
+            .should.be.rejectedWith(task.define.Error, 'error')
         })
       })
       describe('performance mode', () => {
@@ -876,7 +876,7 @@ scenarios:
             {},
             () => {
               const script = JSON.parse(testJsonScriptStringified)
-              script.mode = task.def.modes.MON
+              script.mode = task.define.modes.MON
               return slsart.invoke({ d: JSON.stringify(script) })
                 .then(() => expect(logs[1]).to.eql(completeMessage))
             } // eslint-disable-line comma-dangle
@@ -888,7 +888,7 @@ scenarios:
             {},
             () => {
               const script = JSON.parse(testJsonScriptStringified)
-              script.mode = task.def.modes.MONITORING
+              script.mode = task.define.modes.MONITORING
               return slsart.invoke({ d: JSON.stringify(script) })
                 .then(() => expect(logs[1]).to.eql(completeMessage))
             } // eslint-disable-line comma-dangle
