@@ -13,7 +13,7 @@ const { expect } = chai
 let awsStub
 
 // eslint-disable-next-line import/no-dynamic-require
-const func = require(path.join('..', '..', '..', 'lib', 'faas', 'aws-func'))
+const func = require(path.join('..', '..', '..', '..', 'lib', 'faas', 'aws-func'))
 
 const tagContext = {
   functionName: 'name',

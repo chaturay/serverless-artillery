@@ -4,7 +4,7 @@ const path = require('path')
 const { expect } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
-const func = require(path.join('..', '..', '..', 'lib', 'faas', 'aws-func'))
+const func = require(path.join('..', '..', '..', '..', 'lib', 'faas', 'aws-func'))
 
 const tagScript = () => ({
   config: {

@@ -12,7 +12,7 @@ chai.use(chaiAsPromised)
 const { expect, assert } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
-const func = require(path.join('..', '..', '..', 'lib', 'faas', 'aws-func'))
+const func = require(path.join('..', '..', '..', '..', 'lib', 'faas', 'aws-func'))
 
 describe('./lib/faas/aws-func/handle.js', () => {
   describe(':impl', () => {
