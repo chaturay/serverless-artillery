@@ -10,9 +10,9 @@ chai.should()
 const { expect } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
-const alert = require(path.join('..', '..', '..', 'lib', 'faas', 'alert.js'))
+const alert = require(path.join('..', '..', '..', '..', 'lib', 'faas', 'aws-alert'))
 // eslint-disable-next-line import/no-dynamic-require
-const task = require(path.join('..', '..', '..', 'lib', 'faas', 'task.js'))
+const task = require(path.join('..', '..', '..', '..', 'lib', 'faas', 'task.js'))
 
 let analysis
 let result
