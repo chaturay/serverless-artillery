@@ -73,7 +73,7 @@ quibble(path.join('..', '..', 'lib', 'serverless-fx'), ServerlessFake)
 quibble('get-stdin', () => BbPromise.resolve(testJsonScriptStringified))
 quibble('shortid', { generate: () => shortidResult })
 
-const func = require(path.join('..', '..', 'lib', 'faas', 'func.js')) // eslint-disable-line import/no-dynamic-require
+const func = require(path.join('..', '..', 'lib', 'faas', 'aws-func')) // eslint-disable-line import/no-dynamic-require
 const task = require(path.join('..', '..', 'lib', 'faas', 'task.js')) // eslint-disable-line import/no-dynamic-require
 const slsart = require(path.join('..', '..', 'lib', 'index.js')) // eslint-disable-line import/no-dynamic-require
 

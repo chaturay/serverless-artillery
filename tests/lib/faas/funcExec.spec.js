@@ -13,7 +13,7 @@ const { expect } = chai
 let awsStub
 
 // eslint-disable-next-line import/no-dynamic-require
-const func = require(path.join('..', '..', '..', 'lib', 'faas', 'func.js'))
+const func = require(path.join('..', '..', '..', 'lib', 'faas', 'aws-func'))
 
 const tagContext = {
   functionName: 'name',
@@ -33,7 +33,7 @@ const validScript = () => ({
   },
 })
 
-describe('./lib/faas/funcExec.js', () => {
+describe('./lib/faas/aws-func/invoke.js', () => {
   beforeEach(() => {
     awsStub = sinon.stub(aws.Service.prototype, 'makeRequest')
   })

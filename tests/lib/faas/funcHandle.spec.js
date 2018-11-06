@@ -12,9 +12,9 @@ chai.use(chaiAsPromised)
 const { expect, assert } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
-const func = require(path.join('..', '..', '..', 'lib', 'faas', 'func.js'))
+const func = require(path.join('..', '..', '..', 'lib', 'faas', 'aws-func'))
 
-describe('./lib/faas/funcHandle.js', () => {
+describe('./lib/faas/aws-func/handle.js', () => {
   describe(':impl', () => {
     describe('#createUnhandledRejectionHandler', () => {
       it('should print to the console', () => {

@@ -4,7 +4,7 @@ const path = require('path')
 const { expect } = chai
 
 // eslint-disable-next-line import/no-dynamic-require
-const func = require(path.join('..', '..', '..', 'lib', 'faas', 'func.js'))
+const func = require(path.join('..', '..', '..', 'lib', 'faas', 'aws-func'))
 // eslint-disable-next-line import/no-dynamic-require
 const task = require(path.join('..', '..', '..', 'lib', 'faas', 'task.js'))
 
