@@ -123,7 +123,10 @@ describe('versioning module', () => {
           iamRoleStatements: [],
         },
         functions: {
-          [constants.TestFunctionName]: {},
+          [constants.TestFunctionName]: {
+            handler: '',
+            timeout: '',
+          },
         },
       })
 
@@ -265,7 +268,7 @@ describe('versioning module', () => {
         } catch(ex) {
           exceptionThrown = true
           expect(ex.message).to.equal(message)
-          expect(ex.constructor.name).to.equal(errorType)
+          expect(ex.name).to.equal(errorType)
         }
         expect(exceptionThrown).to.be.true
       }
@@ -273,7 +276,7 @@ describe('versioning module', () => {
       it('checks if the script is an object', () => {
         validateScriptConfig(
           '',
-          'The given service must be an object',
+          'data should be object',
           'UpdatePreconditionError'
         )
       })
@@ -282,19 +285,94 @@ describe('versioning module', () => {
         validateScriptConfig(
           'provider:\n' +
           '  name: aws',
-          'The given service must have "provider.iamRoleStatements" defined as an array',
+          'data.provider should have required property \'iamRoleStatements\'',
           'UpdatePreconditionError'
         )
       })
 
-      it('checks if the given service must have a function with the name "loadGenerator"', () => {
+      it('requires the service to have a functions property', () => {
         validateScriptConfig(
           'provider:\n' +
           '  iamRoleStatements: []',
 
-          'The given service must have a function with the name "loadGenerator"',
+          'data should have required property \'functions\'',
           'UpdatePreconditionError'
         )
+      })
+
+      it('requires the service to have a functions property which is an object', () => {
+        validateScriptConfig(
+          'provider:\n' +
+          '  iamRoleStatements: []\n' +
+          'functions: ""',
+
+          'data.functions should be object',
+          'UpdatePreconditionError'
+        )
+      })
+
+      it('requires the service to have a function with the name "loadGenerator"', () => {
+        validateScriptConfig(
+          'provider:\n' +
+          '  iamRoleStatements: []\n' +
+          'functions: {}',
+
+          'data.functions should have required property \'loadGenerator\'',
+          'UpdatePreconditionError'
+        )
+      })
+
+      it('requires the service to have a "loadGenerator" function as an object', () => {
+        validateScriptConfig(
+          'provider:\n' +
+          '  iamRoleStatements: []\n' +
+          'functions:\n' +
+          '  loadGenerator: ""',
+
+          'data.functions.loadGenerator should be object',
+          'UpdatePreconditionError'
+        )
+      })
+
+      it('requires the service to have a "loadGenerator" function to have a handler', () => {
+        validateScriptConfig(
+          'provider:\n' +
+          '  iamRoleStatements: []\n' +
+          'functions:\n' +
+          '  loadGenerator: {}',
+
+          'data.functions.loadGenerator should have required property \'.handler\'',
+          'UpdatePreconditionError'
+        )
+      })
+
+      it('requires the service to have a "loadGenerator" function to have a timeout', () => {
+        validateScriptConfig(
+          'provider:\n' +
+          '  iamRoleStatements: []\n' +
+          'functions:\n' +
+          '  loadGenerator:\n' +
+          '    handler: ""\n',
+
+          'data.functions.loadGenerator should have required property \'.timeout\'',
+          'UpdatePreconditionError'
+        )
+      })
+
+      it('validates a minimum script', () => {
+        const config =
+          'provider:\n' +
+          '  iamRoleStatements: []\n' +
+          'functions:\n' +
+          '  loadGenerator:\n' +
+          '    handler: ""\n' +
+          '    timeout: ""\n'
+
+        const fs = fsSpies()
+        fs.readFileSync.withArgs('target-project/serverless.yml').returns(config)
+
+        expect(() => versioning(fs)('target-project').validateServiceDefinition())
+          .not.to.throw()
       })
 
       it('checks if the given service has function "loadGenerator" that already has environment variable "TOPIC_ARN" defined.', () => {
@@ -303,10 +381,12 @@ describe('versioning module', () => {
           '  iamRoleStatements: []\n' +
           'functions:\n' +
           '  loadGenerator:\n' +
+          '    handler: ""\n' +
+          '    timeout: ""\n' +
           '    environment:\n' +
           '      TOPIC_ARN: arn\n',
 
-          'The given service has function "loadGenerator" that already has environment variable "TOPIC_ARN" defined.',
+          'data.functions.loadGenerator.environment should match pattern "^(?!TOPIC_ARN|TOPIC_NAME).*", data.functions.loadGenerator.environment property name \'TOPIC_ARN\' is invalid',
           'UpdateConflictError'
         )
       })
@@ -317,10 +397,12 @@ describe('versioning module', () => {
           '  iamRoleStatements: []\n' +
           'functions:\n' +
           '  loadGenerator:\n' +
+          '    handler: ""\n' +
+          '    timeout: ""\n' +
           '    environment:\n' +
           '      TOPIC_NAME: aTopic',
 
-          'The given service has function "loadGenerator" that already has environment variable "TOPIC_NAME" defined.',
+          'data.functions.loadGenerator.environment should match pattern "^(?!TOPIC_ARN|TOPIC_NAME).*", data.functions.loadGenerator.environment property name \'TOPIC_NAME\' is invalid',
           'UpdateConflictError'
         )
       })
@@ -331,10 +413,12 @@ describe('versioning module', () => {
           '  iamRoleStatements: []\n' +
           'functions:\n' +
           '  loadGenerator:\n' +
+          '    handler: ""\n' +
+          '    timeout: ""\n' +
           '    events: one',
 
-          'If defined, the events attribute of the "loadGenerator" function must be an array.',
-          'UpdatePreconditionError'
+          'data.functions.loadGenerator.events should be array',
+          'UpdateConflictError'
         )
       })
 
@@ -344,11 +428,13 @@ describe('versioning module', () => {
           '  iamRoleStatements: []\n' +
           'functions:\n' +
           '  loadGenerator:\n' +
+          '    handler: ""\n' +
+          '    timeout: ""\n' +
           '    events:\n' +
           '      - schedule:\n' +
           '          name: ${self:service}-${opt:stage, self:provider.stage}-monitoring\n',
 
-          'The "loadGenerator" function already has a schedule event named "${self:service}-${opt:stage, self:provider.stage}-monitoring"',
+          'data.functions.loadGenerator.events[0].schedule.name should match pattern "^(?!\\${self:service}-\\${opt:stage, self:provider\\.stage}-monitoring).*"',
           'UpdateConflictError'
         )
       })
@@ -359,6 +445,8 @@ describe('versioning module', () => {
           '  iamRoleStatements: []\n' +
           'functions:\n' +
           '  loadGenerator:\n' +
+          '    handler: ""\n' +
+          '    timeout: ""\n' +
           '    events:\n' +
           '      - schedule:\n' +
           '          name: scheduleName\n' +
@@ -367,7 +455,7 @@ describe('versioning module', () => {
           '    monitoringAlerts:\n' +
           '      Type: \'AWS::SNS::Topic\'\n',
 
-          'A resource with logical ID monitoringAlerts already exists',
+          'data.resources.Resources should match pattern "^(?!monitoringAlerts).*", data.resources.Resources property name \'monitoringAlerts\' is invalid',
           'UpdateConflictError'
         )
       })
@@ -379,6 +467,8 @@ describe('versioning module', () => {
           '  iamRoleStatements: []\n' +
           'functions:\n' +
           '  loadGenerator:\n' +
+          '    handler: ""\n' +
+          '    timeout: ""\n' +
           '    events:\n' +
           '      - schedule:\n' +
           '          name: scheduleName\n' +
