@@ -9,7 +9,7 @@ const func = require(path.join('..', '..', '..', 'lib', 'faas', 'aws-func'))
 const task = require(path.join('..', '..', '..', 'lib', 'faas', 'task.js'))
 
 const getDefaultSettings = () => {
-  const ret = func.def.getSettings()
+  const ret = func.define.getSettings()
   ret.alert = () => Promise.resolve()
   ret.task = {
     sampling: task.def.defaultsToSettings(task.def.sampling),

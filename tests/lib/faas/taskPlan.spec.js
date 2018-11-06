@@ -20,7 +20,7 @@ let result
 let expected
 let defaultSettings
 
-const runOnceSettings = func.def.getSettings()
+const runOnceSettings = func.define.getSettings()
 runOnceSettings.task = { sampling: task.def.defaultsToSettings(task.def.acceptance) }
 
 const validScript = () => ({
@@ -36,7 +36,7 @@ const validScript = () => ({
 
 describe('./lib/faas/taskPlan.js', () => {
   beforeEach(() => {
-    defaultSettings = func.def.getSettings({})
+    defaultSettings = func.define.getSettings({})
   })
   describe(':impl', () => {
     // ###############

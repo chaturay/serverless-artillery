@@ -13,7 +13,7 @@ const func = require(path.join('..', '..', '..', 'lib', 'faas', 'aws-func')) // 
 const task = require(path.join('..', '..', '..', 'lib', 'faas', 'task.js')) // eslint-disable-line import/no-dynamic-require
 const handler = require(path.join('..', '..', '..', 'lib', 'faas', 'handler.js')) // eslint-disable-line import/no-dynamic-require
 
-const defaultSettings = func.def.getSettings()
+const defaultSettings = func.define.getSettings()
 
 describe('./lib/faas/handler.js', () => {
   describe(':impl', () => {
@@ -44,40 +44,40 @@ describe('./lib/faas/handler.js', () => {
       let implDelayStub
       let implHandleStub
       const implHandleResult = {}
-      let funcExecStub
-      const funcExecResult = {}
+      let funcInvokeStub
+      const funcInvokeResult = {}
       beforeEach(() => {
         implDelayStub = sinon.stub(handler.impl, 'delay').returns(Promise.resolve())
         implHandleStub = sinon.stub(handler.impl, 'handle').returns(Promise.resolve(implHandleResult))
-        funcExecStub = sinon.stub(func, 'exec').returns(Promise.resolve(funcExecResult))
+        funcInvokeStub = sinon.stub(func, 'invoke').returns(Promise.resolve(funcInvokeResult))
       })
       afterEach(() => {
         implDelayStub.restore()
         implHandleStub.restore()
-        funcExecStub.restore()
+        funcInvokeStub.restore()
       })
       it('executes the given event via impl.handle when in simulation mode', () =>
         handler.impl.invokeSelf(0, { _simulation: true })
           .then((result) => {
             expect(result).to.equal(implHandleResult)
             expect(implHandleStub).to.be.calledOnce
-            expect(funcExecStub).to.not.be.called
+            expect(funcInvokeStub).to.not.be.called
           }) // eslint-disable-line comma-dangle
       )
-      it('executes the given event via func.exec when in standard mode', () =>
+      it('executes the given event via func.invoke when in standard mode', () =>
         handler.impl.invokeSelf(0, {})
           .then((result) => {
-            expect(result).to.equal(funcExecResult)
+            expect(result).to.equal(funcInvokeResult)
             expect(implHandleStub).to.not.be.called
-            expect(funcExecStub).to.be.calledOnce
+            expect(funcInvokeStub).to.be.calledOnce
           }) // eslint-disable-line comma-dangle
       )
-      it('executes the given event via func.exec when in standard and trace modes', () =>
+      it('executes the given event via func.invoke when in standard and trace modes', () =>
         handler.impl.invokeSelf(0, { _trace: true })
           .then((result) => {
-            expect(result).to.equal(funcExecResult)
+            expect(result).to.equal(funcInvokeResult)
             expect(implHandleStub).to.not.be.called
-            expect(funcExecStub).to.be.calledOnce
+            expect(funcInvokeStub).to.be.calledOnce
           }) // eslint-disable-line comma-dangle
       )
     })

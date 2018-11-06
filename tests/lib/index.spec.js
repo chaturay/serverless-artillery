@@ -730,9 +730,9 @@ scenarios:
           implParseInputStub.restore()
         })
         it('handles and reports validation errors from the function plugin, exiting the process', () => {
-          implParseInputStub.throws(new func.def.FunctionError('func.error'))
+          implParseInputStub.throws(new func.define.FunctionError('func.error'))
           return slsart.invoke({ d: testJsonScriptStringified })
-            .should.be.rejectedWith(func.def.FunctionError, 'func.error')
+            .should.be.rejectedWith(func.define.FunctionError, 'func.error')
         })
         it('handles and reports validation errors from the task plugin, exiting the process', () => {
           implParseInputStub.throws(new task.def.TaskError('task.error'))

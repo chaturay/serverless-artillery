@@ -57,7 +57,7 @@ describe('./lib/faas/aws-func/invoke.js', () => {
         const inEnv = 'SERVERLESS_STAGE' in process.env
         const slsStage = process.env.SERVERLESS_STAGE
         process.env.SERVERLESS_STAGE = STAGE
-        return func.exec(validScript())
+        return func.invoke(validScript())
           .then(() => {
             expect(awsStub).to.have.been.calledOnce
             expect(awsStub.getCall(0).args[1].FunctionName).to.eql(`${tagContext.functionName}:${STAGE}`)
@@ -73,7 +73,7 @@ describe('./lib/faas/aws-func/invoke.js', () => {
           })
       })
       it('defaults to an "Event" calling type', () =>
-        func.exec(validScript())
+        func.invoke(validScript())
           .then(() => {
             expect(awsStub).to.have.been.calledOnce
             expect(awsStub.getCall(0).args[1].InvocationType).to.eql('Event')
@@ -81,7 +81,7 @@ describe('./lib/faas/aws-func/invoke.js', () => {
       )
       it('defaults to an "Event" calling type', () => {
         const type = 'A_Type'
-        return func.exec(validScript(), type)
+        return func.invoke(validScript(), type)
           .then(() => {
             expect(awsStub).to.have.been.calledOnce
             expect(awsStub.getCall(0).args[1].InvocationType).to.equal(type)
@@ -91,13 +91,13 @@ describe('./lib/faas/aws-func/invoke.js', () => {
         awsStub.withArgs('invoke', sinon.match.any, sinon.match.any).callsFake(
           () => ({ promise: () => Promise.resolve({ Payload: '{ NOT PARSABLE' }) }) // eslint-disable-line comma-dangle
         )
-        return expect(func.exec(validScript())).to.eventually.equal(undefined)
+        return expect(func.invoke(validScript())).to.eventually.equal(undefined)
       })
       it('rejects failures during invocation', () => {
         awsStub.withArgs('invoke', sinon.match.any, sinon.match.any).callsFake(
           () => ({ promise: () => Promise.reject(new Error('REJECTED!')) }) // eslint-disable-line comma-dangle
         )
-        return expect(func.exec(validScript())).to.eventually.be.rejected
+        return expect(func.invoke(validScript())).to.eventually.be.rejected
       })
     })
   })

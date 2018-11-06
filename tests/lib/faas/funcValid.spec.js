@@ -40,33 +40,33 @@ describe('./lib/faas/aws-func/valid.js', () => {
         })
         it('rejects a defined, non-object _split', () => {
           script._split = ''
-          expect(() => func.valid(script)).to.throw(func.def.FunctionError)
+          expect(() => func.valid(script)).to.throw(func.define.FunctionError)
         })
         const settings = [
-          { name: 'maxChunkDurationInSeconds', max: func.def.MAX_CHUNK_DURATION_IN_SECONDS, min: func.def.MIN_CHUNK_DURATION_IN_SECONDS },
-          { name: 'maxScriptDurationInSeconds', max: func.def.MAX_SCRIPT_DURATION_IN_SECONDS },
-          { name: 'maxChunkRequestsPerSecond', max: func.def.MAX_CHUNK_REQUESTS_PER_SECOND },
-          { name: 'maxScriptRequestsPerSecond', max: func.def.MAX_SCRIPT_REQUESTS_PER_SECOND },
-          { name: 'timeBufferInMilliseconds', max: func.def.MAX_TIME_BUFFER_IN_MILLISECONDS },
+          { name: 'maxChunkDurationInSeconds', max: func.define.MAX_CHUNK_DURATION_IN_SECONDS, min: func.define.MIN_CHUNK_DURATION_IN_SECONDS },
+          { name: 'maxScriptDurationInSeconds', max: func.define.MAX_SCRIPT_DURATION_IN_SECONDS },
+          { name: 'maxChunkRequestsPerSecond', max: func.define.MAX_CHUNK_REQUESTS_PER_SECOND },
+          { name: 'maxScriptRequestsPerSecond', max: func.define.MAX_SCRIPT_REQUESTS_PER_SECOND },
+          { name: 'timeBufferInMilliseconds', max: func.define.MAX_TIME_BUFFER_IN_MILLISECONDS },
         ]
         settings.forEach((setting) => {
           describe(`validates _split.${setting.name}`, () => {
             it('rejects non integer values', () => {
               script._split[setting.name] = 'not a number'
-              expect(() => func.valid(script)).to.throw(func.def.FunctionError)
+              expect(() => func.valid(script)).to.throw(func.define.FunctionError)
             })
             it('rejects negative values', () => {
               script._split[setting.name] = -1
-              expect(() => func.valid(script)).to.throw(func.def.FunctionError)
+              expect(() => func.valid(script)).to.throw(func.define.FunctionError)
             })
             it(`rejects values greater than ${setting.max}`, () => {
               script._split[setting.name] = setting.max + 1
-              expect(() => func.valid(script)).to.throw(func.def.FunctionError)
+              expect(() => func.valid(script)).to.throw(func.define.FunctionError)
             })
             if (setting.min) {
               it(`rejects values less than ${setting.min}`, () => {
                 script._split[setting.name] = setting.min - 1
-                expect(() => func.valid(script)).to.throw(func.def.FunctionError)
+                expect(() => func.valid(script)).to.throw(func.define.FunctionError)
               })
             }
           })
