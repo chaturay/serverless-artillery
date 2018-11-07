@@ -9,6 +9,7 @@
   "author": "Erik Erikson <erik.m.erikson@nordstrom.com>",
   "license": "Apache-2.0",
   "dependencies": {
+    "js-yaml": "^3.11.0",
     "lodash.merge": "^4.6.1",
     "lodash.omit": "^4.5.0",
     "util-promisify": "^2.1.0"

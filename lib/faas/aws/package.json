@@ -4,7 +4,6 @@
   "repository": "n/a",
   "license": "Apache-2.0",
   "dependencies": {
-    "js-yaml": "^3.11.0",
     "serverless-star": "file:../serverless-star"
   }
 }

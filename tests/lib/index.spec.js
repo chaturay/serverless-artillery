@@ -1069,12 +1069,12 @@ scenarios:
         restoreCwd()
         rmdir(tmpdir)
       })
-      it.only(`refuses to overwrite existing ${slsart.constants.ServerlessFiles.join(', ')} files`, () => {
-        replaceCwd(path.join(__dirname, '..', '..', 'lib', 'faas', 'aws'))
+      it(`refuses to overwrite existing ${slsart.constants.ServerlessFiles.join(', ')} files`, () => {
+        replaceCwd(path.join(__dirname, '..', '..', 'lib', 'faas'))
         return slsart.configure({}).should.be.rejected
       })
       it(`refuses to overwrite existing ${slsart.constants.ServerlessFiles.join(', ')} files with debug and tracing`, () => {
-        replaceCwd(path.join(__dirname, '..', '..', 'lib', 'faas', 'aws'))
+        replaceCwd(path.join(__dirname, '..', '..', 'lib', 'faas'))
         return slsart.configure({ debug: true, trace: true }).should.be.rejected
       })
       it('creates unique project artifacts and resolves after mock dependency install', () => {

@@ -10,7 +10,6 @@ chai.use(chaiAsPromised)
 
 const { expect } = chai
 
-const packageJson = require(path.join(__dirname, '..', '..', 'lib', 'faas', 'aws', 'package.json')) // eslint-disable-line import/no-dynamic-require
 const slsart = require('../../lib/index')
 const npm = require('../../lib/npm')
 
@@ -37,36 +36,42 @@ describe('./lib/npm.js:exports', function npmExports() { // eslint-disable-line 
     }
     it('installs project dependencies and not dev dependencies',
       function createUniqueArtifacts() { // eslint-ignore-line prefer-arrow-callback
+        const options = { debug: true, trace: true }
         this.timeout(60000)
         return fs.mkdirAsync(tmpdir)
           .then(() => {
             replaceCwd(tmpdir)
-            return slsart.configure({ debug: true, trace: true })
+            return slsart.configure(options)
           })
           .then(() => {
-            npm.install(tmpdir, 'aws-sdk') // given that it is skipped as "already present in lambda"
+            slsart.constants.ServerlessDirectories.forEach((dir) => {
+              npm.install(options, path.join(tmpdir, dir), 'aws-sdk') // given that it is skipped as "already present in lambda"
+            })
             require(path.join(tmpdir, 'aws', 'handler.js')) // eslint-disable-line global-require, import/no-dynamic-require
           })
           .then(() => {
             let dependencyChecks = []
-            if (packageJson.dependencies) {
-              dependencyChecks = dependencyChecks.concat(
-                Object.keys(packageJson.dependencies)
-                  .map(dependency => fs.accessAsync(path.join(tmpdir, 'node_modules', dependency))
-                    .then((err) => {
-                      expect(err).to.be.undefined
-                    })))
-            }
-            if (packageJson.devDependencies) {
-              dependencyChecks = dependencyChecks.concat(
-                Object.keys(packageJson.devDependencies)
-                  .map(devDependency => fs.accessAsync(path.join(tmpdir, 'node_modules', devDependency))
-                    .then((err) => {
-                      expect(err).to.be.an('object')
-                      expect(err).to.have.a.property('code')
-                      expect(err.code).to.eql('ENOENT')
-                    })))
-            }
+            slsart.constants.ServerlessDirectories.forEach((dir) => {
+              const packageJson = require(path.join(tmpdir, dir, 'package.json')) // eslint-disable-line global-require, import/no-dynamic-require
+              if (packageJson.dependencies) {
+                dependencyChecks = dependencyChecks.concat(
+                  Object.keys(packageJson.dependencies)
+                    .map(dependency => fs.accessAsync(path.join(tmpdir, dir, 'node_modules', dependency))
+                      .then((err) => {
+                        expect(err).to.be.undefined
+                      })))
+              }
+              if (packageJson.devDependencies) {
+                dependencyChecks = dependencyChecks.concat(
+                  Object.keys(packageJson.devDependencies)
+                    .map(devDependency => fs.accessAsync(path.join(tmpdir, dir, 'node_modules', devDependency))
+                      .then((err) => {
+                        expect(err).to.be.an('object')
+                        expect(err).to.have.a.property('code')
+                        expect(err.code).to.eql('ENOENT')
+                      })))
+              }
+            })
             return BbPromise.all(dependencyChecks)
           })
           .finally(() => {
