@@ -94,7 +94,8 @@ const impl = {
   },
   callAll: fns => BbPromise.all(fns.map(fn => fn())),
   cleanupAll: () => BbPromise.all([impl.cleanupService(), impl.cleanupScript()]),
-  cleanupService: () => BbPromise.all(slsart.constants.ServerlessFiles.map(file => fs.unlinkAsync(file))),
+  cleanupService: () => BbPromise.all(slsart.constants.ServerlessFiles.map(file => fs.unlinkAsync(file)))
+    .then(BbPromise.all(slsart.constants.ServerlessDirectories.map(dir => fs.rmdirAsync(dir)))),
   cleanupScript: () => fs.unlinkAsync(slsart.constants.DefaultScriptName),
   // TARGET SERVICE
   deployTarget: options => () => impl.runIn(path.join(__dirname, 'target'), impl.deploy(options)),
