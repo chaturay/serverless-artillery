@@ -110,7 +110,7 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
         }
       })
       it('returns an absoute path to the global script.yml if no path was given and a local one does not exist', () => {
-        const expected = path.join(path.resolve(path.join(__dirname, '..', '..', 'lib', 'faas')), 'script.yml')
+        const expected = path.join(path.resolve(path.join(__dirname, '..', '..', 'lib', 'faas', 'aws')), 'script.yml')
         expect(slsart.impl.findScriptPath()).to.eql(expected)
       })
     })
@@ -569,7 +569,7 @@ scenarios:
     })
 
     describe('#findServicePath', () => {
-      const faasPath = path.resolve('lib', 'faas')
+      const faasPath = path.resolve('lib', 'faas', 'aws')
       const replaceImpl = (cwdResult, fileExistsResult, testFunc) => (() => {
         const { cwd } = process
         const { fileExists } = slsart.impl
@@ -1069,12 +1069,12 @@ scenarios:
         restoreCwd()
         rmdir(tmpdir)
       })
-      it(`refuses to overwrite existing ${slsart.constants.ServerlessFiles.join(', ')} files`, () => {
-        replaceCwd(path.join(__dirname, '..', '..', 'lib', 'faas'))
+      it.only(`refuses to overwrite existing ${slsart.constants.ServerlessFiles.join(', ')} files`, () => {
+        replaceCwd(path.join(__dirname, '..', '..', 'lib', 'faas', 'aws'))
         return slsart.configure({}).should.be.rejected
       })
       it(`refuses to overwrite existing ${slsart.constants.ServerlessFiles.join(', ')} files with debug and tracing`, () => {
-        replaceCwd(path.join(__dirname, '..', '..', 'lib', 'faas'))
+        replaceCwd(path.join(__dirname, '..', '..', 'lib', 'faas', 'aws'))
         return slsart.configure({ debug: true, trace: true }).should.be.rejected
       })
       it('creates unique project artifacts and resolves after mock dependency install', () => {
@@ -1093,7 +1093,7 @@ scenarios:
         npmInstallResult = BbPromise.resolve
         return slsart.configure({})
           .then(() => { shortidResult = shortidRes })
-          .then(() => BbPromise.resolve({ path: path.join(tmpdir, 'serverless.yml') }))
+          .then(() => BbPromise.resolve({ path: path.join(tmpdir, 'aws', 'serverless.yml') }))
           .then(slsart.impl.getScriptText)
           .then((yml) => {
             const sls = yaml.safeLoad(yml)

@@ -10,7 +10,7 @@ chai.use(chaiAsPromised)
 
 const { expect } = chai
 
-const packageJson = require(path.join(__dirname, '..', '..', 'lib', 'faas', 'package.json')) // eslint-disable-line import/no-dynamic-require
+const packageJson = require(path.join(__dirname, '..', '..', 'lib', 'faas', 'aws', 'package.json')) // eslint-disable-line import/no-dynamic-require
 const slsart = require('../../lib/index')
 const npm = require('../../lib/npm')
 
@@ -45,7 +45,7 @@ describe('./lib/npm.js:exports', function npmExports() { // eslint-disable-line 
           })
           .then(() => {
             npm.install(tmpdir, 'aws-sdk') // given that it is skipped as "already present in lambda"
-            require(path.join(tmpdir, 'handler.js')) // eslint-disable-line global-require, import/no-dynamic-require
+            require(path.join(tmpdir, 'aws', 'handler.js')) // eslint-disable-line global-require, import/no-dynamic-require
           })
           .then(() => {
             let dependencyChecks = []

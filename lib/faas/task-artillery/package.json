@@ -1,0 +1,14 @@
+{
+  "name": "task-artillery",
+  "version": "0.0.1",
+  "description": "TODO",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Erik Erikson <erik.m.erikson@nordstrom.com>",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "artillery": "git+https://github.com/Nordstrom/artillery.git#2d99b7ab1075e9df9f6eb2903102abc7849f1879"
+  }
+}

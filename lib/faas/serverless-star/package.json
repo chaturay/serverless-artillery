@@ -1,0 +1,16 @@
+{
+  "name": "serverless-star",
+  "version": "0.0.1",
+  "description": "TODO",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Erik Erikson <erik.m.erikson@nordstrom.com>",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "aws-alert": "file:../aws-alert",
+    "aws-func": "file:../aws-func",
+    "task-artillery": "file:../task-artillery"
+  }
+}
