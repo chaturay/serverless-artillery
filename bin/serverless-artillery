@@ -188,13 +188,7 @@ const yargs = require('yargs')
   )
   .command('configure', 'Create a local copy of the deployment assets for modification and deployment.  See ' +
     'https://docs.serverless.com for documentation.', {})
-  .command(
-    'update',
-    'TODO',
-    {
-      TODO: 'TODO',
-    } // eslint-disable-line comma-dangle
-  )
+  .command('upgrade', 'Upgrade local assets to latest version.', {})
   .demand(1)
 
 const command = yargs.argv._[0]

@@ -444,7 +444,7 @@ scenarios:
               DisplayName: '${self:service} Monitoring Alerts', // eslint-disable-line no-template-curly-in-string
               Subscription: [{
                 Endpoint: 'http://example.com',
-                Protocol: 'http'
+                Protocol: 'http',
               }],
             },
           },
@@ -1282,69 +1282,6 @@ scenarios:
         } // eslint-disable-line comma-dangle
       )
     })
-    //
-    // describe('#update', () => {
-    //   let scriptStub
-    //   let configureStub
-    //   let fileExistsStub
-    //   let writeBackupStub
-    //   let fsReadFileAsyncStub
-    //   let fsWriteFileAsyncStub
-    //   beforeEach(() => {
-    //     scriptStub = sinon.stub(slsart, 'script').resolves()
-    //     configureStub = sinon.stub(slsart, 'configure').resolves()
-    //     fileExistsStub = sinon.stub(slsart.impl, 'fileExists').returns(true)
-    //     writeBackupStub = sinon.stub(slsart.impl, 'writeBackup').resolves()
-    //     fsReadFileAsyncStub = sinon.stub(fs, 'readFileAsync').resolves(JSON.stringify({
-    //       provider: {
-    //         iamRoleStatements: [],
-    //       },
-    //       functions: {
-    //         [slsart.constants.TestFunctionName]: {},
-    //       },
-    //     }))
-    //     fsWriteFileAsyncStub = sinon.stub(fs, 'writeFileAsync').resolves()
-    //   })
-    //   afterEach(() => {
-    //     scriptStub.restore()
-    //     configureStub.restore()
-    //     fileExistsStub.restore()
-    //     writeBackupStub.restore()
-    //     fsReadFileAsyncStub.restore()
-    //     fsWriteFileAsyncStub.restore()
-    //   })
-    //   it('modifies and writes the service', () => slsart.update({}).should.be.fulfilled
-    //     .then(() => fsWriteFileAsyncStub.should.have.been.called))
-    //   it('writes a backup if serverless.yml is present', () => slsart.update({}).should.be.fulfilled
-    //     .then(() => {
-    //       scriptStub.should.not.have.been.called
-    //       configureStub.should.not.have.been.called
-    //       writeBackupStub.should.have.been.calledOnce
-    //     }))
-    //   it('generates script, configures, and does not write a backup if no script.yml or serverless.yml', () => {
-    //     fileExistsStub.returns(false)
-    //     return slsart.update({}).should.be.fulfilled
-    //       .then(() => {
-    //         scriptStub.should.have.been.calledOnce
-    //         configureStub.should.have.been.calledOnce
-    //         writeBackupStub.should.not.have.been.called
-    //       })
-    //   })
-    //   it('rejects the update command if running script fails', () => {
-    //     fileExistsStub.returns(false)
-    //     scriptStub.returns(BbPromise.reject(new Error('reasons')))
-    //     return slsart.update({}).should.be.rejected
-    //   })
-    //   it('rejects the update command if running configure fails', () => {
-    //     fileExistsStub.returns(false)
-    //     configureStub.returns(BbPromise.reject(new Error('reasons')))
-    //     return slsart.update({}).should.be.rejected
-    //   })
-    //   it('rejects the update command if reading serverless.yml fails', () => {
-    //     fsReadFileAsyncStub.returns(BbPromise.reject(new Error('reasons')))
-    //     return slsart.update({}).should.be.rejected
-    //   })
-    // })
   })
 })
 

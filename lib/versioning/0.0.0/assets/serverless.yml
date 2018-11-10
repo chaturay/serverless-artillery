@@ -10,7 +10,7 @@
 
 # If the following value is changed, your service may be duplicated (this value is used to build the CloudFormation
 # Template script's name)
-service: serverless-artillery-SDM6JSPSq
+service: serverless-artillery
 
 provider: # Using Node JS v4.3 on AWS
   name: aws
