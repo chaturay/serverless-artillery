@@ -1,6 +1,6 @@
 const path = require('path')
 
-const idioms = require('../idioms')
+const idioms = require('./idioms')
 
 const modifyScript = () => idioms.loadAndMerge(path.join(__dirname, 'script.yml'), {
   config: {

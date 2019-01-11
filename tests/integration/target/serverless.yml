@@ -1,56 +1,82 @@
-service: target
+service: slsart-integration-target-${self:custom.instanceId}
+custom: ${file(./config.yml)}
 
 provider:
   name: aws
   runtime: nodejs6.10
-#  iamRoleStatements:
-#    -  Effect: Allow
-#       Action:
-#         - 'dynamodb:UpdateItem'
-#       Resource:
-#        Fn::Join:
-#          - '/'
-#          - - 'arn:aws:dynamodb:${self:provider.region}:${self:custom.private.accountId}:table'
-#            - Ref: ProductCategory
-#    -  Effect: Allow
-#       Action:
-#         - 'dynamodb:UpdateItem'
-#       Resource:
-#        Fn::Join:
-#          - '/'
-#          - - 'arn:aws:dynamodb:${self:provider.region}:${self:custom.private.accountId}:table'
-#            - Ref: ProductCatalog
+  endpointType: private
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:ListBucket
+      Resource: arn:aws:s3:::slsart-integration-target-${self:custom.instanceId}-reqs
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+        - s3:DeleteObject
+      Resource: arn:aws:s3:::slsart-integration-target-${self:custom.instanceId}-reqs/*
+  usagePlan:
+    throttle:
+      burstLimit: 10
+      rateLimit: 1
 
 functions:
-  get:
-    handler: handler.get
+  test:
+    handler: handler.test
     events:
       - http:
-          path: /
+          path: test/{id}
           method: get
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
+    environment:
+      SLSART_INTEGRATION_BUCKET: slsart-integration-target-${self:custom.instanceId}-reqs
+
+  list:
+    handler: handler.list
+    events:
+      - http:
+          path: list/{id}
+          method: get
+    environment:
+      SLSART_INTEGRATION_BUCKET: slsart-integration-target-${self:custom.instanceId}-reqs
+
+  deleteList:
+    handler: handler.deleteList
+    events:
+      - http:
+          path: list/{id}
+          method: delete
+    environment:
+      SLSART_INTEGRATION_BUCKET: slsart-integration-target-${self:custom.instanceId}-reqs
 
 resources:
-#  Resources:
-#    ActivityRecord:
-#      Type: AWS::DynamoDB::Table
-#      Properties:
-#        AttributeDefinitions:
-#          - AttributeName: category
-#            AttributeType: S
-#        KeySchema:
-#          - AttributeName: category
-#            KeyType: HASH
-#        ProvisionedThroughput:
-#          ReadCapacityUnits: 1
-#          WriteCapacityUnits: 1
-#        TableName: ${self:custom.stage}-ProductCategory-${self:custom.productCatalogBuilderVersion}
+  Resources:
+
+    TestBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: slsart-integration-target-${self:custom.instanceId}-reqs
+        LifecycleConfiguration:
+          Rules:
+            - ExpirationInDays: 1
+              Status: Enabled
+
   Outputs:
-     GetApi:
+     TestApi:
        Description: The URL of the ApiGateway at which to invoke the get function
        Value:
         Ref: ApiGatewayRestApi
        Export:
-        Name: ${self:service}-get-api
+        Name: ${self:service}-test-api
+     ListApi:
+       Description: The URL of the ApiGateway at which to invoke the get function
+       Value:
+        Ref: ApiGatewayRestApi
+       Export:
+        Name: ${self:service}-list-api
+     DeleteListApi:
+       Description: The URL of the ApiGateway at which to invoke the get function
+       Value:
+        Ref: ApiGatewayRestApi
+       Export:
+        Name: ${self:service}-deletelist-api
