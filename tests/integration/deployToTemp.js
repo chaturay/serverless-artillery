@@ -5,7 +5,8 @@ const childProcess = require('child_process')
 const { randomString } = require('./target/handler')
 const fs = require('./fs')
 
-const defaultSourcePath = join(__dirname, 'target')
+const defaultTargetSourcePath = join(__dirname, 'target')
+const defaultSlsartSourcePath = join(__dirname, '../../lib/lambda')
 const defaultRoot = join(tmpdir(), 'slsart-integration')
 
 const execError = (err, stderr) =>
@@ -18,8 +19,32 @@ const namesToFullPaths = directory =>
 const filterOutSpecFiles = names =>
   names.filter(name => !name.endsWith('.spec.js'))
 
+const tap = fn => (value) => {
+  fn(value)
+  return value
+}
+
+const pathsFromTempDirectory = tempFolder => ({
+  tempFolder,
+  targetTempFolder: join(tempFolder, 'target'),
+  slsartTempFolder: join(tempFolder, 'slsart'),
+})
+
+const urlsFromDeployTargetOutput = (output) => {
+  const lines = output.split('\n')
+  const startIndex = lines.indexOf('endpoints:') + 1
+  const urls = lines.slice(startIndex, startIndex + 3)
+    .map(line => line.split(' - '))
+    .map(([, url]) => url.trim())
+  return {
+    testUrl: urls[0],
+    listUrl: urls[1],
+    deleteUrl: urls[2],
+  }
+}
+
 const impl = {
-  findTargetSourceFiles: (ls = fs.ls, sourcePath = defaultSourcePath) =>
+  findTargetSourceFiles: (ls = fs.ls, sourcePath = defaultTargetSourcePath) =>
     () =>
       ls(sourcePath)
         .then(filterOutSpecFiles)
@@ -39,6 +64,15 @@ const impl = {
         .then(copyAll(destination))
         .then(writeConfig(destination, instanceId)),
 
+  stageSlsart: (
+    sourcePath = defaultSlsartSourcePath,
+    listAbsolutePathsRecursively = fs.listAbsolutePathsRecursively,
+    copyAll = fs.copyAll
+  ) =>
+    destination =>
+      listAbsolutePathsRecursively(sourcePath)
+        .then(copyAll(destination)),
+
   execAsync: (exec = childProcess.exec) =>
     (command, options = {}) =>
       new Promise((resolve, reject) =>
@@ -55,24 +89,37 @@ const impl = {
     (instanceId = random()) =>
       ({ instanceId, destination: join(root, instanceId) }),
 
-  deployNewTarget: (
+  deployNewTestResources: (
     tempLocation = impl.tempLocation(),
     mkdirp = fs.mkdirp,
     stageTarget = impl.stageTarget(),
+    stageSlsart = impl.stageSlsart(),
     deploy = impl.deploy(),
     log = console.log,
     warn = console.error
   ) =>
-    ({ instanceId, destination } = tempLocation()) =>
-      mkdirp(destination)
-        .then(() => log('staging target', instanceId, 'to', destination))
-        .then(() => stageTarget(destination, instanceId))
-        .then(() => log('deploying', destination))
-        .then(() => deploy(destination))
-        .then(log)
-        .then(() => true)
+    ({ instanceId, destination } = tempLocation()) => {
+      const paths = pathsFromTempDirectory(destination)
+      const {
+        targetTempFolder,
+        slsartTempFolder,
+      } = paths
+      return mkdirp(slsartTempFolder)
+        .then(() => log('staging slsart', instanceId, 'to', slsartTempFolder))
+        .then(() => stageSlsart(slsartTempFolder))
+        .then(() => log('deploying slsart', slsartTempFolder))
+        .then(() => deploy(slsartTempFolder))
+        .then(() => mkdirp(targetTempFolder))
+        .then(() => log('staging target', instanceId, 'to', targetTempFolder))
+        .then(() => stageTarget(targetTempFolder, instanceId))
+        .then(() => log('deploying target', targetTempFolder))
+        .then(() => deploy(targetTempFolder))
+        .then(urlsFromDeployTargetOutput)
+        .then(urls => Object.assign({}, urls, paths))
+        .then(tap(log))
         .catch(err =>
-          warn('failed to deploy a new target:', err.stack) || false),
+          warn('failed to deploy a new target:', err.stack) || false)
+    },
 
   remove: (exec = impl.execAsync()) =>
     directory =>
@@ -84,11 +131,20 @@ const impl = {
     warn = console.error,
     rmrf = fs.rmrf
   ) =>
-    directory =>
-      log('removing temp deployment', directory) || remove(directory)
-        .catch(() => warn('failed to sls remove', directory))
-        .then(() => log('deleting', directory) || rmrf(directory))
-        .then(() => log('done')),
+    directory =>{
+      const {
+        targetTempFolder,
+        slsartTempFolder,
+      } = pathsFromTempDirectory(directory)
+      log('  removing temp deployment', directory)
+      log('    removing', targetTempFolder)
+      return remove(targetTempFolder)
+        .catch(() => warn('    failed to sls remove', targetTempFolder))
+        .then(() => remove(slsartTempFolder))
+        .catch(() => warn('    failed to sls remove', slsartTempFolder))
+        .then(() => log('    deleting', directory) || rmrf(directory))
+        .then(() => log('  done'))
+    },
 
   listTempDeployments: (ls = fs.ls) =>
     root =>
@@ -112,7 +168,7 @@ const impl = {
 
 module.exports = {
   impl,
-  deployNewTarget: impl.deployNewTarget(),
+  deployNewTestResources: impl.deployNewTestResources(),
   removeTempDeployment: impl.removeTempDeployment(),
   cleanupDeployments: impl.cleanupDeployments(),
 }
