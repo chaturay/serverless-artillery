@@ -168,5 +168,7 @@ module.exports = {
   writeObject: pure.writeObject(s3.writeFile),
   streamObjects: pure.streamObjects(s3.listFiles, readObject),
   deleteObjects: pure.deleteObjects(s3.deleteFiles, s3.listFiles),
+  listFiles: s3.listFiles,
+  deleteFiles: s3.deleteFiles,
 }
 /* eslint-enable no-return-assign, no-nested-ternary */

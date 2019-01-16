@@ -4,6 +4,7 @@ const childProcess = require('child_process')
 
 const { randomString } = require('./target/handler')
 const fs = require('./fs')
+const persistence = require('./target/persistence')
 
 const defaultTargetSourcePath = join(__dirname, 'target')
 const defaultSlsartSourcePath = join(__dirname, '../../lib/lambda')
@@ -121,12 +122,24 @@ const impl = {
           warn('failed to deploy a new target:', err.stack) || false)
     },
 
+  deleteAllObjects: ({ listFiles, deleteFiles } = persistence) =>
+    (instanceId) => {
+      process.env.SLSART_INTEGRATION_BUCKET =
+        `slsart-integration-target-${instanceId}-reqs`
+      const deleteNext = listNext =>
+        listNext && listNext()
+          .then(({ keys, next }) => deleteFiles(keys).then(() => next))
+          .then(deleteNext)
+      return deleteNext(listFiles)
+    },
+
   remove: (exec = impl.execAsync()) =>
     directory =>
       exec('sls remove', { cwd: directory }),
 
   removeTempDeployment: (
     log = console.log,
+    deleteAllObjects = impl.deleteAllObjects(),
     remove = impl.remove(),
     warn = console.error,
     rmrf = fs.rmrf
@@ -138,7 +151,8 @@ const impl = {
       } = pathsFromTempDirectory(directory)
       log('  removing temp deployment', directory)
       log('    removing', targetTempFolder)
-      return remove(targetTempFolder)
+      return deleteAllObjects()
+        .then(() => remove(targetTempFolder))
         .catch(() => warn('    failed to sls remove', targetTempFolder))
         .then(() => remove(slsartTempFolder))
         .catch(() => warn('    failed to sls remove', slsartTempFolder))
