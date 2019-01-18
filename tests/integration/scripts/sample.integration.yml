@@ -1,0 +1,12 @@
+script:
+  config:
+    target: 'https://artillery.io'
+    phases:
+      - duration: 5
+        arrivalRate: 1
+  scenarios:
+    - flow:
+      - get:
+          url: "/"
+expectations:
+  todo: ''

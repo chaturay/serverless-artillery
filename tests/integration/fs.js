@@ -82,12 +82,21 @@ const pure = {
         Promise.all(sourceFiles.map(copyTofolder(destination))),
 
   writeFile: (writeFile = fs.writeFile) =>
-    (destination, data) =>
+    destination =>
+      data =>
+        new Promise((resolve, reject) =>
+          writeFile(destination, data, err =>
+            (err
+              ? reject(err)
+              : resolve()))),
+
+  readFile: (readFile = fs.readFile) =>
+    destination =>
       new Promise((resolve, reject) =>
-        writeFile(destination, data, err =>
+        readFile(destination, (err, data) =>
           (err
             ? reject(err)
-            : resolve()))),
+            : resolve(data.toString())))),
 
   rm: (unlink = fs.unlink) =>
     path =>

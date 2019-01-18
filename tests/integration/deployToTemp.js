@@ -1,10 +1,11 @@
 const { tmpdir } = require('os')
-const { join } = require('path')
+const { join, sep, dirname } = require('path')
 const childProcess = require('child_process')
+const { safeLoad, safeDump } = require('js-yaml')
 
 const { randomString } = require('./target/handler')
 const fs = require('./fs')
-const persistence = require('./target/persistence')
+const { s3 } = require('./target/persistence')
 
 const defaultTargetSourcePath = join(__dirname, 'target')
 const defaultSlsartSourcePath = join(__dirname, '../../lib/lambda')
@@ -31,6 +32,11 @@ const pathsFromTempDirectory = tempFolder => ({
   slsartTempFolder: join(tempFolder, 'slsart'),
 })
 
+const instanceIdFromTempDirectory = tempFolder => {
+  const parts = tempFolder.split(sep)
+  return parts[parts.length - 1]
+}
+
 const urlsFromDeployTargetOutput = (output) => {
   const lines = output.split('\n')
   const startIndex = lines.indexOf('endpoints:') + 1
@@ -44,6 +50,31 @@ const urlsFromDeployTargetOutput = (output) => {
   }
 }
 
+const defaultLog = process.env.DEBUG
+  ? console.log
+  : () => {}
+
+const defaultWarn = process.env.DEBUG
+  ? console.warn
+  : () => {}
+
+const updateSlsartServerlessYml = yml =>
+  Object.assign(
+    {},
+    yml,
+    { service: 'slsart-integration-runner-${self:custom.instanceId}' },
+    { custom: '${file(./config.yml)}' },
+    { provider: Object.assign(
+      {},
+      yml.provider,
+      {
+        deploymentBucket: {
+          name: 'slsart-integration-${self:custom.instanceId}-depl'
+        }
+      }),
+    },
+  )
+
 const impl = {
   findTargetSourceFiles: (ls = fs.ls, sourcePath = defaultTargetSourcePath) =>
     () =>
@@ -53,7 +84,7 @@ const impl = {
 
   writeConfig: (writeFile = fs.writeFile) =>
     (destination, instanceId) =>
-      writeFile(join(destination, 'config.yml'), `instanceId: ${instanceId}`),
+      writeFile(join(destination, 'config.yml'))(`instanceId: ${instanceId}`),
 
   stageTarget: (
     findTargetSourceFiles = impl.findTargetSourceFiles(),
@@ -65,14 +96,37 @@ const impl = {
         .then(copyAll(destination))
         .then(writeConfig(destination, instanceId)),
 
-  stageSlsart: (
+  findSlsartSourceFiles: (
     sourcePath = defaultSlsartSourcePath,
-    listAbsolutePathsRecursively = fs.listAbsolutePathsRecursively,
-    copyAll = fs.copyAll
+    ls = fs.ls,
   ) =>
-    destination =>
-      listAbsolutePathsRecursively(sourcePath)
-        .then(copyAll(destination)),
+    () =>
+      ls(sourcePath)
+        .then(namesToFullPaths(sourcePath)),
+
+  updateSlsartServerlessYmlFile: ({ readFile, writeFile } = fs) =>
+    (destination, instanceId) => {
+      const serverlessYmlPath = join(destination, 'serverless.yml')
+      return readFile(serverlessYmlPath)
+        .then(safeLoad)
+        .then(updateSlsartServerlessYml)
+        .then(safeDump)
+        .then(writeFile(serverlessYmlPath))
+    },
+
+  stageSlsart: (
+    findSlsartSourceFiles = impl.findSlsartSourceFiles(),
+    copyAll = fs.copyAll,
+    writeConfig = impl.writeConfig(),
+    updateSlsartServerlessYmlFile = impl.updateSlsartServerlessYmlFile(),
+    exec = impl.execAsync()
+  ) =>
+    (destination, instanceId) =>
+      findSlsartSourceFiles()
+        .then(copyAll(destination))
+        .then(() => writeConfig(destination, instanceId))
+        .then(() => updateSlsartServerlessYmlFile(destination, instanceId))
+        .then(() => exec('npm i', { cwd: destination })),
 
   execAsync: (exec = childProcess.exec) =>
     (command, options = {}) =>
@@ -95,9 +149,10 @@ const impl = {
     mkdirp = fs.mkdirp,
     stageTarget = impl.stageTarget(),
     stageSlsart = impl.stageSlsart(),
+    { createBucket } = s3,
     deploy = impl.deploy(),
-    log = console.log,
-    warn = console.error
+    log = defaultLog,
+    warn = defaultWarn
   ) =>
     ({ instanceId, destination } = tempLocation()) => {
       const paths = pathsFromTempDirectory(destination)
@@ -105,9 +160,12 @@ const impl = {
         targetTempFolder,
         slsartTempFolder,
       } = paths
+      const deploymentBucketName = `slsart-integration-${instanceId}-depl`
       return mkdirp(slsartTempFolder)
+        .then(() => log('creating deployment bucket', deploymentBucketName))
+        .then(() => createBucket(deploymentBucketName))
         .then(() => log('staging slsart', instanceId, 'to', slsartTempFolder))
-        .then(() => stageSlsart(slsartTempFolder))
+        .then(() => stageSlsart(slsartTempFolder, instanceId))
         .then(() => log('deploying slsart', slsartTempFolder))
         .then(() => deploy(slsartTempFolder))
         .then(() => mkdirp(targetTempFolder))
@@ -122,10 +180,9 @@ const impl = {
           warn('failed to deploy a new target:', err.stack) || false)
     },
 
-  deleteAllObjects: ({ listFiles, deleteFiles } = persistence) =>
-    (instanceId) => {
-      process.env.SLSART_INTEGRATION_BUCKET =
-        `slsart-integration-target-${instanceId}-reqs`
+  deleteAllObjects: ({ listFiles, deleteFiles } = s3) =>
+    (bucketName) => {
+      process.env.SLSART_INTEGRATION_BUCKET = bucketName
       const deleteNext = listNext =>
         listNext && listNext()
           .then(({ keys, next }) => deleteFiles(keys).then(() => next))
@@ -138,25 +195,36 @@ const impl = {
       exec('sls remove', { cwd: directory }),
 
   removeTempDeployment: (
-    log = console.log,
+    log = defaultLog,
     deleteAllObjects = impl.deleteAllObjects(),
     remove = impl.remove(),
-    warn = console.error,
+    { deleteBucket } = s3,
+    warn = defaultWarn,
     rmrf = fs.rmrf
   ) =>
-    directory =>{
+    (directory) => {
       const {
         targetTempFolder,
         slsartTempFolder,
       } = pathsFromTempDirectory(directory)
+      const instanceId = instanceIdFromTempDirectory(directory)
+      const requestBucketName = `slsart-integration-target-${instanceId}-reqs`
+      const deploymentBucketName = `slsart-integration-${instanceId}-depl`
       log('  removing temp deployment', directory)
       log('    removing', targetTempFolder)
-      return deleteAllObjects()
+      return deleteAllObjects(requestBucketName)
         .then(() => remove(targetTempFolder))
-        .catch(() => warn('    failed to sls remove', targetTempFolder))
+        .catch(err => warn('    failed to sls remove', targetTempFolder, err.message))
+        .then(() => log('    removing', slsartTempFolder))
         .then(() => remove(slsartTempFolder))
-        .catch(() => warn('    failed to sls remove', slsartTempFolder))
-        .then(() => log('    deleting', directory) || rmrf(directory))
+        .catch(err => warn('    failed to sls remove', slsartTempFolder, err.message))
+        .catch(err => warn('    failed to delete deployment bucket', deploymentBucketName, err.message))
+        .then(() => log('    deleting', directory))
+        .then(() => rmrf(directory))
+        .then(() => deleteAllObjects(deploymentBucketName))
+        .catch(err => log('    failed to delete all objects from', deploymentBucketName, err.message))
+        .then(() => deleteBucket(deploymentBucketName))
+        .catch(err => log('    failed to delete bucket', deploymentBucketName, err.message))
         .then(() => log('  done'))
     },
 
@@ -169,7 +237,7 @@ const impl = {
   cleanupDeployments: (
     list = impl.listTempDeployments(),
     remove = impl.removeTempDeployment(),
-    log = console.log,
+    log = defaultLog,
     root = defaultRoot
   ) =>
     () =>
@@ -185,4 +253,5 @@ module.exports = {
   deployNewTestResources: impl.deployNewTestResources(),
   removeTempDeployment: impl.removeTempDeployment(),
   cleanupDeployments: impl.cleanupDeployments(),
+  exec: impl.execAsync(),
 }

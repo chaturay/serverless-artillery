@@ -5,6 +5,8 @@ provider:
   name: aws
   runtime: nodejs6.10
   endpointType: private
+  deploymentBucket:
+    name: slsart-integration-${self:custom.instanceId}-depl
   iamRoleStatements:
     - Effect: Allow
       Action:

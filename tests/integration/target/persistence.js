@@ -21,16 +21,6 @@ const withoutUndefinedValues = (object = {}) =>
     {}
   )
 
-const memoize = (fn) => {
-  const cache = {}
-  return (...args) => {
-    const key = JSON.stringify(args)
-    return Object.keys(cache).includes(key)
-      ? cache[key]
-      : cache[key] = fn(...args)
-  }
-}
-
 const pure = {
   createParams: options => Object.assign(
     {},
@@ -39,9 +29,17 @@ const pure = {
 
   s3: (
     s3 = new AWS.S3(),
-    createParams = memoize(pure.createParams)
+    createParams = pure.createParams
   ) => {
     const s3Impl = {
+      createBucket: (name) =>
+        s3.createBucket({ Bucket: name }).promise()
+          .then(() => true),
+
+      deleteBucket: (name) =>
+        s3.deleteBucket({ Bucket: name }).promise()
+          .then(() => true),
+
       writeFile: (key, data) =>
         s3.putObject(createParams({ Key: key, Body: data })).promise()
           .then(() => true),
@@ -62,21 +60,25 @@ const pure = {
         s3.getObject(createParams({ Key: key })).promise()
           .then(({ Body }) => Body.toString()),
 
-      deleteFiles: (...keys) =>
-        s3.deleteObjects(
-          createParams(
-            {
-              Delete: {
-                Quiet: true,
-                Objects: flatten(keys).map(key => ({ Key: key })),
-              },
-            })
-        ).promise()
-          .then(({ Errors }) => ({
-            ok: !Errors.length,
-            errors: Errors.map(({ Key, Message }) =>
-              ({ key: Key, error: Message })),
-          })),
+      deleteFiles: (...keys) => {
+        const allKeys = flatten(keys)
+        return allKeys
+          ? Promise.resolve({ ok: true })
+          : s3.deleteObjects(
+              createParams(
+                {
+                  Delete: {
+                    Quiet: true,
+                    Objects: flatten(keys).map(key => ({ Key: key })),
+                  },
+                })
+            ).promise()
+              .then(({ Errors }) => ({
+                ok: !Errors.length,
+                errors: Errors.map(({ Key, Message }) =>
+                  ({ key: Key, error: Message })),
+              }))
+      },
     }
     return s3Impl
   },
