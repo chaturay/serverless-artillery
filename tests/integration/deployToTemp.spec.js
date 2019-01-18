@@ -13,19 +13,15 @@ const {
     findTargetSourceFiles,
     writeConfig,
     stageTarget,
+    stageSlsart,
     execAsync,
     deploy,
     tempLocation,
-    deployNewTarget,
     remove,
-    removeTempDeployment,
     listTempDeployments,
     cleanupDeployments,
   },
 } = require('./deployToTemp')
-
-const missing = value =>
-  strictEqual(value, undefined)
 
 const values = ([
   'directory',
@@ -45,8 +41,6 @@ const values = ([
     (result, key) => Object.assign({ [key]: { $: Symbol(key) } }, result),
     {}
   )
-
-const strictEqualTo = expected => value => strictEqual(value, expected)
 
 const deepStrictEqualTo = expected => value => deepStrictEqual(value, expected)
 
@@ -69,7 +63,11 @@ const sequence = (functions) => {
     (...args) => {
       ok(expected.length, `mock ${name} called after end of sequence`)
       const [expectedName, expectedArgs, returnValue] = expected.shift()
-      deepStrictEqual([name, args], [expectedName, expectedArgs || []])
+      deepStrictEqual(
+        [name, args],
+        [expectedName, expectedArgs || []],
+        `expected ${expectedName}(${expectedArgs}); got ${name}(${args})`
+      )
       return returnValue
     }
   return functions.reduce(
@@ -133,6 +131,20 @@ describe('./tests/integration/deployToTemp', () => {
         .then(() => fail('should reject'), isValue('err')))
   })
 
+
+  describe('#stageSlsart', () => {
+    const sourceFiles = ['foo/first.js', 'foo/second.js']
+    const listAbsolutePathsRecursively = () => Promise.resolve(sourceFiles)
+    const copyAllOk = destination =>
+      files =>
+        deepStrictEqual([destination, files], [values.destination, sourceFiles])
+        || Promise.resolve(values.result)
+    const stageSlsartOk =
+      stageSlsart(values.sourcePath, listAbsolutePathsRecursively, copyAllOk)
+    it('should copy all source files', () =>
+      stageSlsartOk(values.destination))
+  })
+
   describe('#execAsync', () => {
     const execOk = mockedCallback(
       [values.command, values.options],
@@ -188,55 +200,6 @@ describe('./tests/integration/deployToTemp', () => {
       ))
   })
 
-  describe('#deployNewTarget', () => {
-    const error = new Error()
-    const deployNewTargetWithMockSequence = (mockSequence) => {
-      const mocks = sequence(mockSequence)
-      return deployNewTarget(
-        () => values, // provides { instanceId, destination }
-        mocks.mkdirp,
-        mocks.stageTarget,
-        mocks.deploy,
-        mocks.log,
-        mocks.warn
-      )()
-    }
-    it('should resolve after making directory, staging and deploying', () =>
-      deployNewTargetWithMockSequence([
-        ['mkdirp', [values.destination], Promise.resolve()],
-        ['log', ['staging target', values.instanceId, 'to', values.destination]],
-        ['stageTarget', [values.destination, values.instanceId], Promise.resolve()],
-        ['log', ['deploying', values.destination]],
-        ['deploy', [values.destination], Promise.resolve(values.stdout)],
-        ['log', [values.stdout]],
-      ]).then(strictEqualTo(true)))
-    it('should continue staging/deploying and resolve after failing to make dir', () =>
-      deployNewTargetWithMockSequence([
-        ['mkdirp', [values.destination], Promise.resolve(error)],
-        ['log', ['staging target', values.instanceId, 'to', values.destination]],
-        ['stageTarget', [values.destination, values.instanceId], Promise.resolve()],
-        ['log', ['deploying', values.destination]],
-        ['deploy', [values.destination], Promise.resolve(values.stdout)],
-        ['log', [values.stdout]],
-      ]).then(strictEqualTo(true)))
-    it('should reject when failing to stage target', () =>
-      deployNewTargetWithMockSequence([
-        ['mkdirp', [values.destination], Promise.resolve()],
-        ['log', ['staging target', values.instanceId, 'to', values.destination]],
-        ['stageTarget', [values.destination, values.instanceId], Promise.reject(error)],
-        ['warn', ['failed to deploy a new target:', error.stack]],
-      ]).then(strictEqualTo(false)))
-    it('should reject when failing to deploy', () =>
-      deployNewTargetWithMockSequence([
-        ['mkdirp', [values.destination], Promise.resolve()],
-        ['log', ['staging target', values.instanceId, 'to', values.destination]],
-        ['stageTarget', [values.destination, values.instanceId], Promise.resolve()],
-        ['log', ['deploying', values.destination]],
-        ['deploy', [values.destination], Promise.reject(error)],
-        ['warn', ['failed to deploy a new target:', error.stack]],
-      ]).then(strictEqualTo(false)))
-  })
-
   describe('#remove', () => {
     const execAsyncOk = (...args) =>
       deepStrictEqual(args, ['sls remove', { cwd: values.directory }]) ||
@@ -248,38 +211,6 @@ describe('./tests/integration/deployToTemp', () => {
     it('should pass through exec rejection', () =>
       remove(execAsyncFail)()
         .then(() => fail('should reject'), err => strictEqual(err, error)))
-  })
-
-  describe('#removeTempDeployment', () => {
-    const removeTempDeploymentWithMockSequence = (mockSequence) => {
-      const mocks = sequence(mockSequence)
-      return removeTempDeployment(
-        mocks.log,
-        mocks.remove,
-        mocks.warn,
-        mocks.rmrf
-      )(values.directory)
-    }
-    const error = new Error()
-    it('should resolve and log on successful remove and rmrf', () =>
-      removeTempDeploymentWithMockSequence([
-        ['log', ['removing temp deployment', values.directory]],
-        ['remove', [values.directory], Promise.resolve(values.stdout)],
-        ['log', ['deleting', values.directory]],
-        ['rmrf', [values.directory], Promise.resolve(values.directory)],
-        ['log', ['done']],
-      ])
-        .then(missing))
-    it('should warn and resolve on unsuccessful remove and rmrf', () =>
-      removeTempDeploymentWithMockSequence([
-        ['log', ['removing temp deployment', values.directory]],
-        ['remove', [values.directory], Promise.reject(error)],
-        ['warn', ['failed to sls remove', values.directory]],
-        ['log', ['deleting', values.directory]],
-        ['rmrf', [values.directory], Promise.resolve(values.directory)],
-        ['log', ['done']],
-      ])
-        .then(missing))
   })
 
   describe('#listTempDeployments', () => {
