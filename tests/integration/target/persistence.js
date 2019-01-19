@@ -32,11 +32,11 @@ const pure = {
     createParams = pure.createParams
   ) => {
     const s3Impl = {
-      createBucket: (name) =>
+      createBucket: name =>
         s3.createBucket({ Bucket: name }).promise()
           .then(() => true),
 
-      deleteBucket: (name) =>
+      deleteBucket: name =>
         s3.deleteBucket({ Bucket: name }).promise()
           .then(() => true),
 
@@ -65,19 +65,19 @@ const pure = {
         return allKeys
           ? Promise.resolve({ ok: true })
           : s3.deleteObjects(
-              createParams(
-                {
-                  Delete: {
-                    Quiet: true,
-                    Objects: flatten(keys).map(key => ({ Key: key })),
-                  },
-                })
-            ).promise()
-              .then(({ Errors }) => ({
-                ok: !Errors.length,
-                errors: Errors.map(({ Key, Message }) =>
-                  ({ key: Key, error: Message })),
-              }))
+            createParams(
+              {
+                Delete: {
+                  Quiet: true,
+                  Objects: flatten(keys).map(key => ({ Key: key })),
+                },
+              })
+          ).promise()
+            .then(({ Errors }) => ({
+              ok: !Errors.length,
+              errors: Errors.map(({ Key, Message }) =>
+                ({ key: Key, error: Message })),
+            }))
       },
     }
     return s3Impl

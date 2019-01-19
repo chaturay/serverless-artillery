@@ -23,10 +23,13 @@ const urlsForScript = ({ testUrl, listUrl, deleteUrl }) =>
 describe('./tests/integration', () => {
   const deploying =
     deployNewTestResources()
+    // mockDeployNewTestResources()
       .then(result => ({
         urlsForName: urlsForScript(result),
         tempFolder: result.tempFolder,
       }))
+
+  it('should deploy temporary resources', () => deploying)
 
   readdirSync(scriptsPath)
     .map(name => ({

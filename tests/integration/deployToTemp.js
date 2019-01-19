@@ -1,5 +1,5 @@
 const { tmpdir } = require('os')
-const { join, sep, dirname } = require('path')
+const { join, sep } = require('path')
 const childProcess = require('child_process')
 const { safeLoad, safeDump } = require('js-yaml')
 
@@ -32,7 +32,7 @@ const pathsFromTempDirectory = tempFolder => ({
   slsartTempFolder: join(tempFolder, 'slsart'),
 })
 
-const instanceIdFromTempDirectory = tempFolder => {
+const instanceIdFromTempDirectory = (tempFolder) => {
   const parts = tempFolder.split(sep)
   return parts[parts.length - 1]
 }
@@ -58,22 +58,25 @@ const defaultWarn = process.env.DEBUG
   ? console.warn
   : () => {}
 
+/* eslint-disable no-template-curly-in-string */
 const updateSlsartServerlessYml = yml =>
   Object.assign(
     {},
     yml,
     { service: 'slsart-integration-runner-${self:custom.instanceId}' },
     { custom: '${file(./config.yml)}' },
-    { provider: Object.assign(
-      {},
-      yml.provider,
-      {
-        deploymentBucket: {
-          name: 'slsart-integration-${self:custom.instanceId}-depl'
-        }
-      }),
-    },
+    {
+      provider: Object.assign(
+        {},
+        yml.provider,
+        {
+          deploymentBucket: {
+            name: 'slsart-integration-${self:custom.instanceId}-depl',
+          },
+        }),
+    }
   )
+/* eslint-enable no-template-curly-in-string */
 
 const impl = {
   findTargetSourceFiles: (ls = fs.ls, sourcePath = defaultTargetSourcePath) =>
@@ -98,14 +101,14 @@ const impl = {
 
   findSlsartSourceFiles: (
     sourcePath = defaultSlsartSourcePath,
-    ls = fs.ls,
+    ls = fs.ls
   ) =>
     () =>
       ls(sourcePath)
         .then(namesToFullPaths(sourcePath)),
 
   updateSlsartServerlessYmlFile: ({ readFile, writeFile } = fs) =>
-    (destination, instanceId) => {
+    (destination) => {
       const serverlessYmlPath = join(destination, 'serverless.yml')
       return readFile(serverlessYmlPath)
         .then(safeLoad)
