@@ -37,15 +37,15 @@
   },
   "homepage": "https://github.com/Nordstrom/serverless-artillery#readme",
   "dependencies": {
-    "ajv": "^6.5.4",
-    "aws-sdk": "^2.230.1",
-    "bluebird": "^3.5.1",
+    "ajv": "^6.7.0",
+    "aws-sdk": "^2.388.0",
+    "bluebird": "^3.5.3",
     "diff": "^3.5.0",
     "get-stdin": "^6.0.0",
-    "js-yaml": "^3.11.0",
-    "rimraf": "^2.6.2",
+    "js-yaml": "^3.12.1",
+    "rimraf": "^2.6.3",
     "semver": "^5.5.0",
-    "shortid": "^2.2.8",
+    "shortid": "^2.2.14",
     "yargs": "^11.1.0"
   },
   "devDependencies": {
@@ -54,19 +54,21 @@
     "chai-spies": "^1.0.0",
     "coveralls": "^3.0.1",
     "cross-spawn": "^6.0.5",
-    "eslint": "^4.19.1",
+    "deep-diff": "^1.0.2",
+    "eslint": "^5.12.0",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-import": "^2.11.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
-    "eslint-plugin-react": "^7.7.0",
+    "eslint-plugin-react": "^7.12.3",
     "lodash.merge": "^4.6.1",
     "mocha": "^5.1.1",
     "np": "^2.20.1",
     "nyc": "^11.7.1",
     "quibble": "^0.5.5",
-    "serverless": "^1.26.1",
+    "serverless": "^1.36.1",
     "sinon": "^5.0.2",
-    "sinon-chai": "^3.0.0"
+    "sinon-chai": "^3.3.0",
+    "tmp": "0.0.33"
   },
   "nyc": {
     "include": [
