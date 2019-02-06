@@ -67,9 +67,9 @@ scenarios:
 ```
 
 In this script, we specify that we are testing the service running on http://aws.amazon.com which will be talking to over HTTP. We define one load phase, which will last 5 seconds with 2 new virtual users (arriving every second (on average).
-For more details on setting up scripts read Artillery’s documentation.
+For more details on setting up scripts read [Artillery’s documentation](https://artillery.io/docs/script-reference/).
 
-Next you want to deploy your code to aws, and you will need to set up an AWS account and set up your credentials.
+Next you want to deploy your code to aws, and you will need to [set up an AWS account and set up your credentials](https://github.com/Nordstrom/serverless-artillery-workshop/tree/master/Lesson0%20-%20Before%20the%20workshop).
 
 With that done, you are now ready to deploy your script and start the test.
 
