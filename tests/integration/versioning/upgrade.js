@@ -126,15 +126,15 @@ const performUpgradeOnTestProject = (tempProjectPath) => {
 
 // Copy test project files to temp directory for upgrading.
 const setupTempProject = (upgradePath, testName) => {
-  const tempPath = tmp.dirSync({ mode: 0o777, prefix: `${upgradePath}-${testName}` }).name
-  const projectPath = path.join(__dirname, upgradePath, testName, 'configured')
+  const testProjectPath = tmp.dirSync({ mode: 0o777, prefix: `${upgradePath}-${testName}` }).name
+  const solutionPath = path.join(__dirname, upgradePath, testName, 'configured')
 
-  return ncp(projectPath, tempPath)
-    .then(() => ({ projectPath, tempPath }))
+  return ncp(solutionPath, testProjectPath)
+    .then(() => ({ solutionPath, testProjectPath }))
 }
 
-// Starting with the expected differences, check the actual results once available.
-const checkUpgradeResults = (projectPath, tempPath, expectedDiff) => (actualDiff) => {
+// Compare the expected file changes to the actual changes.
+const checkUpgradeResults = ([expectedDiff, actualDiff]) => {
   expectedDiff.forEach((expectedFileDiff) => {
     const fileDiff = actualDiff.find(actualFileDiff => actualFileDiff.file === expectedFileDiff.file)
     if (!fileDiff) throw new Error(`Missing file in upgraded project: ${expectedFileDiff.file}`)
@@ -142,18 +142,22 @@ const checkUpgradeResults = (projectPath, tempPath, expectedDiff) => (actualDiff
   })
 }
 
-// Runs the integration tests from one project version to to another.
-// Test projects starting state can be found in the `X.X.X-to-Y.Y.Y/test-name/configured/*` directories.
-// Expected upgrade results (solutions) are found in the `X.X.X-to-Y.Y.Y/test-name/upgraded/*` directories.
+// Given paths to the test project, upgrade it then compare to our reference upgraded project (the solution).
+const upgradeProjectAndDiff = ({solutionPath, testProjectPath}) =>
+  performUpgradeOnTestProject(testProjectPath)
+    .then(() => diffProjects(solutionPath, testProjectPath))
+
+// Given the upgrade path and the upgrade test name, upgrade the project and produce a diff.
+const copyProjectUpgradeAndDiff = (upgradePath, testName) =>
+  setupTempProject(upgradePath,testName)
+    .then(upgradeProjectAndDiff)
+
+// Perform a test for a given upgrade path (e.g. 0.0.0-to-0.0.1) and test name (e.g. default).
 const upgradeTest = (upgradePath, testName) =>
-  diffTestProjectToSolution(upgradePath, testName)
-    .then(expectedDiff => setupTempProject(upgradePath, testName)
-      .then(({ projectPath, tempPath }) =>
-        performUpgradeOnTestProject(tempPath)
-          .then(() => diffProjects(projectPath, tempPath))
-          .then(checkUpgradeResults(projectPath, tempPath, expectedDiff))
-      )
-    )
+  Promise.all([
+    diffTestProjectToSolution(upgradePath, testName),
+    copyProjectUpgradeAndDiff(upgradePath, testName)
+  ]).then(checkUpgradeResults)
 
 describe('upgrade integration tests', () => {
   describe('from 0.0.0 to 0.0.1', () => {
