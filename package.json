@@ -45,6 +45,7 @@
     "js-yaml": "^3.11.0",
     "semver": "^5.5.0",
     "shortid": "^2.2.8",
+    "xmlhttprequest": "^1.8.0",
     "yargs": "^11.1.0"
   },
   "devDependencies": {

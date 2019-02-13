@@ -4,7 +4,7 @@ custom: ${file(./config.yml)}
 provider:
   name: aws
   runtime: nodejs6.10
-  endpointType: private
+  endpointType: regional
   deploymentBucket:
     name: slsart-integration-${self:custom.instanceId}-depl
   iamRoleStatements:

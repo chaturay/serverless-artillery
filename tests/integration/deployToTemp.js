@@ -86,8 +86,9 @@ const impl = {
         .then(namesToFullPaths(sourcePath)),
 
   writeConfig: (writeFile = fs.writeFile) =>
-    (destination, instanceId) =>
-      writeFile(join(destination, 'config.yml'))(`instanceId: ${instanceId}`),
+    (destination, instanceId) => {
+      writeFile(join(destination, 'config.yml'))(`instanceId: ${instanceId}`)
+    },
 
   stageTarget: (
     findTargetSourceFiles = impl.findTargetSourceFiles(),
@@ -131,17 +132,19 @@ const impl = {
         .then(() => updateSlsartServerlessYmlFile(destination, instanceId))
         .then(() => exec('npm i', { cwd: destination })),
 
-  execAsync: (exec = childProcess.exec) =>
+  execAsync: (exec = childProcess.exec, 
+    log = defaultLog,
+    warn = defaultWarn) =>
     (command, options = {}) =>
       new Promise((resolve, reject) =>
         exec(command, options, (err, stdout, stderr) =>
           (err
-            ? reject(execError(err, stderr))
-            : resolve(stdout)))),
+            ? warn('execAsync ERROR: ', err, stderr, stdout) || reject(execError(err, stderr))
+            : log('execAsync SUCCESS: ', stdout) || resolve(stdout)))),
 
   deploy: (exec = impl.execAsync()) =>
     directory =>
-      exec('sls deploy', { cwd: directory }),
+      (process.env.DEBUG ? exec('sls deploy -v', { cwd: directory }) : exec('sls deploy', { cwd: directory })),
 
   tempLocation: (random = () => randomString(8), root = defaultRoot) =>
     (instanceId = random()) =>
@@ -180,6 +183,7 @@ const impl = {
         .then(urls => Object.assign({}, urls, paths))
         .then(tap(log))
         .catch(err =>
+          // warn('failed to deploy a new target:', err.stack) || false)
           warn('failed to deploy a new target:', err.stack) || false)
     },
 
@@ -225,9 +229,9 @@ const impl = {
         .then(() => log('    deleting', directory))
         .then(() => rmrf(directory))
         .then(() => deleteAllObjects(deploymentBucketName))
-        .catch(err => log('    failed to delete all objects from', deploymentBucketName, err.message))
+        .catch(err => warn('    failed to delete all objects from', deploymentBucketName, err.message))
         .then(() => deleteBucket(deploymentBucketName))
-        .catch(err => log('    failed to delete bucket', deploymentBucketName, err.message))
+        .catch(err => warn('    failed to delete bucket', deploymentBucketName, err.message))
         .then(() => log('  done'))
     },
 
@@ -257,4 +261,5 @@ module.exports = {
   removeTempDeployment: impl.removeTempDeployment(),
   cleanupDeployments: impl.cleanupDeployments(),
   exec: impl.execAsync(),
+  deleteAllObjects: impl.deleteAllObjects(),
 }

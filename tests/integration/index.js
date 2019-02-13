@@ -27,6 +27,7 @@ describe('./tests/integration', () => {
       .then(result => ({
         urlsForName: urlsForScript(result),
         tempFolder: result.tempFolder,
+        slsartTempFolder: result.slsartTempFolder,
       }))
 
   it('should deploy temporary resources', () => deploying)
@@ -36,9 +37,10 @@ describe('./tests/integration', () => {
       name,
       script: safeLoad(readFileSync(join(scriptsPath, name))),
       resources: deploying
-        .then(({ urlsForName, tempFolder }) => ({
+        .then(({ urlsForName, tempFolder, slsartTempFolder }) => ({
           urls: urlsForName(name),
           tempFolder,
+          slsartTempFolder,
         })),
     }))
     .map(test)

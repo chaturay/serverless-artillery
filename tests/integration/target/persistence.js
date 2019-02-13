@@ -60,25 +60,22 @@ const pure = {
         s3.getObject(createParams({ Key: key })).promise()
           .then(({ Body }) => Body.toString()),
 
-      deleteFiles: (...keys) => {
-        const allKeys = flatten(keys)
-        return allKeys
-          ? Promise.resolve({ ok: true })
-          : s3.deleteObjects(
-            createParams(
-              {
-                Delete: {
-                  Quiet: true,
-                  Objects: flatten(keys).map(key => ({ Key: key })),
-                },
-              })
-          ).promise()
-            .then(({ Errors }) => ({
-              ok: !Errors.length,
-              errors: Errors.map(({ Key, Message }) =>
-                ({ key: Key, error: Message })),
-            }))
-      },
+      deleteFiles: (...keys) =>
+        s3.deleteObjects(
+          createParams(
+            {
+              Delete: {
+                Quiet: true,
+                Objects: flatten(keys).map(key => ({ Key: key })),
+              },
+            })
+        ).promise()
+          .then(({ Errors }) => ({
+            ok: !Errors.length,
+            errors: Errors.map(({ Key, Message }) =>
+              ({ key: Key, error: Message })),
+          }))
+      ,
     }
     return s3Impl
   },

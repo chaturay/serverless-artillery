@@ -5,12 +5,17 @@ const { writeFileSync } = require('fs')
 
 const { exec } = require('./deployToTemp')
 
+const XHR = require('xmlhttprequest')
+
+const REQUEST_FINISHED = 4
+const STATUS_OK = 200
+
 const log = process.env.DEBUG
   ? console.log
   : () => {}
 
 // write the script.yml to disk and slsart invoke it
-const executeScript = (tempFolder, name, { script }, { testUrl }) => {
+const executeScript = (tempFolder, slsartTempFolder, name, { script }, { testUrl }) => {
   const scriptFileName = join(tempFolder, name)
   const modifiedScript = Object.assign(
     {},
@@ -18,7 +23,7 @@ const executeScript = (tempFolder, name, { script }, { testUrl }) => {
     { config: Object.assign({}, script.config, { target: testUrl }) }
   )
   writeFileSync(scriptFileName, safeDump(modifiedScript))
-  return exec(`slsart invoke ${scriptFileName}`, { cwd: tempFolder })
+  return exec(`slsart invoke -p ${scriptFileName}`, { cwd: slsartTempFolder })
 }
 
 // return the expected duration of the script + 10% (in seconds)
@@ -29,22 +34,47 @@ const approximateScriptDuration = ({ script: { config: { phases } } }) =>
 const awaitScriptDuration = script =>
   new Promise(resolve => setTimeout(resolve, approximateScriptDuration(script)))
 
+// make http GET request to target endpoint for list of calls
+const makeListRequest = (listUrl) => {
+  const request = new XHR.XMLHttpRequest()
+  return new Promise((resolve, reject) => {
+    request.onreadystatechange = () => {
+      if (request.readyState === REQUEST_FINISHED) {
+        if (request.status === STATUS_OK) {
+          resolve(request)
+        } else {
+          reject(new Error(`status: ${request.status}, statusText: ${request.statusText}`))
+        }
+      }
+    }
+    request.open('GET', listUrl)
+    request.send()
+  })
+}
+
 // return an array of calls as { timestamp: 77777777, eventId: 123abc }
 //  sorted by timestamp earliest -> latest
 const fetchListOfCalls = ({ listUrl }) => {
   log('fetching list of calls from', listUrl)
-  // todo: get the body from a GET request to the listUrl
-  const body = '[{ "timestamp": 1000 }, { "timestamp": 2000 }]'
-  return Promise.resolve(JSON.parse(body))
-    .then(listOfCalls => [...listOfCalls].sort(call => call.timestamp))
+  return makeListRequest(listUrl)
+    .then(response => Promise.resolve(JSON.parse(response.responseText)))
+    .then(listOfCalls => Promise.resolve(listOfCalls.sort((callA, callB) => callA.timestamp - callB.timestamp)))
+    .catch(err => log('failed to fetch list of calls: ', err.stack))
 }
 
 // from a chronological list of calls, assert that the count of calls within the
 //  given time range is within the given min and max
 const assertExpectation = (listOfCalls, from, to, min, max) => {
-  // todo: perform assertion
   log('asserting that from', from, 'to', to, 'seconds saw', min, 'to', max, 'requests')
-  ok(true)
+  const firstTimestamp = listOfCalls[0].timestamp
+  const startTime = firstTimestamp + (from * 1000)
+  const finishTime = firstTimestamp + (to * 1000)
+
+  const relevantCalls = listOfCalls
+    .filter(call => call.timestamp >= startTime && call.timestamp < finishTime)
+    .length
+  log(`saw ${relevantCalls} requests made`)
+  ok(relevantCalls >= min && relevantCalls <= max)
 }
 
 // generate an it() call for the given expectation
@@ -65,13 +95,13 @@ const test = ({
   resources,
 }) => {
   const executing = resources
-    .then(({ urls, tempFolder }) =>
-      executeScript(tempFolder, name, script, urls))
+    .then(({ urls, tempFolder, slsartTempFolder }) =>
+      executeScript(tempFolder, slsartTempFolder, name, script, urls))
 
   const finishing = executing
     .then(() => awaitScriptDuration(script))
     .then(() => resources)
-    .then(fetchListOfCalls)
+    .then(({ urls }) => fetchListOfCalls(urls))
 
   describe(name, () => {
     // todo: consider getting this text dynamically from the test script
