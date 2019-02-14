@@ -1,14 +1,10 @@
+const fetch = require('node-fetch')
 const { ok } = require('assert')
 const { join } = require('path')
 const { safeDump } = require('js-yaml')
 const { writeFileSync } = require('fs')
 
 const { exec } = require('./deployToTemp')
-
-const XHR = require('xmlhttprequest')
-
-const REQUEST_FINISHED = 4
-const STATUS_OK = 200
 
 const log = process.env.DEBUG
   ? console.log
@@ -34,30 +30,12 @@ const approximateScriptDuration = ({ script: { config: { phases } } }) =>
 const awaitScriptDuration = script =>
   new Promise(resolve => setTimeout(resolve, approximateScriptDuration(script)))
 
-// make http GET request to target endpoint for list of calls
-const makeListRequest = (listUrl) => {
-  const request = new XHR.XMLHttpRequest()
-  return new Promise((resolve, reject) => {
-    request.onreadystatechange = () => {
-      if (request.readyState === REQUEST_FINISHED) {
-        if (request.status === STATUS_OK) {
-          resolve(request)
-        } else {
-          reject(new Error(`status: ${request.status}, statusText: ${request.statusText}`))
-        }
-      }
-    }
-    request.open('GET', listUrl)
-    request.send()
-  })
-}
-
 // return an array of calls as { timestamp: 77777777, eventId: 123abc }
 //  sorted by timestamp earliest -> latest
 const fetchListOfCalls = ({ listUrl }) => {
   log('fetching list of calls from', listUrl)
-  return makeListRequest(listUrl)
-    .then(response => Promise.resolve(JSON.parse(response.responseText)))
+  return fetch(listUrl)
+    .then(response => Promise.resolve(response.json()))
     .then(listOfCalls => Promise.resolve(listOfCalls.sort((callA, callB) => callA.timestamp - callB.timestamp)))
     .catch(err => log('failed to fetch list of calls: ', err.stack))
 }

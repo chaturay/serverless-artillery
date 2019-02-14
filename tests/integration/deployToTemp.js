@@ -183,7 +183,6 @@ const impl = {
         .then(urls => Object.assign({}, urls, paths))
         .then(tap(log))
         .catch(err =>
-          // warn('failed to deploy a new target:', err.stack) || false)
           warn('failed to deploy a new target:', err.stack) || false)
     },
 
@@ -261,5 +260,4 @@ module.exports = {
   removeTempDeployment: impl.removeTempDeployment(),
   cleanupDeployments: impl.cleanupDeployments(),
   exec: impl.execAsync(),
-  deleteAllObjects: impl.deleteAllObjects(),
 }
