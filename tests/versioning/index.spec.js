@@ -52,7 +52,7 @@ describe('versioning module', () => {
     })
 
     describe('checkForProjectDependencies', () => {
-      it('reads form the package.json', () => {
+      it('reads from the package.json', () => {
         const fs = fsSpies()
         fs.existsSync.withArgs('target-project/.slsart').returns(false)
         fs.readFileSync.withArgs('target-project/package.json').returns('{}')

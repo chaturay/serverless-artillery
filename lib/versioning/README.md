@@ -77,8 +77,8 @@ using the following steps:
 1. `package.json` has expected dependencies
 1. `serverless.yml` still contains minimum expected configuration
 1. `serverless.yml` has no additions conflicting with new version
-1. Copy reference versions of file modified by developer (`*.orig`)
-1. Backup any modified files potentially overwritten by the upgrade (`*.bak`)
+1. Copies reference version of configured assets into `original-assets.?.?.?`
+1. Backup existing project files into `backup` directory
 1. Update dependencies in `package.json`
 1. Transform `serverless.yml` service definition to new version
 1. Update `.slsart` config file with new version

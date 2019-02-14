@@ -44,7 +44,7 @@ const ignoredFile = (fullFilePath) => {
   const ignoredFileList = [
     'node_modules',
     'package-lock.json',
-    // 'backup',
+    'backup',
   ]
   const baseFilename = path.basename(fullFilePath)
 
