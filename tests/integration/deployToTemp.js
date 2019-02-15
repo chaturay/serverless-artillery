@@ -39,7 +39,7 @@ const instanceIdFromTempDirectory = (tempFolder) => {
 
 const urlsFromDeployTargetOutput = (output) => {
   const lines = output.split('\n')
-  const startIndex = lines.indexOf('endpoints:') + 1
+  const startIndex = lines.findIndex(line => /endpoints:/.test(line)) + 1
   const urls = lines.slice(startIndex, startIndex + 3)
     .map(line => line.split(' - '))
     .map(([, url]) => url.trim())

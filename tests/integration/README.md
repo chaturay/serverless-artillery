@@ -3,6 +3,12 @@
 Start an integration test by running the command:
 `npm run integration`
 
+To enable logging in test runs, set a DEBUG environment variable before starting the tests.
+e.g. `export DEBUG=*`
+
+Make sure that you are running Node version 8 or higher.
+Also, if you have set an environment variable for AWS Region, make sure it is the same region as your test instance and target (see definition of terms below).
+
 ## Definition of Terms
 *Test Instance*
 > A Serverless Artillery project that will be deployed to execute a single integration test.
