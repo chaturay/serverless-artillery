@@ -1,0 +1,31 @@
+script:
+  _split:
+    maxChunkDurationInSeconds: 20
+  config:
+    target: 'https://example.com'
+    phases:
+      - duration: 30
+        arrivalRate: 1
+        rampTo: 10
+      - duration: 30
+        arrivalRate: 10
+      - duration: 30
+        arrivalRate: 10
+        rampTo: 1
+  scenarios:
+    - flow:
+      - get:
+          url: '/'
+expectations:
+  - from: 0
+    to: 30
+    min: 155
+    max: 175
+  - from: 30
+    to: 60
+    min: 290
+    max: 310
+  - from: 60
+    to: 90
+    min: 155
+    max: 175

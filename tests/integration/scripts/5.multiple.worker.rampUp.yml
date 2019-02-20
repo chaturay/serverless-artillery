@@ -1,0 +1,18 @@
+script:
+  _split:
+    maxChunkRequestsPerSecond: 10
+  config:
+    target: 'https://example.com'
+    phases:
+      - duration: 10
+        arrivalRate: 1
+        rampTo: 15
+  scenarios:
+    - flow:
+      - get:
+          url: '/'
+expectations:
+  - from: 0
+    to: 10
+    min: 70
+    max: 90
