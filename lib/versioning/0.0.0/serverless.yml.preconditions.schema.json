@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "provider": {
+      "type": "object",
+      "properties": {
+        "iamRoleStatements": {
+          "type": "array"
+        }
+      },
+      "required": ["iamRoleStatements"]
+    },
+    "functions": {
+      "type": "object",
+      "properties": {
+        "loadGenerator": {
+          "type": "object",
+          "required": ["handler", "timeout"]
+        }
+      },
+      "required": ["loadGenerator"]
+    }
+  },
+  "required": ["provider", "functions"]
+}

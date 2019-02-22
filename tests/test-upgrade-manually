@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+echo "Ensuring latest version of SA is installed"
+npm uninstall -g serverless-artillery
+npm install -g serverless-artillery
+
+echo
+echo "Creating a test custom project"
+mkdir test-upgrade
+cd test-upgrade
+slsart configure
+
+echo
+echo "Installing development version of SA"
+pushd ../..
+npm install -g .
+popd
+
+echo
+echo "Upgrading the custom project"
+slsart upgrade
+read -p "Review upgrade and press [Enter] when done..."
+
+echo
+echo "Removing test project"
+cd ..
+rm -rf test-upgrade
+echo "DONE"
