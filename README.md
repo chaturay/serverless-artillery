@@ -2,14 +2,18 @@
 
 [//]: # (Thanks to https://www.divio.com/en/blog/documentation/)
 
-Serverless-artillery makes it easier to test services for load and functionality more quickly and with almost no code.
+
+### Introduction
+Combine [`serverless`](https://serverless.com) with [`artillery`](https://artillery.io) and you get `serverless-artillery` (a.k.a. `slsart`). 
+
+Serverless-artillery makes it easy to test your services for load and functionality quickly and with almost no code.
 
 
 ### Use serverless-artillery if
 
-1. You want to know if your services (either internal or public) scale with a different amount of traffic.
-1. You want to test if your services behave as you expect after you deploy new changes
-1. You want to constantly monitor your services over time to make sure the latency of your services is under control.
+1. You want to know if your services (either internal or public) can handle different amount of traffic load (i.e. performance testing).
+2. You want to test if your services behave as you expect after you deploy new changes (i.e. acceptance testing).
+3. You want to constantly monitor your services over time to make sure the latency of your services is under control (i.e. monitoring mode).
 
 
 ### Installation
