@@ -26,7 +26,7 @@ Serverless-artillery makes it easy to test your services for load and functional
             <li><a href="#installing-serverless-artillery">Installing serverless-artillery</a></li>
             <li><a href="#problems-installing">Problems installing?</a></li>
             <ul>
-                <li><a href="#node_modules-owned-by-root">Node_modules owned by root?</a></li>
+                <li><a href="#error-npm-err-code-eacces">Error: npm ERR! code EACCES</a></li>
                 <li><a href="#installing-in-docker">Installing in Docker?</a></li>
             </ul>
         </ul>
@@ -54,8 +54,8 @@ npm install -g serverless-artillery
 
 ## Problems installing?
 **ASHMITODO:Look into this:** 
-### Node_modules owned by root?
-If you are installing into a node_modules owned by root, [read this](root-owns-node-modules.md).
+### Error: npm ERR! code EACCES
+If you are installing into a node_modules owned by root and getting error `npm ERR! code EACCES`, [read this](root-owns-node-modules.md).
 ### Installing in Docker?
 Post installation causes permission issues when installing in a Docker image. To successfully install in Docker make sure to add the following to your Dockerfile before the serverless and serverless-artillery install. Refer to the [example Dockerfile](Dockerfile).
 ```
