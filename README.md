@@ -13,6 +13,20 @@ Serverless-artillery makes it easy to test your services for load and functional
 2. You want to test if your services behave as you expect after you deploy new changes (i.e. acceptance testing).
 3. You want to constantly monitor your services over time to make sure the latency of your services is under control (i.e. monitoring mode).
 
+# Table of Contents
+<details><summary>Click to expand/collapse</summary>
+<ul>
+    <li><a href="#installation">Installation</a></li>
+        <ul>
+            <li><a href="#prerequisite">Prerequisite</a></li>
+            <li><a href="#installation">Installing serverless-artillery</a></li>
+        </ul>
+    <li><a href="#uninstallation">Uninstallation</a></li>
+    <li><a href="#installation">Installation</a></li>
+    <li><a href="#tutorial">Tutorial</a></li>
+</ul>
+</details>
+
 # Installation
 ## Prerequisite
 ### 1. Node JS
