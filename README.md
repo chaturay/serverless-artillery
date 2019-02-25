@@ -22,7 +22,7 @@ Serverless-artillery makes it easy to test your services for load and functional
             <ul>
                 <li><a href="#1-node-js">Node JS</a></li>
                 <li><a href="#2-serverless-framework">Serverless Framework</a></li>
-                <li><a href="#problems-installing?">Problems installing?</a></li>
+                <li><a href="#problems-installing">Problems installing?</a></li>
             </ul>
             <li><a href="#installing-serverless-artillery">Installing serverless-artillery</a></li>
         </ul>
