@@ -22,9 +22,13 @@ Serverless-artillery makes it easy to test your services for load and functional
             <ul>
                 <li><a href="#1-node-js">Node JS</a></li>
                 <li><a href="#2-serverless-framework-cli">Serverless Framework CLI</a></li>
-                <li><a href="#problems-installing">Problems installing?</a></li>
             </ul>
             <li><a href="#installing-serverless-artillery">Installing serverless-artillery</a></li>
+            <li><a href="#problems-installing">Problems installing?</a></li>
+            <ul>
+                <li><a href="#node_modules-owned-by-root">Node_modules owned by root?</a></li>
+                <li><a href="#installing-in-docker">Installing in Docker?</a></li>
+            </ul>
         </ul>
     <li><a href="#uninstallation">Uninstallation</a></li>
     <li><a href="#tutorial">Tutorial</a></li>
@@ -32,6 +36,7 @@ Serverless-artillery makes it easy to test your services for load and functional
 </details>
 
 # Installation
+
 ## Prerequisite
 ### 1. Node JS
 Before installing serverless-artillery, install Node JS (maintenance LTS version+ (v6+)) from https://nodejs.org/en/download/ or with your operating system’s package manager.
@@ -40,13 +45,23 @@ Before installing serverless-artillery, install Serverless Framework CLI (a.k.a.
 ```
 npm install -g serverless
 ```
+
 ## Installing serverless-artillery
 Now you can install serverless-artillery using the following command.
 ```
 npm install -g serverless-artillery
 ```
+
 ## Problems installing?
-**ASHMITODO:Look into this:** If this didn’t work, read [problems installing serverless-artillery](https://github.com/Nordstrom/serverless-artillery/blob/monitoring-mode/root-owns-node-modules.md).
+**ASHMITODO:Look into this:** 
+### Node_modules owned by root?
+If you are installing into a node_modules owned by root, [read this](root-owns-node-modules.md).
+### Installing in Docker?
+Post installation causes permission issues when installing in a Docker image. To successfully install in Docker make sure to add the following to your Dockerfile before the serverless and serverless-artillery install. Refer to the [example Dockerfile](Dockerfile).
+```
+ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
+ENV PATH=$PATH:/home/node/.npm-global/bin
+```
 
 # Uninstallation
 You can uninstall serverless-artillery using the following command.
@@ -55,7 +70,6 @@ npm uninstall -g serverless-artillery
 ```
 
 # Tutorial
-
 Let’s learn by example.
 
 Throughout this tutorial we will walk you towards testing the AWS website, https://aws.amazon.com/.  
