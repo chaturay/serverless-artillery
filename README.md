@@ -6,12 +6,12 @@
 # Introduction
 Combine [`Serverless`](https://serverless.com) with [`artillery`](https://artillery.io) and you get `serverless-artillery` (a.k.a. `slsart`). 
 
-Serverless-artillery makes it easy to test your services for load and functionality quickly and with almost no code.
+Serverless-artillery makes it easy to test your services for load and functionality quickly, with almost no code and without having to maintain any servers or testing infrastructure.
 
 ## Use serverless-artillery if
 1. You want to know if your services (either internal or public) can handle different amount of traffic load (i.e. performance testing).
-2. You want to test if your services behave as you expect after you deploy new changes (i.e. acceptance testing).
-3. You want to constantly monitor your services over time to make sure the latency of your services is under control (i.e. monitoring mode).
+1. You want to test if your services behave as you expect after you deploy new changes (i.e. acceptance testing).
+1. You want to constantly monitor your services over time to make sure the latency of your services is under control (i.e. monitoring mode).
 
 # Table of Contents
 <details><summary>Click to expand/collapse</summary>
@@ -22,6 +22,7 @@ Serverless-artillery makes it easy to test your services for load and functional
             <ul>
                 <li><a href="#1-node-js">Node JS</a></li>
                 <li><a href="#2-serverless-framework">Serverless Framework</a></li>
+                <li><a href="#problems-installing?">Problems installing?</a></li>
             </ul>
             <li><a href="#installing-serverless-artillery">Installing serverless-artillery</a></li>
         </ul>
@@ -33,9 +34,9 @@ Serverless-artillery makes it easy to test your services for load and functional
 # Installation
 ## Prerequisite
 ### 1. Node JS
-Before installing serverless-artillery, you will need to install the latest version of node from https://nodejs.org/en/download/ or with your operating system’s package manager.
+Before installing serverless-artillery, install Node JS (v6+) from https://nodejs.org/en/download/ or with your operating system’s package manager.
 ### 2. Serverless Framework
-Run the following command to install Serverless Framework (a.k.a. Serverless).
+Before installing serverless-artillery, install Serverless Framework (a.k.a. Serverless) (v1.0+).
 ```
 npm install -g serverless
 ```
@@ -44,8 +45,8 @@ Now you can install serverless-artillery using the following command.
 ```
 npm install -g serverless-artillery
 ```
-
-**ASHMITODO:Look into this** If this didn’t work, read [problems installing serverless-artillery](https://github.com/Nordstrom/serverless-artillery/blob/monitoring-mode/root-owns-node-modules.md).
+## Problems installing?
+**ASHMITODO:Look into this:** If this didn’t work, read [problems installing serverless-artillery](https://github.com/Nordstrom/serverless-artillery/blob/monitoring-mode/root-owns-node-modules.md).
 
 # Uninstallation
 You can uninstall serverless-artillery using the following command.
