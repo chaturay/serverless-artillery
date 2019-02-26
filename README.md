@@ -31,6 +31,11 @@ Serverless-artillery makes it easy to test your services for load and functional
             </ul>
         </ul>
     <li><a href="#uninstallation">Uninstallation</a></li>
+    <li><a href="#before-running-serverless-artillery">Before running serverless-artillery</a></li>
+        <ul>
+            <li><a href="#setup-for-nordstrom-technology">Setup for Nordstrom Technology</a></li>
+            <li><a href="#setup-for-everyone-else">Setup for everyone else</a></li>
+        </ul>
     <li><a href="#tutorial">Tutorial</a></li>
 </ul>
 </details>
@@ -58,7 +63,7 @@ slsart --version
 You should see serverless-artillery print its version if the installation has been successful.
 
 ## Problems installing?
-**ASHMITODO:Look into this:** 
+**ASHMITODO:Look into this:**
 ### Error: npm ERR! code EACCES
 If you are installing into a node_modules owned by root and getting error `npm ERR! code EACCES`, [read this](root-owns-node-modules.md).
 ### Installing in Docker?
@@ -74,17 +79,17 @@ When needed, you can uninstall serverless-artillery using the following command.
 npm uninstall -g serverless-artillery
 ```
 
+# Before running serverless-artillery
+**ASHMITODO:Look into this:**
+## Setup for Nordstrom Technology
+If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Setup`_** in **Confluence** and follow the instructions there.
+## Setup for everyone else
+In order to use serverless-artillery, depending on the AWS account environment you're working in, you may need to define `AWS_PROFILE` to declare the AWS credentials to use and possibly `HTTP_PROXY` in order to escape your corporate proxy.  See the [Serverless Framework docs](https://serverless.com/framework/docs/) or the [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for details of how to set your system up for successful deployment, invocation, and removal. 
+
 # Tutorial
 Let’s learn by example.
 
 Throughout this tutorial we will walk you towards testing the AWS website, https://aws.amazon.com/.  
-
-You can verify that serverless-artillery is installed by typing `slsart --version` from your shell; you should see something like:
-
-```
-slsart --version
-0.3.2
-```
 
 Create the initial script you will need by typing the following in your shell:
 
