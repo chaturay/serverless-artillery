@@ -176,6 +176,9 @@ Now you are all set to invoke performance test using following command.
 slsart invoke
 ```
 At the end of the test serverless-artillery will generate a report of the test. **Please note that this report is generated only for small load.**
+
+**NOTE** that for performance testing, the command will take the `script.yml` from your local machine (and not the one deployed in AWS account) to run the performance test. Hence if you edit it on your local machine after deploying serverless-artillery to AWS, you don't need to deploy again in order to run the performance test again. Also note that this is true only for performance test and acceptance test and not monitoring.
+
 ### 6. Remove serverless-artillery
 After the test is done, you can remove serverless-artillery from AWS using following command.
 ```
