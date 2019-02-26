@@ -159,8 +159,8 @@ scenarios:
 
 ### 3. Deploy serverless-artillery
 We need to deploy serverless-artillery to you AWS account before we can use it to start our test.
-- Make sure you have [set up an AWS account and set up your credentials](#before-running-serverless-artillery) before proceeding.
-- Use the following command to deploy serverless-artillery.
+1. Make sure you have [set up an AWS account and set up your credentials](#before-running-serverless-artillery) before proceeding.
+1. Use the following command to deploy serverless-artillery.
 ```
 slsart deploy
 ```
