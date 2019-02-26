@@ -94,7 +94,7 @@ If you want to quickly test your setup or see the tool in action, do the followi
 ```
 slsart deploy
 ```
-2. The following command will run serverless-artillery using default script, creating small traffic against the sample endpoint in default script. At the end you will see it genrate a report of the test. Please note that this report is generated only for small load.
+2. The following command will invoke/run serverless-artillery using default load script, creating small traffic against the sample endpoint in default script. At the end you will see it genrate a report of the test. Please note that this report is generated only for small load.
 ```
 slsart invoke
 ```
