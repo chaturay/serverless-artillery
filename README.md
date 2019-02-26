@@ -90,7 +90,7 @@ In order to use serverless-artillery, depending on the AWS account environment y
 # Run a quick test
 If you want to quickly test your setup or see the tool in action, do the following to quickly run a **small load/performance test**. Don't worry about what these commands do in detail. This document explains them in detail later.
 
-1. The following command will deploy serverless-artillery to the AWS account you selected in the previous step with default stack name `serverless-artillery-dev`.
+1. The following command will deploy serverless-artillery to the AWS account you selected in the [previous step](#before-running-serverless-artillery) with default AWS stack name `serverless-artillery-dev`.
 ```
 slsart deploy
 ```
@@ -98,7 +98,7 @@ slsart deploy
 ```
 slsart invoke
 ```
-3. The following command will removed the default stack deployed in step 1.
+3. The following command will removed the default AWS stack deployed in step 1.
 ```
 slsart remove
 ```
@@ -156,3 +156,15 @@ After the test is done, you can remove the project from AWS:
 ```
 slsart remove
 ```
+
+# Glossary
+- service
+- end point
+- load
+- traffic
+- AWS stack
+- SA script
+- load testing
+- performance testing
+- acceptance testing
+- monitoring
