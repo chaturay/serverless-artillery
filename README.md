@@ -88,6 +88,20 @@ If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless
 In order to use serverless-artillery, depending on the AWS account environment you're working in, you may need to define `AWS_PROFILE` to declare the AWS credentials to use and possibly `HTTP_PROXY` in order to escape your corporate proxy.  See the [Serverless Framework docs](https://serverless.com/framework/docs/) or the [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for details of how to set your system up for successful deployment, invocation, and removal. 
 
 # Run a quick test
+If you want to quickly test your setup or see the tool in action, do the following to quickly run a **small load/performance test**. Don't worry about what these commands do in detail. This document explains them in detail later.
+
+1. The following command will deploy serverless-artillery to the AWS account you selected in the previous step with default stack name `serverless-artillery-dev`.
+```
+slsart deploy
+```
+2. The following command will run serverless-artillery using default script, creating small traffic against the sample endpoint in default script. At the end you will see it genrate a report of the test. Please note that this report is generated only for small load.
+```
+slsart invoke
+```
+3. The following command will removed the default stack deployed in step 1.
+```
+slsart remove
+```
 
 # Tutorial
 Let’s learn by example.
