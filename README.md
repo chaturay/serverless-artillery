@@ -85,7 +85,7 @@ npm uninstall -g serverless-artillery
 ## Setup for Nordstrom Technology
 If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Setup`_** in **Confluence** and follow the instructions there.
 ## Setup for everyone else
-In order to use serverless-artillery, depending on the AWS account environment you're working in, you may need to define `AWS_PROFILE` to declare the AWS credentials to use and possibly `HTTP_PROXY` in order to escape your corporate proxy.  See the [Serverless Framework docs](https://serverless.com/framework/docs/) or the [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for details of how to set your system up for successful deployment, invocation, and removal. 
+In order to use serverless-artillery, depending on the AWS account environment you're working in, you may need to define `AWS_PROFILE` to declare the AWS credentials to use and possibly `HTTP_PROXY` in order to escape your corporate proxy.  See the [Serverless Framework docs](https://serverless.com/framework/docs/) or [serverless-artillery workshop](https://github.com/Nordstrom/serverless-artillery-workshop)'s [Lesson 0](https://github.com/Nordstrom/serverless-artillery-workshop/tree/master/Lesson0%20-%20Before%20the%20workshop) for details of how to set your system up for successful deployment, invocation, and removal. 
 
 # Run a quick test
 If you want to quickly test your setup or see the tool in action, do the following to quickly run a **small load/performance test**. Don't worry about what these commands do in detail. This document explains them in detail later.
@@ -94,7 +94,7 @@ If you want to quickly test your setup or see the tool in action, do the followi
 ```
 slsart deploy
 ```
-2. The following command will invoke/run serverless-artillery using default load script, creating small traffic against the sample endpoint in default script. At the end you will see it genrate a report of the test. Please note that this report is generated only for small load.
+2. The following command will invoke/run serverless-artillery using default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script. At the end of the test serverless-artillery will generate a report of the test. **Please note that this report is generated only for small load.**
 ```
 slsart invoke
 ```
@@ -103,19 +103,23 @@ slsart invoke
 slsart remove
 ```
 
-# Tutorial
-Let’s learn by example.
+# Simple Performance Testing Tutorial
+Let’s learn by example. 
 
-Throughout this tutorial we will walk you towards testing the AWS website, https://aws.amazon.com/.  
+Throughout this tutorial we will walk you towards performance testing the AWS website, https://aws.amazon.com/.
 
-Create the initial script you will need by typing the following in your shell:
+### 1. Create script.yml
+Serverless-artillery needs to know information about the performance test that user wants to perform. It needs information like, the target URL of the service that user wants to test, load progression, user's interaction with the service etc. All these are described in a `script.yml` file. It is the same `script.yml` that Artillery.io uses. 
+- **Please see [here for basic concepts for Artillery.io usage](https://artillery.io/docs/basic-concepts/#basic-concepts).**
+- **Please see [here for Artillery.io's test script reference](https://artillery.io/docs/script-reference/).**
 
+Run the following command to create the initial `script.yml` file.
 ```
 slsart script
 ```
 
-`slsart script` created script.yml file, if we look at what it contains:
-
+### 2. Understanding script.yml
+Open `script.yml` with your favorite editor to see what it contains.
 ```
 # Thank you for trying serverless-artillery!
 # This default script is intended to get you started quickly.
@@ -137,31 +141,40 @@ scenarios:
           url: "/"
 
 ```
+- The script has [`config` section](https://artillery.io/docs/script-reference/#the-config-section)
+  - under which it specifies http://aws.amazon.com as the `target` for the test
+    - and that requests should be made using [HTTP protocol](https://artillery.io/docs/http-reference/)
+  - There is one [load `phase`](https://artillery.io/docs/script-reference/#load-phases) of `duration` of 5 sec and `arrivalRate` of 2 new virtual users arriving every second.
+- The script has [`scenarios` section](https://artillery.io/docs/script-reference/#scenarios)
+  - which contains one scenario
+    - which contains one flow
+      - which has one [flow action](https://artillery.io/docs/http-reference/#flow-actions) to send [GET request](https://artillery.io/docs/http-reference/#get-post-put-patch-delete-requests) for the specified `target`.
 
-In this script, we specify that we are testing the service running on http://aws.amazon.com which will be talking to over HTTP. We define one load phase, which will last 5 seconds with 2 new virtual users (arriving every second (on average).
-For more details on setting up scripts read [Artillery’s documentation](https://artillery.io/docs/script-reference/).
-
-Next you want to deploy your code to aws, and you will need to [set up an AWS account and set up your credentials](https://github.com/Nordstrom/serverless-artillery-workshop/tree/master/Lesson0%20-%20Before%20the%20workshop).
-
-With that done, you are now ready to deploy your script and start the test.
-
+### 3. Deploy serverless-artillery
+We need to deploy serverless-artillery to you AWS account before we can use it to start our test.
+- Make sure you have [set up an AWS account and set up your credentials](#before-running-serverless-artillery) before proceeding.
+- Use the following command to deploy serverless-artillery.
 ```
-slsart deploy //deploys code from your computer to AWS
-Slsart invoke /starts the test by creating traffic against the sample endpoint
-
+slsart deploy
 ```
+You can go to your AWS account console > CloudFormation, and see AWS stack `serverless-artillery-dev` created there if the command is successful.
 
-After the test is done, you can remove the project from AWS:
-
+### 4. Invoke performance test
+Now you are all set to invoke performance test using following command.
+```
+slsart invoke
+```
+At the end of the test serverless-artillery will generate a report of the test. **Please note that this report is generated only for small load.**
+### 5. Remove serverless-artillery
+After the test is done, you can remove serverless-artillery from AWS using following command.
 ```
 slsart remove
 ```
 
 # Glossary
-- service
-- end point
-- load
-- traffic
+- service/ end point/ target URL
+- load/ traffic/ requests
+- deploy to AWS
 - AWS stack
 - SA script
 - load testing
