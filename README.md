@@ -39,7 +39,7 @@ Serverless-artillery makes it easy to test your services for load and functional
 
 ## Prerequisite
 ### 1. Node JS
-Before installing serverless-artillery, install Node JS (maintenance LTS version+ (v6+)) from https://nodejs.org/en/download/ or with your operating system’s package manager.
+Before installing serverless-artillery, install Node JS from https://nodejs.org/en/download/ or with your operating system’s package manager. You can install the latest LTS version. We support any version higher than maintenance LTS (v6+).
 ### 2. Serverless Framework CLI
 Before installing serverless-artillery, install Serverless Framework CLI (a.k.a. Serverless) (v1.0+). It should be either installed globally or available in the local node_modules. To install globally use the following command.
 ```
@@ -51,6 +51,11 @@ Now you can install serverless-artillery using the following command.
 ```
 npm install -g serverless-artillery
 ```
+To check that the installation succeeded, run:
+```
+slsart --version
+```
+You should see serverless-artillery print its version if the installation has been successful.
 
 ## Problems installing?
 **ASHMITODO:Look into this:** 
@@ -64,7 +69,7 @@ ENV PATH=$PATH:/home/node/.npm-global/bin
 ```
 
 # Uninstallation
-You can uninstall serverless-artillery using the following command.
+When needed, you can uninstall serverless-artillery using the following command.
 ```
 npm uninstall -g serverless-artillery
 ```
