@@ -36,6 +36,7 @@ Serverless-artillery makes it easy to test your services for load and functional
             <li><a href="#setup-for-nordstrom-technology">Setup for Nordstrom Technology</a></li>
             <li><a href="#setup-for-everyone-else">Setup for everyone else</a></li>
         </ul>
+    <li><a href="#run-a-quick-test">Run a quick test</a></li>
     <li><a href="#tutorial">Tutorial</a></li>
 </ul>
 </details>
@@ -85,6 +86,8 @@ npm uninstall -g serverless-artillery
 If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Setup`_** in **Confluence** and follow the instructions there.
 ## Setup for everyone else
 In order to use serverless-artillery, depending on the AWS account environment you're working in, you may need to define `AWS_PROFILE` to declare the AWS credentials to use and possibly `HTTP_PROXY` in order to escape your corporate proxy.  See the [Serverless Framework docs](https://serverless.com/framework/docs/) or the [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for details of how to set your system up for successful deployment, invocation, and removal. 
+
+# Run a quick test
 
 # Tutorial
 Let’s learn by example.
