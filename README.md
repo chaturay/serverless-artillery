@@ -20,8 +20,8 @@ Serverless-artillery makes it easy to test your services for load and functional
         <ul>
             <li><a href="#prerequisite">Prerequisite</a></li>
             <ul>
-                <li><a href="#1-node-js">Node JS</a></li>
-                <li><a href="#2-serverless-framework-cli">Serverless Framework CLI</a></li>
+                <li><a href="#1-node-js">1. Node JS</a></li>
+                <li><a href="#2-serverless-framework-cli">2. Serverless Framework CLI</a></li>
             </ul>
             <li><a href="#installing-serverless-artillery">Installing serverless-artillery</a></li>
             <li><a href="#problems-installing">Problems installing?</a></li>
@@ -37,7 +37,14 @@ Serverless-artillery makes it easy to test your services for load and functional
             <li><a href="#setup-for-everyone-else">Setup for everyone else</a></li>
         </ul>
     <li><a href="#run-a-quick-test">Run a quick test</a></li>
-    <li><a href="#tutorial">Tutorial</a></li>
+    <li><a href="#simple-performance-testing-yutorial">Simple Performance Testing Tutorial</a></li>
+        <ul>
+            <li><a href="#1-create-scriptyml">1. Create script.yml</a></li>
+            <li><a href="#2-understanding-scriptyml">2. Understanding script.yml</a></li>
+            <li><a href="#3-deploy-serverless-artillery">3. Deploy serverless-artillery</a></li>
+            <li><a href="#4-invoke-performance-test">4. Invoke performance test</a></li>
+            <li><a href="#5-remove-serverless-artillery">5. Remove serverless-artillery</a></li>
+        </ul>
 </ul>
 </details>
 
