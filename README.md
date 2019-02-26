@@ -41,9 +41,10 @@ Serverless-artillery makes it easy to test your services for load and functional
         <ul>
             <li><a href="#1-create-scriptyml">1. Create script.yml</a></li>
             <li><a href="#2-understanding-scriptyml">2. Understanding script.yml</a></li>
-            <li><a href="#3-deploy-serverless-artillery">3. Deploy serverless-artillery</a></li>
-            <li><a href="#4-invoke-performance-test">4. Invoke performance test</a></li>
-            <li><a href="#5-remove-serverless-artillery">5. Remove serverless-artillery</a></li>
+            <li><a href="#2-setup-aws-account-credentials">3. Setup AWS account credentials</a></li>
+            <li><a href="#4-deploy-serverless-artillery">4. Deploy serverless-artillery</a></li>
+            <li><a href="#5-invoke-performance-test">5. Invoke performance test</a></li>
+            <li><a href="#6-remove-serverless-artillery">6. Remove serverless-artillery</a></li>
         </ul>
 </ul>
 </details>
@@ -157,22 +158,25 @@ scenarios:
     - which contains one flow
       - which has one [flow action](https://artillery.io/docs/http-reference/#flow-actions) to send [GET request](https://artillery.io/docs/http-reference/#get-post-put-patch-delete-requests) for the specified `target`.
 
-### 3. Deploy serverless-artillery
+### 3. Setup AWS account credentials
+Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding. **It should be running while using any serverless-artillery command that interacts with AWS.**
+
+### 4. Deploy serverless-artillery
 We need to deploy serverless-artillery to you AWS account before we can use it to start our test.
-1. Make sure you have [set up an AWS account and set up your credentials](#before-running-serverless-artillery) before proceeding.
-1. Use the following command to deploy serverless-artillery.
+
+Use the following command to deploy serverless-artillery.
 ```
 slsart deploy
 ```
 You can go to your AWS account console > CloudFormation, and see AWS stack `serverless-artillery-dev` created there if the command is successful.
 
-### 4. Invoke performance test
+### 5. Invoke performance test
 Now you are all set to invoke performance test using following command.
 ```
 slsart invoke
 ```
 At the end of the test serverless-artillery will generate a report of the test. **Please note that this report is generated only for small load.**
-### 5. Remove serverless-artillery
+### 6. Remove serverless-artillery
 After the test is done, you can remove serverless-artillery from AWS using following command.
 ```
 slsart remove
