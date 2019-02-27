@@ -90,14 +90,12 @@ npm uninstall -g serverless-artillery
 ```
 
 # Load generating Lambda function on AWS
-Serverless-artillery deploys and invokes load generating Lambda function on AWS to run the required tests.
+Serverless-artillery generates the requests to run the specified tests using load generating Lambda function called `serverless-artillery-*dev-loadGenerator` that is deployed and invoked on AWS along with other assets.
 
 # Before running serverless-artillery
 **ASHMITODO:Look into this:**
 
-Serverless-artillery needs to deploy assets like load generating Lambda function to AWS, invoke the load generating Lambda function to run the tests and remove these assets from AWS when not needed. Hence you need an AWS account and setup credentials with which to deploy, invoke and remove the assets from AWS.
-
-ASHMI NEXT BELOW
+Serverless-artillery needs to _deploy_ assets like load generating Lambda function `serverless-artillery-*dev-loadGenerator` to AWS, _invoke_ the function to run the tests and _remove_ these assets from AWS when not needed. Hence you need an AWS account and setup credentials with which to deploy, invoke and remove the assets from AWS.
 
 ## Setup for Nordstrom Technology
 If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Setup`_** in **Confluence** and follow the instructions there.
@@ -105,12 +103,13 @@ If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless
 In order to use serverless-artillery, depending on the AWS account environment you're working in, you may need to define `AWS_PROFILE` to declare the AWS credentials to use and possibly `HTTP_PROXY` in order to escape your corporate proxy.  See the [Serverless Framework docs](https://serverless.com/framework/docs/) or [serverless-artillery workshop](https://github.com/Nordstrom/serverless-artillery-workshop)'s [Lesson 0](https://github.com/Nordstrom/serverless-artillery-workshop/tree/master/Lesson0%20-%20Before%20the%20workshop) for details of how to set your system up for successful deployment, invocation, and removal. 
 
 # Run a quick test
-If you want to quickly test your setup or see the tool in action, do the following to quickly run a **small load/performance test**. Don't worry about what these commands do in detail. This document explains them in detail later.
+If you want to quickly test your setup or see serverless-artillery in action, do the following to quickly run a **small load/performance test**. Don't worry about what these commands do in detail. This document explains them in detail later.
 
-1. The following command will deploy serverless-artillery to the AWS account you selected in the [previous step](#before-running-serverless-artillery) with default AWS stack name `serverless-artillery-dev`.
+1. The following command will deploy required assets (like load generating Lambda function) to the AWS account you selected in the [previous step](#before-running-serverless-artillery). By default it uses AWS CloudFormation Stack name `serverless-artillery-dev`.
 ```
 slsart deploy
 ```
+NEXT
 2. The following command will invoke/run serverless-artillery using default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script. At the end of the test serverless-artillery will generate a report of the test. **Please note that this report is generated only for small load.**
 ```
 slsart invoke
