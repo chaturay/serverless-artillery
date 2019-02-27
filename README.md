@@ -50,6 +50,7 @@ Serverless-artillery makes it easy to test your services for load and functional
 </details>
 
 # Installation
+Before you can use serverless-artillery you need to install it on your local machine as follows.
 
 ## Prerequisite
 ### 1. Node JS
@@ -61,7 +62,7 @@ npm install -g serverless
 ```
 
 ## Installing serverless-artillery
-Now you can install serverless-artillery using the following command.
+Now you can install serverless-artillery on your local machine using the following command.
 ```
 npm install -g serverless-artillery
 ```
@@ -83,13 +84,21 @@ ENV PATH=$PATH:/home/node/.npm-global/bin
 ```
 
 # Uninstallation
-When needed, you can uninstall serverless-artillery using the following command.
+When needed, you can uninstall serverless-artillery from you local machine using the following command.
 ```
 npm uninstall -g serverless-artillery
 ```
 
+# Load generating Lambda function on AWS
+Serverless-artillery deploys and invokes load generating Lambda function on AWS to run the required tests.
+
 # Before running serverless-artillery
 **ASHMITODO:Look into this:**
+
+Serverless-artillery needs to deploy assets like load generating Lambda function to AWS, invoke the load generating Lambda function to run the tests and remove these assets from AWS when not needed. Hence you need an AWS account and setup credentials with which to deploy, invoke and remove the assets from AWS.
+
+ASHMI NEXT BELOW
+
 ## Setup for Nordstrom Technology
 If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Setup`_** in **Confluence** and follow the instructions there.
 ## Setup for everyone else
