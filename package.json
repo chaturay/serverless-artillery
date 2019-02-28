@@ -8,6 +8,7 @@
     "slsart": "./bin/serverless-artillery"
   },
   "scripts": {
+    "audit": "npm audit; pushd lib/lambda && npm audit && popd",
     "test": "./node_modules/.bin/nyc ./node_modules/.bin/_mocha -r aws-sdk -r ./lib/lambda/node_modules/artillery-core \"./tests/**/*.spec.js\"",
     "light": "./node_modules/.bin/nyc ./node_modules/.bin/_mocha -r aws-sdk -r ./lib/lambda/node_modules/artillery-core \"./tests/**/!(serverless-artillery|npm).spec.js\"",
     "coverage": "./node_modules/.bin/nyc report --reporter=text-lcov | coveralls",
@@ -36,7 +37,7 @@
   },
   "homepage": "https://github.com/Nordstrom/serverless-artillery#readme",
   "dependencies": {
-    "aws-sdk": "^2.5.0",
+    "aws-sdk": "^2.411.0",
     "bluebird": "^3.4.6",
     "get-stdin": "^5.0.1",
     "js-yaml": "^3.6.1",
@@ -48,16 +49,16 @@
     "chai": "^3.5.0",
     "chai-as-promised": "^7.1.1",
     "coveralls": "^3.0.0",
-    "eslint": "^4.7.2",
+    "eslint": "^4.5.0",
     "eslint-config-airbnb": "^15.1.0",
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-jsx-a11y": "^5.1.1",
     "eslint-plugin-react": "^7.4.0",
-    "mocha": "^3.0.2",
+    "mocha": "^6.0.2",
     "np": "^2.16.0",
-    "nyc": "^11.0.3",
+    "nyc": "^13.3.0",
     "quibble": "^0.5.3",
-    "serverless": "^1.0.3",
+    "serverless": "^1.38.0",
     "sinon": "^4.1.3",
     "sinon-chai": "^2.14.0"
   },

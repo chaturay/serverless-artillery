@@ -1,9 +1,9 @@
 {
   "description": "A load generator function implementation",
   "repository": "n/a",
-  "license": "All rights reserved for deployer.",
+  "license": "Apache-2.0",
   "dependencies": {
     "artillery-core": "^2.0.3-0",
-    "csv-parse": "^1.1.7"
+    "csv-parse": "^1.3.3"
   }
 }
