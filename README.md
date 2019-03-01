@@ -95,7 +95,18 @@ npm uninstall -g serverless-artillery
 ```
 
 # How it works?
-<img src="docs/HowItWorks.jpg">
+<img src="docs/HowItWorks.jpg" width="442">
+
+* Serverless-artillery would be installed and run on your local machine.
+* It would take your JSON or YAML load script (script.yml) that specifies 
+  * test target/URL/endpoint/service, 
+  * load progression,
+  * and the scenarios that are important for your service to test.
+* When you run `slsart deploy`, serverless-artillery would deploy a load generating Lambda function called `serverless-artillery-*dev-loadGenerator` on your AWS account along with other assets.
+* When you run `slsart invoke`, serverless-artillery would invoke the loadGenerator.
+  * It would generate the number of requests as specified in script.yml to specified test target in order to run the specified scenarios.
+* When you run `slsart remove`, serverless-artillery would remove these assets from your AWS account when not needed.
+
 <img src="docs/Architecture.gif">
 
 # Load generating Lambda function on AWS
