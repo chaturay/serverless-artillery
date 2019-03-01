@@ -16,6 +16,7 @@ Serverless-artillery makes it easy to test your services for load and functional
 # Table of Contents
 <details><summary>Click to expand/collapse</summary>
 <ul>
+    <li><a href="#how-it-works">How it works?</a></li>
     <li><a href="#installation">Installation</a></li>
         <ul>
             <li><a href="#installing-on-local-machine">Installing on local machine</a></li>
@@ -55,6 +56,8 @@ Serverless-artillery makes it easy to test your services for load and functional
     <li><a href="#glossary">Glossary</a></li>
 </ul>
 </details>
+
+# How it works?
 
 # Installation
 
