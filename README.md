@@ -37,14 +37,14 @@ Serverless-artillery makes it easy to test your services for load and functional
             <li><a href="#setup-for-everyone-else">Setup for everyone else</a></li>
         </ul>
     <li><a href="#run-a-quick-test">Run a quick test</a></li>
-    <li><a href="#simple-performance-testing-yutorial">Simple Performance Testing Tutorial</a></li>
+    <li><a href="#simple-performance-testing-tutorial">Simple Performance Testing Tutorial</a></li>
         <ul>
             <li><a href="#1-create-scriptyml">1. Create script.yml</a></li>
             <li><a href="#2-understanding-scriptyml">2. Understanding script.yml</a></li>
-            <li><a href="#2-setup-aws-account-credentials">3. Setup AWS account credentials</a></li>
-            <li><a href="#4-deploy-serverless-artillery">4. Deploy serverless-artillery</a></li>
+            <li><a href="#3-setup-aws-account-credentials">3. Setup AWS account credentials</a></li>
+            <li><a href="#4-deploy-assets-to-aws">4. Deploy assets to AWS</a></li>
             <li><a href="#5-invoke-performance-test">5. Invoke performance test</a></li>
-            <li><a href="#6-remove-serverless-artillery">6. Remove serverless-artillery</a></li>
+            <li><a href="#6-remove-assets-from-aws">6. Remove assets from AWS</a></li>
         </ul>
 </ul>
 </details>
@@ -109,12 +109,12 @@ If you want to quickly test your setup or see serverless-artillery in action, do
 ```
 slsart deploy
 ```
-NEXT
-2. The following command will invoke/run serverless-artillery using default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script. At the end of the test serverless-artillery will generate a report of the test. **Please note that this report is generated only for small load.**
+
+2. The following command will invoke load generating Lambda function using default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script. At the end of the test serverless-artillery will generate a report of the test. **Please note that this report is generated only for small load.**
 ```
 slsart invoke
 ```
-3. The following command will removed the default AWS stack deployed in step 1.
+3. The following command will remove the AWS CloudFormation Stack deployed in step 1.
 ```
 slsart remove
 ```
@@ -125,7 +125,7 @@ Let’s learn by example.
 Throughout this tutorial we will walk you towards performance testing the AWS website, https://aws.amazon.com/.
 
 ### 1. Create script.yml
-Serverless-artillery needs to know information about the performance test that user wants to perform. It needs information like, the target URL of the service that user wants to test, load progression, user's interaction with the service etc. All these are described in a `script.yml` file. It is the same `script.yml` that Artillery.io uses. 
+Serverless-artillery needs to know information about the performance test that user wants to run. It needs information like, the target URL of the service that user wants to test, load progression, user's interaction with the service etc. All these are described in a `script.yml` file. It is the same `script.yml` that Artillery.io uses. 
 - **Please see [here for basic concepts for Artillery.io usage](https://artillery.io/docs/basic-concepts/#basic-concepts).**
 - **Please see [here for Artillery.io's test script reference](https://artillery.io/docs/script-reference/).**
 
@@ -169,10 +169,10 @@ scenarios:
 ### 3. Setup AWS account credentials
 Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding. **It should be running while using any serverless-artillery command that interacts with AWS.**
 
-### 4. Deploy serverless-artillery
-We need to deploy serverless-artillery to you AWS account before we can use it to start our test.
+### 4. Deploy assets to AWS
+We need to deploy assets (like load generating Lambda) to your AWS account before we can use it to start our test.
 
-Use the following command to deploy serverless-artillery.
+Use the following command to deploy the assets.
 ```
 slsart deploy
 ```
@@ -185,10 +185,10 @@ slsart invoke
 ```
 At the end of the test serverless-artillery will generate a report of the test. **Please note that this report is generated only for small load.**
 
-**NOTE** that for performance testing, the command will take the `script.yml` from your local machine (and not the one deployed in AWS account) to run the performance test. Hence if you edit it on your local machine after deploying serverless-artillery to AWS, you don't need to deploy again in order to run the performance test again. Also note that this is true only for performance test and acceptance test and not monitoring.
+**NOTE** that for performance testing, the command will take the `script.yml` from your local machine (and not the one deployed in AWS account) to run the performance test. Hence if you edit it on your local machine after deploying assets to AWS, you don't need to deploy again in order to run the performance test again. Also note that this is true only for performance test and acceptance test and not monitoring.
 
-### 6. Remove serverless-artillery
-After the test is done, you can remove serverless-artillery from AWS using following command.
+### 6. Remove assets from AWS
+After the test is done, you can remove the assets from AWS using following command.
 ```
 slsart remove
 ```
