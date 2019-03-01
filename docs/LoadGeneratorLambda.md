@@ -9,9 +9,10 @@
 - It generates specified load, and measures and reports the resulting latency and return codes. 
 
 ## Load generating Lambda
-<img src="docs/Architecture.gif">
 
-- Serverless-artillery generates the requests to run the specified tests using load generating Lambda function named `serverless-artillery-*dev-loadGenerator` that is deployed and invoked on AWS along with other assets.
+<img src="Architecture.gif">
+
+- Serverless-artillery generates the requests to run the specified tests using load generating Lambda function named `serverless-artillery-<optional-unique-string-><stage default:dev>-loadGenerator` that is deployed and invoked on AWS along with other assets.
 - It has an ephimeral architecture. It only exists as long as you need it.
 - It runs Artillery.io node package in AWS Lambda function.
   - Each lambda function can only generate a certain amount of load, and can only run for up to five minutes (five minutes is a built-in limitation of AWS Lambda) (now 15 minutes). 
