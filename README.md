@@ -105,20 +105,20 @@ npm uninstall -g serverless-artillery
   * test target/URL/endpoint/service, 
   * load progression,
   * and the scenarios that are important for your service to test.
-* When you run `slsart deploy`, serverless-artillery would deploy a **load generating Lambda function called `serverless-artillery-*dev-loadGenerator`** on your AWS account along with other assets.
+* When you run `slsart deploy`, serverless-artillery would deploy a **load generating Lambda function called `serverless-artillery-<optional-unique-string-><stage default:dev>-loadGenerator`** on your AWS account along with other assets.
 * When you run `slsart invoke`, serverless-artillery would invoke the function.
   * It would generate the number of requests as specified in script.yml to specified test target in order to run the specified scenarios.
-* When you run `slsart remove`, serverless-artillery would remove these assets from your AWS account when not needed.
+* When you run `slsart remove`, serverless-artillery would remove these assets from your AWS account.
 
 ## Load generating Lambda function on AWS
-Serverless-artillery generates the requests to run the specified tests using load generating Lambda function called `serverless-artillery-*dev-loadGenerator` that is deployed and invoked on AWS along with other assets.
+Serverless-artillery generates the requests to run the specified tests using load generating Lambda function called `serverless-artillery-<optional-unique-string-><stage default:dev>-loadGenerator` that is deployed and invoked on AWS along with other assets.
 
 If you want to learn more about how it works you can view the document [here](docs/LoadGeneratorLambda.md)
 
 # Before running serverless-artillery
 **ASHMITODO:Look into this:**
 
-Serverless-artillery needs to _deploy_ assets like load generating Lambda function `serverless-artillery-*dev-loadGenerator` to AWS, _invoke_ the function to run the tests and _remove_ these assets from AWS when not needed. Hence you need an AWS account and setup credentials with which to deploy, invoke and remove the assets from AWS.
+Serverless-artillery needs to _deploy_ assets like [load generating Lambda function](docs/LoadGeneratorLambda.md) to AWS, _invoke_ the function to run the tests and _remove_ these assets from AWS when not needed. Hence you need an AWS account and setup credentials with which to deploy, invoke and remove the assets from AWS.
 
 ## Setup for Nordstrom Technology
 If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Setup`_** in **Confluence** and follow the instructions there.
