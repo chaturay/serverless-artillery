@@ -16,7 +16,6 @@ Serverless-artillery makes it easy to test your services for load and functional
 # Table of Contents
 <details><summary>Click to expand/collapse</summary>
 <ul>
-    <li><a href="#how-it-works">How it works?</a></li>
     <li><a href="#installation">Installation</a></li>
         <ul>
             <li><a href="#installing-on-local-machine">Installing on local machine</a></li>
@@ -31,6 +30,7 @@ Serverless-artillery makes it easy to test your services for load and functional
             <li><a href="#installing-in-docker">Installing in Docker</a></li>
         </ul>
     <li><a href="#uninstallation">Uninstallation</a></li>
+    <li><a href="#how-it-works">How it works?</a></li>
     <li><a href="#before-running-serverless-artillery">Before running serverless-artillery</a></li>
         <ul>
             <li><a href="#setup-for-nordstrom-technology">Setup for Nordstrom Technology</a></li>
@@ -56,8 +56,6 @@ Serverless-artillery makes it easy to test your services for load and functional
     <li><a href="#glossary">Glossary</a></li>
 </ul>
 </details>
-
-# How it works?
 
 # Installation
 
@@ -95,6 +93,10 @@ When needed, you can uninstall serverless-artillery from you local machine using
 ```
 npm uninstall -g serverless-artillery
 ```
+
+# How it works?
+<img src="docs/HowItWorks.jpg" width="400">
+<img src="docs/Architecture.gif">
 
 # Load generating Lambda function on AWS
 Serverless-artillery generates the requests to run the specified tests using load generating Lambda function called `serverless-artillery-*dev-loadGenerator` that is deployed and invoked on AWS along with other assets.
