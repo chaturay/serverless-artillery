@@ -95,7 +95,7 @@ npm uninstall -g serverless-artillery
 ```
 
 # How it works?
-<img src="docs/HowItWorks.jpg" width="400">
+<img src="docs/HowItWorks.jpg">
 <img src="docs/Architecture.gif">
 
 # Load generating Lambda function on AWS
