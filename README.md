@@ -31,6 +31,9 @@ Serverless-artillery makes it easy to test your services for load and functional
         </ul>
     <li><a href="#uninstallation">Uninstallation</a></li>
     <li><a href="#how-it-works">How it works?</a></li>
+        <ul>
+            <li><a href="#load-generating-lambda-function-on-aws">Load generating Lambda function on AWS</a></li>
+        </ul>
     <li><a href="#before-running-serverless-artillery">Before running serverless-artillery</a></li>
         <ul>
             <li><a href="#setup-for-nordstrom-technology">Setup for Nordstrom Technology</a></li>
@@ -102,15 +105,30 @@ npm uninstall -g serverless-artillery
   * test target/URL/endpoint/service, 
   * load progression,
   * and the scenarios that are important for your service to test.
-* When you run `slsart deploy`, serverless-artillery would deploy a load generating Lambda function called `serverless-artillery-*dev-loadGenerator` on your AWS account along with other assets.
-* When you run `slsart invoke`, serverless-artillery would invoke the loadGenerator.
+* When you run `slsart deploy`, serverless-artillery would deploy a **load generating Lambda function called `serverless-artillery-*dev-loadGenerator`** on your AWS account along with other assets.
+* When you run `slsart invoke`, serverless-artillery would invoke the function.
   * It would generate the number of requests as specified in script.yml to specified test target in order to run the specified scenarios.
 * When you run `slsart remove`, serverless-artillery would remove these assets from your AWS account when not needed.
 
 <img src="docs/Architecture.gif">
 
-# Load generating Lambda function on AWS
-Serverless-artillery generates the requests to run the specified tests using load generating Lambda function called `serverless-artillery-*dev-loadGenerator` that is deployed and invoked on AWS along with other assets.
+## Load generating Lambda function on AWS
+
+
+<img src="docs/Architecture.gif">
+
+
+- Serverless-artillery generates the requests to run the specified tests using load generating Lambda function called `serverless-artillery-*dev-loadGenerator` that is deployed and invoked on AWS along with other assets.
+- has an ephimeral architecture. It only exists as long as you need it.
+- It runs Artillery.io node package in AWS Lambda function.
+  - Each lambda function can only generate a certain amount of load, and can only run for up to five minutes (five minutes is a built-in limitation of AWS Lambda) (now 15 minutes). 
+  - Given these limitations, it is often necessary to invoke more lambdas - both to scale horizontally as well as handing off the work to a new generation of lambdas before their run-time has expired.
+- Above diagram shows how Serverless Artillery solves this problem.
+  - It first runs the Lamdba function in a **control** mode. It examines the submitted load config JSON/YAML script (this is identical to the original “servered” (artillery.io)[https://artillery.io/] script). If the load exceeds what a single lambda is configured to handle, then the load config is chopped up into workloads achievable by a single lambda. 
+  - Control lambda then invokes as many **worker** lambdas as necessary to generate the load. 
+  - Towards the end of the five-minute runtime the controller lambda invokes a new controller lambda to produce load for the remaining duration.
+- The result of the load test can be reported to CloudWatch, InfluxDB or Datadog through plugins and then visualized with CloudWatch, Grafana or Datadog dashboard.
+
 
 # Before running serverless-artillery
 **ASHMITODO:Look into this:**
