@@ -18,17 +18,16 @@ Serverless-artillery makes it easy to test your services for load and functional
 <ul>
     <li><a href="#installation">Installation</a></li>
         <ul>
-            <li><a href="#prerequisite">Prerequisite</a></li>
+            <li><a href="#installing-on-local-machine">Installing on local machine</a></li>
             <ul>
-                <li><a href="#1-node-js">1. Node JS</a></li>
-                <li><a href="#2-serverless-framework-cli">2. Serverless Framework CLI</a></li>
+                <li><a href="#prerequisite">Prerequisite</a></li>
+                <ul>
+                    <li><a href="#1-node-js">1. Node JS</a></li>
+                    <li><a href="#2-serverless-framework-cli">2. Serverless Framework CLI</a></li>
+                </ul>
+                <li><a href="#installing-serverless-artillery">Installing serverless-artillery</a></li>
             </ul>
-            <li><a href="#installing-serverless-artillery">Installing serverless-artillery</a></li>
-            <li><a href="#problems-installing">Problems installing?</a></li>
-            <ul>
-                <li><a href="#error-npm-err-code-eacces">Error: npm ERR! code EACCES</a></li>
-                <li><a href="#installing-in-docker">Installing in Docker?</a></li>
-            </ul>
+            <li><a href="#installing-in-docker">Installing in Docker</a></li>
         </ul>
     <li><a href="#uninstallation">Uninstallation</a></li>
     <li><a href="#before-running-serverless-artillery">Before running serverless-artillery</a></li>
@@ -46,22 +45,31 @@ Serverless-artillery makes it easy to test your services for load and functional
             <li><a href="#5-invoke-performance-test">5. Invoke performance test</a></li>
             <li><a href="#6-remove-assets-from-aws">6. Remove assets from AWS</a></li>
         </ul>
+    <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <ul>
+            <li><a href="#problems-installing">Problems installing?</a></li>
+            <ul>
+                <li><a href="#error-npm-err-code-eacces">Error: npm ERR! code EACCES</a></li>
+            </ul>
+        </ul>
+    <li><a href="#glossary">Glossary</a></li>
 </ul>
 </details>
 
 # Installation
-Before you can use serverless-artillery you need to install it on your local machine as follows.
 
-## Prerequisite
-### 1. Node JS
+## Installing on local machine
+You can install serverless-artillery on your local machine as follows.
+### Prerequisite
+#### 1. Node JS
 Before installing serverless-artillery, install Node JS from https://nodejs.org/en/download/ or with your operating system’s package manager. You can install the latest LTS version. We support any version higher than maintenance LTS (v6+).
-### 2. Serverless Framework CLI
+#### 2. Serverless Framework CLI
 Before installing serverless-artillery, install Serverless Framework CLI (a.k.a. Serverless) (v1.0+). It should be either installed globally or available in the local node_modules. To install globally use the following command.
 ```
 npm install -g serverless
 ```
 
-## Installing serverless-artillery
+### Installing serverless-artillery
 Now you can install serverless-artillery on your local machine using the following command.
 ```
 npm install -g serverless-artillery
@@ -72,12 +80,8 @@ slsart --version
 ```
 You should see serverless-artillery print its version if the installation has been successful.
 
-## Problems installing?
-**ASHMITODO:Look into this:**
-### Error: npm ERR! code EACCES
-If you are installing into a node_modules owned by root and getting error `npm ERR! code EACCES`, [read this](root-owns-node-modules.md).
-### Installing in Docker?
-Post installation causes permission issues when installing in a Docker image. To successfully install in Docker make sure to add the following to your Dockerfile before the serverless and serverless-artillery install. Refer to the [example Dockerfile](Dockerfile).
+## Installing in Docker
+If you prefer using Docker, refer to [example Dockerfile](Dockerfile) for installation. Please note that, post installation causes permission issues when installing in a Docker image. To successfully install in Docker make sure to add the following to your Dockerfile before the serverless and serverless-artillery install.
 ```
 ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
 ENV PATH=$PATH:/home/node/.npm-global/bin
@@ -192,6 +196,12 @@ After the test is done, you can remove the assets from AWS using following comma
 ```
 slsart remove
 ```
+
+# Troubleshooting
+### Problems installing?
+**ASHMITODO:Look into this:**
+#### Error: npm ERR! code EACCES
+If you are installing into a node_modules owned by root and getting error `npm ERR! code EACCES`, [read this](root-owns-node-modules.md).
 
 # Glossary
 - service/ end point/ target URL
