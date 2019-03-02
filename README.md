@@ -113,7 +113,7 @@ npm uninstall -g serverless-artillery
 ## Load generating Lambda function on AWS
 Serverless-artillery generates the requests to run the specified tests using load generating Lambda function called `serverless-artillery-<optional-unique-string-><stage default:dev>-loadGenerator` that is deployed and invoked on AWS along with other assets.
 
-**If you want to learn more about how it works you can view the document [here](docs/LoadGeneratorLambda.md)**
+**If you want to learn more about how it works you can view the document [here](docs/LoadGeneratorLambda.md).**
 
 # Before running serverless-artillery
 **ASHMITODO:Look into this:**
