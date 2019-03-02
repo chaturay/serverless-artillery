@@ -128,16 +128,15 @@ In order to use serverless-artillery, depending on the AWS account environment y
 # Run a quick test
 If you want to quickly test your setup or see serverless-artillery in action, do the following to quickly run a **small load/performance test**. Don't worry about what these commands do in detail. This document explains them in detail later.
 
-1. The following command will deploy required assets (like load generating Lambda function) to the AWS account you selected in the [previous step](#before-running-serverless-artillery). By default it uses AWS CloudFormation Stack name `serverless-artillery-dev`.
+1. The following command will deploy required assets (like [load generating Lambda function](docs/LoadGeneratorLambda.md)) to the AWS account you selected in the [previous step](#before-running-serverless-artillery). By default it uses AWS CloudFormation Stack name `serverless-artillery-dev`.
 ```
 slsart deploy
 ```
-
-2. The following command will invoke load generating Lambda function using default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script. At the end of the test serverless-artillery will generate a report of the test. **Please note that this report is generated only for small load.**
+2. The following command will invoke [load generating Lambda function](docs/LoadGeneratorLambda.md) using default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script. At the end of the test serverless-artillery will generate a report of the test. **Please note that this report is generated only for small load.**
 ```
 slsart invoke
 ```
-3. The following command will remove the AWS CloudFormation Stack deployed in step 1.
+3. The following command will remove the AWS CloudFormation Stack deployed in step 1. If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Remove Instructions`_** in **Confluence** and follow the instructions there.
 ```
 slsart remove
 ```
@@ -148,7 +147,7 @@ Let’s learn by example.
 Throughout this tutorial we will walk you towards performance testing the AWS website, https://aws.amazon.com/.
 
 ### 1. Create script.yml
-Serverless-artillery needs to know information about the performance test that user wants to run. It needs information like, the target URL of the service that user wants to test, load progression, user's interaction with the service etc. All these are described in a `script.yml` file. It is the same `script.yml` that Artillery.io uses. 
+Serverless-artillery needs to know information about the performance test that user wants to run. It needs information like, the target URL of the service that user wants to test, load progression, user's interaction with the service (scenarios) etc. All these are described in a `script.yml` file. It is the same `script.yml` that Artillery.io uses. 
 - **Please see [here for basic concepts for Artillery.io usage](https://artillery.io/docs/basic-concepts/#basic-concepts).**
 - **Please see [here for Artillery.io's test script reference](https://artillery.io/docs/script-reference/).**
 
@@ -193,7 +192,7 @@ scenarios:
 Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding. **It should be running while using any serverless-artillery command that interacts with AWS.**
 
 ### 4. Deploy assets to AWS
-We need to deploy assets (like load generating Lambda) to your AWS account before we can use it to start our test.
+We need to deploy assets (like [load generating Lambda function](docs/LoadGeneratorLambda.md)) to your AWS account before we can use it to start our test.
 
 Use the following command to deploy the assets.
 ```
@@ -211,7 +210,7 @@ At the end of the test serverless-artillery will generate a report of the test. 
 **NOTE** that for performance testing, the command will take the `script.yml` from your local machine (and not the one deployed in AWS account) to run the performance test. Hence if you edit it on your local machine after deploying assets to AWS, you don't need to deploy again in order to run the performance test again. Also note that this is true only for performance test and acceptance test and not monitoring.
 
 ### 6. Remove assets from AWS
-After the test is done, you can remove the assets from AWS using following command.
+After the test is done, you can remove the assets from AWS using following command. If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Remove Instructions`_** in **Confluence** and follow the instructions there.
 ```
 slsart remove
 ```
