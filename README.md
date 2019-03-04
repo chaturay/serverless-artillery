@@ -18,61 +18,45 @@ Serverless-artillery makes it easy to test your services for load and functional
 <p>
 
 - [Installation](#installation)
-  - [Prerequisite](#prerequisite)
+  - [Installing on local machine](#installing-on-local-machine)
+    - [Prerequisite](#prerequisite)
+      - [1. Node JS](#1-node-js)
+      - [2. Serverless Framework CLI](#2-serverless-framework-cli)
+    - [Installing serverless-artillery](#installing-serverless-artillery)
+  - [Installing in Docker](installing-in-docker)
+- [Uninstallation](#uninstallation)
+- [How it works?](#how-it-works)
+  - [Load generating Lambda function on AWS](#load-generating-lambda-function-on-aws)
+- [Before running serverless-artillery](#before-running-serverless-artillery)
+  - [Setup for Nordstrom Technology](#setup-for-nordstrom-technology)
+  - [Setup for everyone else](#setup-for-everyone-else)
+- [Tutorial 1: Run a quick performance test](#tutorial-1-run-a-quick-performance-test)
+  - [T1.1. Deploy](#t11-deploy)
+  - [T1.2. Invoke](#t12-invoke)
+  - [T1.3. Remove](#t13-remove)
+- [Tutorial 2: Performance test with custom script](#tutorial-2-performance-test-with-custom-script)
+  - [T2.1. Create script.yml](#t21-create-scriptyml)
+  - [T2.2. Understanding script.yml](#t22-understanding-scriptyml)
+  - [T2.3. Setup AWS account credentials](#t23-setup-aws-account-credentials)
+  - [T2.4. Deploy assets to AWS](#t24-deploy-assets-to-aws)
+  - [T2.5. Invoke performance test](#t25-invoke-performance-test)
+  - [T2.6. Remove assets from AWS](#t26-remove-assets-from-aws)
+- [Tutorial 3: Performance test with custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets)
+  - [T3.1. Create script.yml](#t31-create-scriptyml)
+  - [T3.2. Understanding script.yml](#t32-understanding-scriptyml)
+  - [T3.3. Create custom deployment assets](#t33-create-custom-deployment-assets)
+  - [T3.4 Understanding serverless.yml](#t34-understanding-serverlessyml)
+- [Troubleshooting](#troubleshooting)
+  - [Problems installing?](#problems-installing)
+  - [Error: npm ERR! code EACCES](#error-npm-err-code-eacces)
+- [Glossary](#glossary)
+  - []()
+  - []()
+  - []()
+  - []()
+  - []()
 
 </p>
-</details>
-
-<details><summary>Click to expand/collapse</summary>
-<ul>
-    <li><a href="#installation">Installation</a></li>
-        <ul>
-            <li><a href="#installing-on-local-machine">Installing on local machine</a></li>
-            <ul>
-                <li><a href="#prerequisite">Prerequisite</a></li>
-                <ul>
-                    <li><a href="#1-node-js">1. Node JS</a></li>
-                    <li><a href="#2-serverless-framework-cli">2. Serverless Framework CLI</a></li>
-                </ul>
-                <li><a href="#installing-serverless-artillery">Installing serverless-artillery</a></li>
-            </ul>
-            <li><a href="#installing-in-docker">Installing in Docker</a></li>
-        </ul>
-    <li><a href="#uninstallation">Uninstallation</a></li>
-    <li><a href="#how-it-works">How it works?</a></li>
-        <ul>
-            <li><a href="#load-generating-lambda-function-on-aws">Load generating Lambda function on AWS</a></li>
-        </ul>
-    <li><a href="#before-running-serverless-artillery">Before running serverless-artillery</a></li>
-        <ul>
-            <li><a href="#setup-for-nordstrom-technology">Setup for Nordstrom Technology</a></li>
-            <li><a href="#setup-for-everyone-else">Setup for everyone else</a></li>
-        </ul>
-    <li><a href="#tutorial-1-run-a-quick-performance-test">Tutorial 1: Run a quick performance test</a></li>
-        <ul>
-            <li><a href="#t11-deploy">T1.1. Deploy</a></li>
-            <li><a href="#t12-invoke">T1.2. Invoke</a></li>
-            <li><a href="#t13-remove">T1.3. Remove</a></li>
-        </ul>  
-    <li><a href="#tutorial-2-performance-test-with-custom-script">Tutorial 2: Performance test with custom script</a></li>
-        <ul>
-            <li><a href="#t21-create-scriptyml">T2.1. Create script.yml</a></li>
-            <li><a href="#t22-understanding-scriptyml">T2.2. Understanding script.yml</a></li>
-            <li><a href="#t23-setup-aws-account-credentials">T2.3. Setup AWS account credentials</a></li>
-            <li><a href="#t24-deploy-assets-to-aws">T2.4. Deploy assets to AWS</a></li>
-            <li><a href="#t25-invoke-performance-test">T2.5. Invoke performance test</a></li>
-            <li><a href="#t26-remove-assets-from-aws">T2.6. Remove assets from AWS</a></li>
-        </ul>
-    <li><a href="#tutorial-3-performance-test-with-custom-deployment-assets">Tutorial 3: Performance test with custom deployment assets</a></li>
-    <li><a href="#troubleshooting">Troubleshooting</a></li>
-        <ul>
-            <li><a href="#problems-installing">Problems installing?</a></li>
-            <ul>
-                <li><a href="#error-npm-err-code-eacces">Error: npm ERR! code EACCES</a></li>
-            </ul>
-        </ul>
-    <li><a href="#glossary">Glossary</a></li>
-</ul>
 </details>
 
 # Installation
