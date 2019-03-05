@@ -185,7 +185,7 @@ Let’s learn by example.
 
 Throughout this tutorial we will walk you towards performance testing the AWS website, https://aws.amazon.com/.
 
-We would test with our custom script but would use default project assets.
+We would test with our custom script but would use default deployment assets.
 
 **Start by creating a new directory for this tutorial and go to that directory in command line.**
 
@@ -479,9 +479,6 @@ If you used CloudWatch plugin you will be able to view the metrics on the CloudW
 
 ### T3.9. Remove assets from AWS
 This section is same as before. See [here](#t27-remove-assets-from-aws) for details.
-
-ASHMI NEXT
-- change language everywhere to say 'custom deployment assets' instead of 'custom project'
 
 # Troubleshooting
 ### Problems installing?
