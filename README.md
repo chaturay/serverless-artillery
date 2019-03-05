@@ -433,13 +433,26 @@ The Serverless framework automatically names the Lambda function based on the se
 
 ### T3.6. Customizing serverless.yml
 This step is optional in the tutorial. If you like you can customize serverless.yml as follows.
+
 #### Service name
 - You can change `service` name to some other unique string as per your need like `serverless-artillery-<unique-string>`. This will be the AWS CloudFormation stack name when you run `slsart deploy`.
+
 #### Plugins
 You can customize the serverless.yml to use required tools/plugins mentioned [below](#addlink)**ASHMITODO**. 
 
 In this tutorial you can add [artillery-plugin-cloudwatch](https://github.com/Nordstrom/artillery-plugin-cloudwatch) to record test results to AWS CloudWatch.
-1. In serverless.yml, under the following section (already exists)
+1. To allow the Lambda code to write to CloudWatch, the correct NPM package dependency must be added. This modifies the package.json file to include the necessary dependency.
+```
+npm install --save artillery-plugin-cloudwatch
+```
+2. Update the config portion of `script.yml` to add CloudWatch plugin from the example below:
+```
+config:
+  plugins:
+    cloudwatch:
+      namespace: "<cloud-watch-namespace-example-serverless-artillery-XnBa473psJ-loadtest>"
+```
+3. In serverless.yml, under the following section (already exists)
 ```
 provider:
   iamRoleStatements:
@@ -452,10 +465,7 @@ add the following
       Resource:
         - '*'
 ```
-2. Install the plugin by running the following command
-```
-npm install --save artillery-plugin-cloudwatch
-```
+
 #### Customization for Nordstrom Engineers
 If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Policies`_** in **Confluence** and follow the instructions there.
 
@@ -464,6 +474,8 @@ This section is same as before. See [here](#t25-deploy-assets-to-aws) for detail
 
 ### T3.8. Invoke performance test
 This section is same as before. See [here](#t26-invoke-performance-test) for details.
+
+If you used CloudWatch plugin you will be able to view the metrics on the CloudWatch dashboard. You can learn more about using CloudWatch dashboard [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html). **Note that it can take few minutes for the data to propogate to CloudWatch.**
 
 ### T3.9. Remove assets from AWS
 This section is same as before. See [here](#t27-remove-assets-from-aws) for details.
