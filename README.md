@@ -62,7 +62,7 @@ Serverless-artillery makes it easy to test your services for load and functional
   - [T3.9. Deploy assets to AWS](#t39-deploy-assets-to-aws)
   - [T3.10. Invoke performance test](#t310-invoke-performance-test)
   - [T3.11. Remove assets from AWS](#t311-remove-assets-from-aws)
-- [Advanced command to create customized `script.yml`](#advanced-command-to-create-customized-scriptyml)
+- [Create customized `script.yml`](#create-customized-scriptyml)
 - [Performance test workshop](#performance-test-workshop)
 - [Troubleshooting](#troubleshooting)
   - [Problems installing?](#problems-installing)
@@ -498,7 +498,7 @@ If you used CloudWatch plugin you will be able to view the metrics on the CloudW
 ### T3.11. Remove assets from AWS
 This section is same as before. See [here](#t28-remove-assets-from-aws) for details.
 
-# Advanced command to create customized `script.yml`
+# Create customized `script.yml`
 Above you used how to use `slsart script` to create the default `script.yml` ([here](#t22-create-scriptyml)) and how to customize it by manually editing it ([here](#t24-customizing-scriptyml)).
 
 `slsart script` command has options to do the above in one command. You can run following command to create custom `script.yml` with **one** load `phase`.
