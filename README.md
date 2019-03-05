@@ -166,8 +166,8 @@ In order to use serverless-artillery, depending on the AWS account environment y
 # Tutorial 1: Run a quick performance test
 If you want to quickly test your setup or see serverless-artillery in action, do the following to quickly run a **small load/performance test**. Don't worry about what these commands do in detail. This document explains them in detail later.
 
-### T1.1. Setup AWS account environment
-If you haven't already, follow the instruction mentioned [here](#before-running-serverless-artillery) to setup AWS account environment.
+### T1.1. Setup AWS account credentials
+Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding. **It should be running while using any serverless-artillery command that interacts with AWS.**
 
 ### T1.2. Deploy
 The following command will deploy required assets (like [load generating Lambda function](docs/LoadGeneratorLambda.md)) to the AWS account you selected in the previous step.
@@ -175,12 +175,14 @@ The following command will deploy required assets (like [load generating Lambda 
 slsart deploy
 ```
 By default it uses AWS CloudFormation Stack name `serverless-artillery-dev`. You will see the stack created if you go to your AWS account console > CloudFormation.
+
 ### T1.3. Invoke
 The following command will invoke [load generating Lambda function](docs/LoadGeneratorLambda.md) using default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script.
 ```
 slsart invoke
 ```
 At the end of the test serverless-artillery will generate a report of the test. **Please note that this report is generated only for small load.**
+
 ### T1.4. Remove
 The following command will remove the AWS CloudFormation Stack deployed in step 1. If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Remove Instructions`_** in **Confluence** and follow the instructions there.
 ```
@@ -286,7 +288,7 @@ We would test with our custom script and custom deployment assets.
 Start by creating a new directory for this tutorial and go to that directory in command line.
 
 ### T3.2. Create `script.yml`
-This section is same as before. See [here](#t21-create-scriptyml) for details.
+This section is same as before. See [here](#t22-create-scriptyml) for details.
 
 Run the following command to create the initial `script.yml` file.
 ```
@@ -294,10 +296,10 @@ slsart script
 ```
 
 ### T3.3. Understanding `script.yml`
-This section is same as before. See [here](#t22-understanding-scriptyml) for details.
+This section is same as before. See [here](#t23-understanding-scriptyml) for details.
 
 ### T3.4. Customizing `script.yml`
-This section is same as before. See [here](#t23-customizing-script.yml) for details.
+This section is same as before. See [here](#t24-customizing-script.yml) for details.
 
 ### T3.5. Create custom deployment assets
 Create a local copy of the deployment assets for customization and deployment using following command.
@@ -476,16 +478,19 @@ add the following
 #### Customization for Nordstrom Engineers
 If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Policies`_** in **Confluence** and follow the instructions there.
 
-### T3.8. Deploy assets to AWS
-This section is same as before. See [here](#t25-deploy-assets-to-aws) for details.
+### T3.8. Setup AWS account credentials
+Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding. **It should be running while using any serverless-artillery command that interacts with AWS.**
 
-### T3.9. Invoke performance test
-This section is same as before. See [here](#t26-invoke-performance-test) for details.
+### T3.9. Deploy assets to AWS
+This section is same as before. See [here](#t26-deploy-assets-to-aws) for details.
+
+### T3.10. Invoke performance test
+This section is same as before. See [here](#t27-invoke-performance-test) for details.
 
 If you used CloudWatch plugin you will be able to view the metrics on the CloudWatch dashboard. You can learn more about using CloudWatch dashboard [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html). **Note that it can take few minutes for the data to propogate to CloudWatch.**
 
-### T3.10. Remove assets from AWS
-This section is same as before. See [here](#t27-remove-assets-from-aws) for details.
+### T3.11. Remove assets from AWS
+This section is same as before. See [here](#t28-remove-assets-from-aws) for details.
 
 # Troubleshooting
 ### Problems installing?
