@@ -314,7 +314,7 @@ slsart configure
 ```
 The important files among other files created by this command are as follows.
 
-|file|description|
+|File|Description|
 |:----|:----------|
 |`package.json`|Node.js dependencies for the load generator Lambda. Add Artillery.io plugins you want to use here.|
 |`serverless.yml`|Serverless service definition. Change AWS-specific settings here.|
@@ -533,9 +533,17 @@ For more options see,
 slsart invoke --help
 ```
 
+## Related tools and plugins
+|Plugin|Description|
+|:----|:----------|
+|[artillery-plugin-aws-sigv4](https://github.com/Nordstrom/artillery-plugin-aws-sigv4)|for testing against an authenticated AWS API Gateway endpoint.|
+|[artillery-plugin-influxdb](https://github.com/Nordstrom/artillery-plugin-influxdb)|to record test results to InfluxDB.|
+|[artillery-plugin-cloudwatch](https://github.com/Nordstrom/artillery-plugin-cloudwatch)|to record test results to AWS CloudWatch.|
+|[artillery-plugin-datadog](https://www.npmjs.com/package/artillery-plugin-datadog)|to record test results to DataDog.|
+|[serverless-attach-managed-policy](https://www.npmjs.com/package/serverless-attach-managed-policy)|if you have automatic IAM role modification in your corporate/shared AWS account.|
+
 # Performance test workshop
 We've created a workshop detailing end-to-end usage of serverless-artillery for performance testing. Check out our conference-style [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for step by step lessons on how to set your system up for successful deployment, invocation, and removal.
-
 
 # Troubleshooting
 ### Problems installing?
