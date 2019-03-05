@@ -37,15 +37,17 @@ Serverless-artillery makes it easy to test your services for load and functional
 - [Tutorial 2: Performance test with custom script](#tutorial-2-performance-test-with-custom-script)
   - [T2.1. Create script.yml](#t21-create-scriptyml)
   - [T2.2. Understanding script.yml](#t22-understanding-scriptyml)
-  - [T2.3. Setup AWS account credentials](#t23-setup-aws-account-credentials)
-  - [T2.4. Deploy assets to AWS](#t24-deploy-assets-to-aws)
-  - [T2.5. Invoke performance test](#t25-invoke-performance-test)
-  - [T2.6. Remove assets from AWS](#t26-remove-assets-from-aws)
+  - [T2.3. Customizing script.yml](#t23-customizing-script.yml)
+  - [T2.4. Setup AWS account credentials](#t24-setup-aws-account-credentials)
+  - [T2.5. Deploy assets to AWS](#t25-deploy-assets-to-aws)
+  - [T2.6. Invoke performance test](#t26-invoke-performance-test)
+  - [T2.7. Remove assets from AWS](#t27-remove-assets-from-aws)
 - [Tutorial 3: Performance test with custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets)
   - [T3.1. Create script.yml](#t31-create-scriptyml)
   - [T3.2. Understanding script.yml](#t32-understanding-scriptyml)
-  - [T3.3. Create custom deployment assets](#t33-create-custom-deployment-assets)
-  - [T3.4 Understanding serverless.yml](#t34-understanding-serverlessyml)
+  - [T3.3. Customizing script.yml](#t33-customizing-script.yml)
+  - [T3.4. Create custom deployment assets](#t34-create-custom-deployment-assets)
+  - [T3.5. Understanding serverless.yml](#t35-understanding-serverlessyml)
 - [Troubleshooting](#troubleshooting)
   - [Problems installing?](#problems-installing)
   - [Error: npm ERR! code EACCES](#error-npm-err-code-eacces)
@@ -175,7 +177,7 @@ Throughout this tutorial we will walk you towards performance testing the AWS we
 
 We would test with our custom script but would use default project assets.
 
-Start by creating a new directory for this tutorial and go to that directory from command line.
+**Start by creating a new directory for this tutorial and go to that directory in command line.**
 
 ### T2.1. Create script.yml
 Serverless-artillery needs to know information about the performance test that user wants to run. It needs information like, the target URL of the service that user wants to test, load progression, user's interaction with the service (scenarios) etc. All these are described in a `script.yml` file. It is the same `script.yml` that Artillery.io uses. 
@@ -226,10 +228,15 @@ scenarios:
     - which contains one flow
       - which has one [flow action](https://artillery.io/docs/http-reference/#flow-actions) to send [GET request](https://artillery.io/docs/http-reference/#get-post-put-patch-delete-requests) for the specified `target`.
 
-### T2.3. Setup AWS account credentials
+### T2.3. Customizing script.yml
+This step is optional in the tutorial. If you like you can customize script.yml as follows.
+- If you have a public endpoint/service/URL that you would like to load test then you can change `target` to point to that.
+- You can also change the [load `phase`](https://artillery.io/docs/script-reference/#load-phases) and [`scenarios` section](https://artillery.io/docs/script-reference/#scenarios) as per your need. We recommend using a low load to try the tool first.
+
+### T2.4. Setup AWS account credentials
 Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding. **It should be running while using any serverless-artillery command that interacts with AWS.**
 
-### T2.4. Deploy assets to AWS
+### T2.5. Deploy assets to AWS
 We need to deploy assets (like [load generating Lambda function](docs/LoadGeneratorLambda.md)) to your AWS account before we can use it to start our test.
 
 Use the following command to deploy the assets.
@@ -238,7 +245,7 @@ slsart deploy
 ```
 You can go to your AWS account console > CloudFormation, and see AWS stack `serverless-artillery-dev` created there if the command is successful.
 
-### T2.5. Invoke performance test
+### T2.6. Invoke performance test
 Now you are all set to invoke performance test using following command.
 ```
 slsart invoke
@@ -247,7 +254,7 @@ At the end of the test serverless-artillery will generate a report of the test. 
 
 **NOTE** that for performance testing, the command will take the `script.yml` from your local machine (and not the one deployed in AWS account) to run the performance test. Hence if you edit it on your local machine after deploying assets to AWS, you don't need to deploy again in order to run the performance test again. Also note that this is true only for performance test and acceptance test and not monitoring.
 
-### T2.6. Remove assets from AWS
+### T2.7. Remove assets from AWS
 After the test is done, you can remove the assets from AWS using following command. If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Remove Instructions`_** in **Confluence** and follow the instructions there.
 ```
 slsart remove
@@ -259,7 +266,7 @@ Throughout this tutorial we will walk you towards performance testing the AWS we
 
 We would test with our custom script and custom deployment assets.
 
-Start by creating a new directory for this tutorial and go to that directory from command line.
+**Start by creating a new directory for this tutorial and go to that directory in command line.**
 
 ### T3.1. Create script.yml
 This section is same as before. See [here](#t21-create-scriptyml) for details.
@@ -272,13 +279,23 @@ slsart script
 ### T3.2. Understanding script.yml
 This section is same as before. See [here](#t22-understanding-scriptyml) for details.
 
-### T3.3. Create custom deployment assets
+### T3.3. Customizing script.yml
+This section is same as before. See [here](#t23-customizing-script.yml) for details.
+
+### T3.4. Create custom deployment assets
 Create a local copy of the deployment assets for customization and deployment using following command.
 ```
 slsart configure
 ```
+The important files among other files created by this command are as follows.
 
-### T3.4 Understanding serverless.yml
+|file|description|
+|:----|:----------|
+|package.json|Node.js dependencies for the load generator Lambda. Add Artillery.io plugins you want to use here.|
+|serverless.yml|Serverless service definition. Change AWS-specific settings here.|
+|handler.js|Load generator Lambda code. **EDIT AT YOUR OWN RISK.**|
+
+### T3.5. Understanding serverless.yml
 Open `serverless.yml` with your favorite editor to see what it contains.
 <details><summary>Click to expand/collapse</summary>
 <p>
@@ -404,14 +421,45 @@ The Serverless framework automatically names the Lambda function based on the se
 - In order to generate load the load generating Lambda needs to invoke itself.
 - The `iamRoleStatements` section in the serverless.yml gives the load generating Lambda function to invoke itself (`lambda:InvokeFunction`).
 
+### T3.6. Customizing serverless.yml
+This step is optional in the tutorial. If you like you can customize serverless.yml as follows.
+#### Service name
+- You can change `service` name to some other unique string as per your need like `serverless-artillery-<unique-string>`. This will be the AWS CloudFormation stack name when you run `slsart deploy`.
+#### Plugins
+You can customize the serverless.yml to use required tools/plugins mentioned [below](#addlink)**ASHMITODO**. 
+
+In this tutorial you can add [artillery-plugin-cloudwatch](https://github.com/Nordstrom/artillery-plugin-cloudwatch) to record test results to AWS CloudWatch.
+1. In serverless.yml, under the following section (already exists)
+```
+provider:
+  iamRoleStatements:
+```
+add the following
+```
+    - Effect: 'Allow'
+      Action:
+        - 'cloudwatch:PutMetricData'
+      Resource:
+        - '*'
+```
+2. Install the plugin by running the following command
+```
+npm install --save artillery-plugin-cloudwatch
+```
+#### Nordstrom Engineers
+If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Policies`_** in **Confluence** and follow the instructions there.
+
+### T3.7. Deploy assets to AWS
+This section is same as before. See [here](#t25-deploy-assets-to-aws) for details.
+
+### T3.8. Invoke performance test
+This section is same as before. See [here](#t26-invoke-performance-test) for details.
+
+### T3.9. Remove assets from AWS
+This section is same as before. See [here](#t27-remove-assets-from-aws) for details.
+
 ASHMI NEXT
 - change language everywhere to say 'custom deployment assets' instead of 'custom project'
-- t3.3 is not complete. talk about the imp files created there. and content of these files.
-- modify some assets
---- nordstrom engineers should refer to "Serverless Artillery - Nordstrom Technology Policies"
-- deploy
-- invoke
-- remove
 
 # Troubleshooting
 ### Problems installing?
