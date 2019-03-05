@@ -62,6 +62,7 @@ Serverless-artillery makes it easy to test your services for load and functional
   - [T3.9. Deploy assets to AWS](#t39-deploy-assets-to-aws)
   - [T3.10. Invoke performance test](#t310-invoke-performance-test)
   - [T3.11. Remove assets from AWS](#t311-remove-assets-from-aws)
+- [Advanced command to create customized `script.yml`](#advanced-command-to-create-customized-scriptyml)
 - [Performance test workshop](#performance-test-workshop)
 - [Troubleshooting](#troubleshooting)
   - [Problems installing?](#problems-installing)
@@ -497,8 +498,27 @@ If you used CloudWatch plugin you will be able to view the metrics on the CloudW
 ### T3.11. Remove assets from AWS
 This section is same as before. See [here](#t28-remove-assets-from-aws) for details.
 
+# Advanced command to create customized `script.yml`
+Above you used how to use `slsart script` to create the default `script.yml` ([here](#t22-create-scriptyml)) and how to customize it by manually editing it ([here](#t24-customizing-scriptyml)).
+
+`slsart script` command has options to do the above in one command. You can run following command to create custom `script.yml` with **one** load `phase`.
+```
+slsart script -e <your-target-endpoint> -d <duration-in-sec> -r <arrival-rate-in-virtual-users-arriving-per-second> -t <ramp-to-in-virtual-users-arriving-per-second>
+```
+
+For example following command will create a `script.yml` with test target https://example.com, performance test starting with 10 requests per second, and scaling up to 25 requests per second, over a duration of 60 seconds.
+```
+slsart script -e https://example.com -d 60 -r 10 -t 25
+```
+
+For more details see
+```
+slsart script --help
+```
+
 # Performance test workshop
 We've created a workshop detailing end-to-end usage of serverless-artillery for performance testing. Check out our conference-style [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for step by step lessons on how to set your system up for successful deployment, invocation, and removal.
+
 
 # Troubleshooting
 ### Problems installing?
