@@ -48,7 +48,7 @@ Serverless-artillery makes it easy to test your services for load and functional
   - [T3.1. Create new directory](#t31-create-new-directory)
   - [T3.2. Create `script.yml`](#t32-create-scriptyml)
   - [T3.3. Understanding `script.yml`](#t33-understanding-scriptyml)
-  - [T3.4. Customizing `script.yml`](#t34-customizing-script.yml)
+  - [T3.4. Customizing `script.yml`](#t34-customizing-scriptyml)
   - [T3.5. Create custom deployment assets](#t35-create-custom-deployment-assets)
   - [T3.6. Understanding `serverless.yml`](#t36-understanding-serverlessyml)
     - [Service name](#service-name)
