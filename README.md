@@ -498,15 +498,16 @@ If you used CloudWatch plugin you will be able to view the metrics on the CloudW
 ### T3.11. Remove assets from AWS
 This section is same as before. See [here](#t28-remove-assets-from-aws) for details.
 
-# Create customized `script.yml`
+# Other commands and use cases
+## Create customized `script.yml`
 Above you used how to use `slsart script` to create the default `script.yml` (see [here](#t22-create-scriptyml)) and how to customize it by manually editing it (see [here](#t24-customizing-scriptyml)).
 
-`slsart script` command has options to do the above in one command. You can run following command to create custom `script.yml` with **one** load `phase`.
+`slsart script` command has options to quickly do the above in one command. Run the following command to create custom `script.yml` with **one** load `phase`.
 ```
 slsart script -e <your-target-endpoint> -d <duration-in-sec> -r <arrival-rate-in-virtual-users-arriving-per-second> -t <ramp-to-in-virtual-users-arriving-per-second>
 ```
 
-For example following command will create a `script.yml` with test target https://example.com, performance test starting with 10 requests per second, and scaling up to 25 requests per second, over a duration of 60 seconds.
+For example, following command will create a `script.yml` with test target https://example.com, performance test starting with 10 requests per second, and scaling up to 25 requests per second, over a duration of 60 seconds.
 ```
 slsart script -e https://example.com -d 60 -r 10 -t 25
 ```
@@ -514,6 +515,22 @@ slsart script -e https://example.com -d 60 -r 10 -t 25
 For more details see
 ```
 slsart script --help
+```
+
+## Performance test using script file with different name/path
+By default `slsart invoke` command will look for `script.yml` to run performance test. You can use `-p` option to specify script file with different name/path as follows.
+```
+slsart invoke -p <path-to-your-script-file>
+```
+
+For example, following command will *invoke* performance test using the specified file.
+```
+slsart invoke -p /my/path/to/myotherscript.yml
+```
+
+For more options see,
+```
+slsart invoke --help
 ```
 
 # Performance test workshop
