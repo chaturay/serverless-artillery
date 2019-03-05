@@ -35,23 +35,23 @@ Serverless-artillery makes it easy to test your services for load and functional
   - [T1.2. Invoke](#t12-invoke)
   - [T1.3. Remove](#t13-remove)
 - [Tutorial 2: Performance test with custom script](#tutorial-2-performance-test-with-custom-script)
-  - [T2.1. Create script.yml](#t21-create-scriptyml)
-  - [T2.2. Understanding script.yml](#t22-understanding-scriptyml)
-  - [T2.3. Customizing script.yml](#t23-customizing-script.yml)
+  - [T2.1. Create `script.yml`](#t21-create-scriptyml)
+  - [T2.2. Understanding `script.yml`](#t22-understanding-scriptyml)
+  - [T2.3. Customizing `script.yml`](#t23-customizing-script.yml)
   - [T2.4. Setup AWS account credentials](#t24-setup-aws-account-credentials)
   - [T2.5. Deploy assets to AWS](#t25-deploy-assets-to-aws)
   - [T2.6. Invoke performance test](#t26-invoke-performance-test)
   - [T2.7. Remove assets from AWS](#t27-remove-assets-from-aws)
 - [Tutorial 3: Performance test with custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets)
-  - [T3.1. Create script.yml](#t31-create-scriptyml)
-  - [T3.2. Understanding script.yml](#t32-understanding-scriptyml)
-  - [T3.3. Customizing script.yml](#t33-customizing-script.yml)
+  - [T3.1. Create `script.yml`](#t31-create-scriptyml)
+  - [T3.2. Understanding `script.yml`](#t32-understanding-scriptyml)
+  - [T3.3. Customizing `script.yml`](#t33-customizing-script.yml)
   - [T3.4. Create custom deployment assets](#t34-create-custom-deployment-assets)
-  - [T3.5. Understanding serverless.yml](#t35-understanding-serverlessyml)
+  - [T3.5. Understanding `serverless.yml`](#t35-understanding-serverlessyml)
     - [Service name](#service-name)
     - [Load generating Lambda function name](#load-generating-lambda-function-name)
     - [Load generating Lambda function permissions](#load-generating-lambda-function-permissions)
-  - [T3.6. Customizing serverless.yml](#t36-customizing-serverlessyml)
+  - [T3.6. Customizing `serverless.yml`](#t36-customizing-serverlessyml)
     - [Service name](#service-name-1)
     - [Plugins](#plugins)
     - [Customization for Nordstrom Engineers](#customization-for-nordstrom-engineers)
@@ -112,14 +112,14 @@ npm uninstall -g serverless-artillery
 <img src="docs/HowItWorks.jpg" width="442">
 
 * Serverless-artillery would be installed and run on your local machine.
-* It would take your JSON or YAML load script (script.yml) that specifies 
+* It would take your JSON or YAML load script (`script.yml`) that specifies 
   * test target/URL/endpoint/service, 
   * load progression,
   * and the scenarios that are important for your service to test.
 * When you run `slsart deploy`, serverless-artillery would deploy a **load generating Lambda function called `serverless-artillery-<optional-unique-string-><stage default:dev>-loadGenerator`** on your AWS account along with other assets.
 * Running the tests
   * **Performance test:** When you run `slsart invoke`, serverless-artillery would invoke the function.
-    * It would generate the number of requests as specified in script.yml to specified test target in order to run the specified scenarios.
+    * It would generate the number of requests as specified in `script.yml` to specified test target in order to run the specified scenarios.
   * **Acceptance test:**
   * **Monitoring:**
 * When you run `slsart remove`, serverless-artillery would remove these assets from your AWS account.
@@ -191,7 +191,7 @@ We would test with our custom script but would use default deployment assets.
 
 **Start by creating a new directory for this tutorial and go to that directory in command line.**
 
-### T2.1. Create script.yml
+### T2.1. Create `script.yml`
 Serverless-artillery needs to know information about the performance test that user wants to run. It needs information like, the target URL of the service that user wants to test, load progression, user's interaction with the service (scenarios) etc. All these are described in a `script.yml` file. It is the same `script.yml` that Artillery.io uses. 
 - **Please see [here for basic concepts for Artillery.io usage](https://artillery.io/docs/basic-concepts/#basic-concepts).**
 - **Please see [here for Artillery.io's test script reference](https://artillery.io/docs/script-reference/).**
@@ -201,7 +201,7 @@ Run the following command to create the initial `script.yml` file.
 slsart script
 ```
 
-### T2.2. Understanding script.yml
+### T2.2. Understanding `script.yml`
 Open `script.yml` with your favorite editor to see what it contains.
 <details><summary>Click to expand/collapse</summary>
 <p>
@@ -240,8 +240,8 @@ scenarios:
     - which contains one flow
       - which has one [flow action](https://artillery.io/docs/http-reference/#flow-actions) to send [GET request](https://artillery.io/docs/http-reference/#get-post-put-patch-delete-requests) for the specified `target`.
 
-### T2.3. Customizing script.yml
-This step is optional in the tutorial. If you like you can customize script.yml as follows.
+### T2.3. Customizing `script.yml`
+This step is optional in the tutorial. If you like you can customize `script.yml` as follows.
 - If you have a public endpoint/service/URL that you would like to load test then you can change `target` to point to that.
 - You can also change the [load `phase`](https://artillery.io/docs/script-reference/#load-phases) and [`scenarios` section](https://artillery.io/docs/script-reference/#scenarios) as per your need. We recommend using a low load to try the tool first.
 
@@ -280,7 +280,7 @@ We would test with our custom script and custom deployment assets.
 
 **Start by creating a new directory for this tutorial and go to that directory in command line.**
 
-### T3.1. Create script.yml
+### T3.1. Create `script.yml`
 This section is same as before. See [here](#t21-create-scriptyml) for details.
 
 Run the following command to create the initial `script.yml` file.
@@ -288,10 +288,10 @@ Run the following command to create the initial `script.yml` file.
 slsart script
 ```
 
-### T3.2. Understanding script.yml
+### T3.2. Understanding `script.yml`
 This section is same as before. See [here](#t22-understanding-scriptyml) for details.
 
-### T3.3. Customizing script.yml
+### T3.3. Customizing `script.yml`
 This section is same as before. See [here](#t23-customizing-script.yml) for details.
 
 ### T3.4. Create custom deployment assets
@@ -303,11 +303,11 @@ The important files among other files created by this command are as follows.
 
 |file|description|
 |:----|:----------|
-|package.json|Node.js dependencies for the load generator Lambda. Add Artillery.io plugins you want to use here.|
-|serverless.yml|Serverless service definition. Change AWS-specific settings here.|
-|handler.js|Load generator Lambda code. **EDIT AT YOUR OWN RISK.**|
+|`package.json`|Node.js dependencies for the load generator Lambda. Add Artillery.io plugins you want to use here.|
+|`serverless.yml`|Serverless service definition. Change AWS-specific settings here.|
+|`handler.js`|Load generator Lambda code. **EDIT AT YOUR OWN RISK.**|
 
-### T3.5. Understanding serverless.yml
+### T3.5. Understanding `serverless.yml`
 Open `serverless.yml` with your favorite editor to see what it contains.
 <details><summary>Click to expand/collapse</summary>
 <p>
@@ -414,33 +414,33 @@ resources:
 </p>
 </details>
 
-Please refer to [serverless.yml documentation](https://serverless.com/framework/docs/providers/aws/guide/serverless.yml/) for details. It contains assets needed for monitoring (turned off by default) as well which we will discuss later.
+Please refer to [`serverless.yml` documentation](https://serverless.com/framework/docs/providers/aws/guide/serverless.yml/) for details. It contains assets needed for monitoring (turned off by default) as well which we will discuss later.
 #### Service name
-- In above serverless.yml the `service` name is set to `serverless-artillery-XnBa473psJ`. In your serverless.yml the string at the end (`XnBa473psJ`) would be different.
+- In above `serverless.yml` the `service` name is set to `serverless-artillery-XnBa473psJ`. In your `serverless.yml` the string at the end (`XnBa473psJ`) would be different.
 - This will be the AWS CloudFormation stack name when you run `slsart deploy`.
 - The `slsart configure` command adds a random string at the end so you get a unique stack name that does not conflict with anyone else also deploying to the same AWS account.
 - You can change `service` name to some other unique string as per your need like `serverless-artillery-<unique-string>`.
-- The rest of the serverless.yml refers to the service name by using `${self:service}`.
+- The rest of the `serverless.yml` refers to the service name by using `${self:service}`.
 #### [Load generating Lambda function](#load-generating-lambda-function-on-aws) name
 The Serverless framework automatically names the Lambda function based on the service, stage and function name as follows.
 - The function `loadGenerator` when deployed is named as `${self:service}-${opt:stage, self:provider.stage}-loadGenerator`.
-  - `${self:service}` is name of the service. In this serverless.yml it is `serverless-artillery-XnBa473psJ`.
+  - `${self:service}` is name of the service. In this `serverless.yml` it is `serverless-artillery-XnBa473psJ`.
   - `${opt:stage, self:provider.stage}` will either use `${opt:stage}` or `${self:provider.stage}`.
     - `${opt:stage}` refers to the (optional) stage name passed in `slsart deploy [--stage <stage-name>]` command.
-    - If no stage name is passed in the deploy command then `${self:provider.stage}` would be used. It is the `stage` name set under `provider` section in the serverless.yml. If one is not provided (like in above example) it is set to `dev`. See [here](https://serverless.com/framework/docs/providers/aws/guide/serverless.yml/).
+    - If no stage name is passed in the deploy command then `${self:provider.stage}` would be used. It is the `stage` name set under `provider` section in the `serverless.yml`. If one is not provided (like in above example) it is set to `dev`. See [here](https://serverless.com/framework/docs/providers/aws/guide/serverless.yml/).
 - In this example function name will be set to `serverless-artillery-XnBa473psJ-dev-loadGenerator` while running `slsart deploy` command (note no stage name specified).
 #### [Load generating Lambda function](#load-generating-lambda-function-on-aws) permissions
 - In order to generate load the load generating Lambda needs to invoke itself.
-- The `iamRoleStatements` section in the serverless.yml gives the load generating Lambda function to invoke itself (`lambda:InvokeFunction`).
+- The `iamRoleStatements` section in the `serverless.yml` gives the load generating Lambda function to invoke itself (`lambda:InvokeFunction`).
 
-### T3.6. Customizing serverless.yml
-This step is optional in the tutorial. If you like you can customize serverless.yml as follows.
+### T3.6. Customizing `serverless.yml`
+This step is optional in the tutorial. If you like you can customize `serverless.yml` as follows.
 
 #### Service name
 - You can change `service` name to some other unique string as per your need like `serverless-artillery-<unique-string>`. This will be the AWS CloudFormation stack name when you run `slsart deploy`.
 
 #### Plugins
-You can customize the serverless.yml to use required tools/plugins mentioned [below](#addlink)**ASHMITODO**. 
+You can customize the `serverless.yml` to use required tools/plugins mentioned [below](#addlink)**ASHMITODO**. 
 
 In this tutorial you can add [artillery-plugin-cloudwatch](https://github.com/Nordstrom/artillery-plugin-cloudwatch) to record test results to AWS CloudWatch.
 1. To allow the Lambda code to write to CloudWatch, the correct NPM package dependency must be added. This modifies the package.json file to include the necessary dependency.
@@ -454,7 +454,7 @@ config:
     cloudwatch:
       namespace: "<cloud-watch-namespace-example-serverless-artillery-XnBa473psJ-loadtest>"
 ```
-3. In serverless.yml, under the following section (already exists)
+3. In `serverless.yml`, under the following section (already exists)
 ```
 provider:
   iamRoleStatements:
