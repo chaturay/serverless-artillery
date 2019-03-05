@@ -188,15 +188,14 @@ slsart remove
 ```
 
 # Tutorial 2: Performance test with custom script
-Let’s learn by example. 
-
 Throughout this tutorial we will walk you towards performance testing the AWS website, https://aws.amazon.com/.
 
 We would test with our custom script but would use default deployment assets.
 
-**Start by creating a new directory for this tutorial and go to that directory in command line.**
+### T2.1. Create new direcotry
+Start by creating a new directory for this tutorial and go to that directory in command line.
 
-### T2.1. Create `script.yml`
+### T2.2. Create `script.yml`
 Serverless-artillery needs to know information about the performance test that user wants to run. It needs information like, the target URL of the service that user wants to test, load progression, user's interaction with the service (scenarios) etc. All these are described in a `script.yml` file. It is the same `script.yml` that Artillery.io uses. 
 - **Please see [here for basic concepts for Artillery.io usage](https://artillery.io/docs/basic-concepts/#basic-concepts).**
 - **Please see [here for Artillery.io's test script reference](https://artillery.io/docs/script-reference/).**
@@ -206,7 +205,7 @@ Run the following command to create the initial `script.yml` file.
 slsart script
 ```
 
-### T2.2. Understanding `script.yml`
+### T2.3. Understanding `script.yml`
 Open `script.yml` with your favorite editor to see what it contains.
 <details><summary>Click to expand/collapse</summary>
 <p>
@@ -245,15 +244,15 @@ scenarios:
     - which contains one flow
       - which has one [flow action](https://artillery.io/docs/http-reference/#flow-actions) to send [GET request](https://artillery.io/docs/http-reference/#get-post-put-patch-delete-requests) for the specified `target`.
 
-### T2.3. Customizing `script.yml`
+### T2.4. Customizing `script.yml`
 This step is optional in the tutorial. If you like you can customize `script.yml` as follows.
 - If you have a public endpoint/service/URL that you would like to load test then you can change `target` to point to that.
 - You can also change the [load `phase`](https://artillery.io/docs/script-reference/#load-phases) and [`scenarios` section](https://artillery.io/docs/script-reference/#scenarios) as per your need. We recommend using a low load to try the tool first.
 
-### T2.4. Setup AWS account credentials
+### T2.5. Setup AWS account credentials
 Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding. **It should be running while using any serverless-artillery command that interacts with AWS.**
 
-### T2.5. Deploy assets to AWS
+### T2.6. Deploy assets to AWS
 We need to deploy assets (like [load generating Lambda function](docs/LoadGeneratorLambda.md)) to your AWS account before we can use it to start our test.
 
 Use the following command to deploy the assets.
@@ -262,7 +261,7 @@ slsart deploy
 ```
 You can go to your AWS account console > CloudFormation, and see AWS stack `serverless-artillery-dev` created there if the command is successful.
 
-### T2.6. Invoke performance test
+### T2.7. Invoke performance test
 Now you are all set to invoke performance test using following command.
 ```
 slsart invoke
@@ -271,7 +270,7 @@ At the end of the test serverless-artillery will generate a report of the test. 
 
 **NOTE** that for performance testing, the command will take the `script.yml` from your local machine (and not the one deployed in AWS account) to run the performance test. Hence if you edit it on your local machine after deploying assets to AWS, you don't need to deploy again in order to run the performance test again. Also note that this is true only for performance test and acceptance test and not monitoring.
 
-### T2.7. Remove assets from AWS
+### T2.8. Remove assets from AWS
 After the test is done, you can remove the assets from AWS using following command. If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Remove Instructions`_** in **Confluence** and follow the instructions there.
 ```
 slsart remove
@@ -283,9 +282,10 @@ Throughout this tutorial we will walk you towards performance testing the AWS we
 
 We would test with our custom script and custom deployment assets.
 
-**Start by creating a new directory for this tutorial and go to that directory in command line.**
+### T3.1. Create new direcotry
+Start by creating a new directory for this tutorial and go to that directory in command line.
 
-### T3.1. Create `script.yml`
+### T3.2. Create `script.yml`
 This section is same as before. See [here](#t21-create-scriptyml) for details.
 
 Run the following command to create the initial `script.yml` file.
@@ -293,13 +293,13 @@ Run the following command to create the initial `script.yml` file.
 slsart script
 ```
 
-### T3.2. Understanding `script.yml`
+### T3.3. Understanding `script.yml`
 This section is same as before. See [here](#t22-understanding-scriptyml) for details.
 
-### T3.3. Customizing `script.yml`
+### T3.4. Customizing `script.yml`
 This section is same as before. See [here](#t23-customizing-script.yml) for details.
 
-### T3.4. Create custom deployment assets
+### T3.5. Create custom deployment assets
 Create a local copy of the deployment assets for customization and deployment using following command.
 ```
 slsart configure
@@ -312,7 +312,7 @@ The important files among other files created by this command are as follows.
 |`serverless.yml`|Serverless service definition. Change AWS-specific settings here.|
 |`handler.js`|Load generator Lambda code. **EDIT AT YOUR OWN RISK.**|
 
-### T3.5. Understanding `serverless.yml`
+### T3.6. Understanding `serverless.yml`
 Open `serverless.yml` with your favorite editor to see what it contains.
 <details><summary>Click to expand/collapse</summary>
 <p>
@@ -438,7 +438,7 @@ The Serverless framework automatically names the Lambda function based on the se
 - In order to generate load the load generating Lambda needs to invoke itself.
 - The `iamRoleStatements` section in the `serverless.yml` gives the load generating Lambda function to invoke itself (`lambda:InvokeFunction`).
 
-### T3.6. Customizing `serverless.yml`
+### T3.7. Customizing `serverless.yml`
 This step is optional in the tutorial. If you like you can customize `serverless.yml` as follows.
 
 #### Service name
@@ -476,15 +476,15 @@ add the following
 #### Customization for Nordstrom Engineers
 If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Policies`_** in **Confluence** and follow the instructions there.
 
-### T3.7. Deploy assets to AWS
+### T3.8. Deploy assets to AWS
 This section is same as before. See [here](#t25-deploy-assets-to-aws) for details.
 
-### T3.8. Invoke performance test
+### T3.9. Invoke performance test
 This section is same as before. See [here](#t26-invoke-performance-test) for details.
 
 If you used CloudWatch plugin you will be able to view the metrics on the CloudWatch dashboard. You can learn more about using CloudWatch dashboard [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html). **Note that it can take few minutes for the data to propogate to CloudWatch.**
 
-### T3.9. Remove assets from AWS
+### T3.10. Remove assets from AWS
 This section is same as before. See [here](#t27-remove-assets-from-aws) for details.
 
 # Troubleshooting
