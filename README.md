@@ -39,7 +39,7 @@ Serverless-artillery makes it easy to test your services for load and functional
   - [T2.1. Create new directory](#t21-create-new-directory)
   - [T2.2. Create `script.yml`](#t22-create-scriptyml)
   - [T2.3. Understanding `script.yml`](#t23-understanding-scriptyml)
-  - [T2.4. Customizing `script.yml`](#t24-customizing-script.yml)
+  - [T2.4. Customizing `script.yml`](#t24-customizing-scriptyml)
   - [T2.5. Setup AWS account credentials](#t25-setup-aws-account-credentials)
   - [T2.6. Deploy assets to AWS](#t26-deploy-assets-to-aws)
   - [T2.7. Invoke performance test](#t27-invoke-performance-test)
@@ -303,7 +303,7 @@ slsart script
 This section is same as before. See [here](#t23-understanding-scriptyml) for details.
 
 ### T3.4. Customizing `script.yml`
-This section is same as before. See [here](#t24-customizing-script.yml) for details.
+This section is same as before. See [here](#t24-customizing-scriptyml) for details.
 
 ### T3.5. Create custom deployment assets
 Create a local copy of the deployment assets for customization and deployment using following command.
