@@ -194,7 +194,7 @@ Throughout this tutorial we will walk you towards performance testing the AWS we
 
 We would test with our custom script but would use default deployment assets.
 
-### T2.1. Create new direcotry
+### T2.1. Create new directory
 Start by creating a new directory for this tutorial and go to that directory in command line.
 
 ### T2.2. Create `script.yml`
@@ -284,7 +284,7 @@ Throughout this tutorial we will walk you towards performance testing the AWS we
 
 We would test with our custom script and custom deployment assets.
 
-### T3.1. Create new direcotry
+### T3.1. Create new directory
 Start by creating a new directory for this tutorial and go to that directory in command line.
 
 ### T3.2. Create `script.yml`
