@@ -496,6 +496,6 @@ If you are installing into a node_modules owned by root and getting error `npm E
 - performance testing
 - acceptance testing
 - monitoring
-- deployment assets
+- deployment assets. default vs custom
 - local deployment assets and remote deployment assets
 - 
