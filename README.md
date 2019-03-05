@@ -23,7 +23,7 @@ Serverless-artillery makes it easy to test your services for load and functional
       - [1. Node JS](#1-node-js)
       - [2. Serverless Framework CLI](#2-serverless-framework-cli)
     - [Installing serverless-artillery](#installing-serverless-artillery)
-  - [Installing in Docker](installing-in-docker)
+  - [Installing in Docker](#installing-in-docker)
 - [Uninstallation](#uninstallation)
 - [How it works?](#how-it-works)
   - [Load generating Lambda function on AWS](#load-generating-lambda-function-on-aws)
