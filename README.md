@@ -9,7 +9,7 @@ Combine [`serverless`](https://serverless.com) with [`artillery`](https://artill
 Serverless-artillery makes it easy to test your services for load and functionality quickly, with almost no code and without having to maintain any servers or testing infrastructure.
 
 ### Use serverless-artillery if
-1. You want to know if your services (either internal or public) can handle different amount of traffic load (i.e. performance testing).
+1. You want to know if your services (either internal or public) can handle different amount of traffic load (i.e. performance or load testing).
 1. You want to test if your services behave as you expect after you deploy new changes (i.e. acceptance testing).
 1. You want to constantly monitor your services over time to make sure the latency of your services is under control (i.e. monitoring mode).
 
