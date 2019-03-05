@@ -122,7 +122,7 @@ npm uninstall -g serverless-artillery
   * test target/URL/endpoint/service, 
   * load progression,
   * and the scenarios that are important for your service to test.
-* When you run `slsart deploy`, serverless-artillery would deploy a **load generating Lambda function called `serverless-artillery-<optional-unique-string-><stage default:dev>-loadGenerator`** on your AWS account along with other assets.
+* When you run `slsart deploy`, serverless-artillery would deploy a **load generating Lambda function**, on your AWS account along with other assets.
 * Running the tests
   * **Performance test:** When you run `slsart invoke`, serverless-artillery would invoke the function.
     * It would generate the number of requests as specified in `script.yml` to specified test target in order to run the specified scenarios.
@@ -147,7 +147,8 @@ npm uninstall -g serverless-artillery
 
 <img src="docs/Architecture.gif">
 
-- Serverless-artillery generates the requests to run the specified tests using load generating Lambda function named `serverless-artillery-<optional-unique-string-><stage default:dev>-loadGenerator` that is deployed and invoked on AWS along with other assets.
+- Serverless-artillery generates the requests to run the specified tests using load generating Lambda function, that is deployed and invoked on AWS along with other assets.
+  -  Naming format is `serverless-artillery-<optional-unique-string-><stage default:dev>-loadGenerator`. For example, `serverless-artillery-dev-loadGenerator` or `serverless-artillery-XnBa473psJ-dev-loadGenerator`.
 - It has an ephimeral architecture. It only exists as long as you need it.
 - It runs Artillery.io node package in AWS Lambda function.
   - Each lambda function can only generate a certain amount of load, and can only run for up to five minutes (five minutes was a built-in limitation of AWS Lambda) (now 15 minutes). 
@@ -432,14 +433,14 @@ Please refer to [`serverless.yml` documentation](https://serverless.com/framewor
 - In above `serverless.yml` the `service` name is set to `serverless-artillery-XnBa473psJ`. In your `serverless.yml` the string at the end (`XnBa473psJ`) would be different.
 - This will be the AWS CloudFormation stack name when you run `slsart deploy`.
 - The `slsart configure` command adds a random string at the end so you get a unique stack name that does not conflict with anyone else also deploying to the same AWS account.
-- You can change `service` name to some other unique string as per your need like `serverless-artillery-<unique-string>`.
+- You can change `service` name to some other unique string as per your need. Format `serverless-artillery-<unique-string>`. For example, `serverless-artillery-myperftestservice`.
 - The rest of the `serverless.yml` refers to the service name by using `${self:service}`.
 #### [Load generating Lambda function](#load-generating-lambda-function-on-aws) name
 The Serverless framework automatically names the Lambda function based on the service, stage and function name as follows.
 - The function `loadGenerator` when deployed is named as `${self:service}-${opt:stage, self:provider.stage}-loadGenerator`.
   - `${self:service}` is name of the service. In this `serverless.yml` it is `serverless-artillery-XnBa473psJ`.
   - `${opt:stage, self:provider.stage}` will either use `${opt:stage}` or `${self:provider.stage}`.
-    - `${opt:stage}` refers to the (optional) stage name passed in `slsart deploy [--stage <stage-name>]` command.
+    - `${opt:stage}` refers to the (optional) stage name passed in `slsart deploy [--stage <stage-name>]` command. For example, if you run `slsart deploy --stage prod` then `prod` would be used for `${opt:stage}`.
     - If no stage name is passed in the deploy command then `${self:provider.stage}` would be used. It is the `stage` name set under `provider` section in the `serverless.yml`. If one is not provided (like in above example) it is set to `dev`. See [here](https://serverless.com/framework/docs/providers/aws/guide/serverless.yml/).
 - In this example function name will be set to `serverless-artillery-XnBa473psJ-dev-loadGenerator` while running `slsart deploy` command (note no stage name specified).
 #### [Load generating Lambda function](#load-generating-lambda-function-on-aws) permissions
@@ -450,22 +451,28 @@ The Serverless framework automatically names the Lambda function based on the se
 This step is optional in the tutorial. If you like you can customize `serverless.yml` as follows.
 
 #### Service name
-- You can change `service` name to some other unique string as per your need like `serverless-artillery-<unique-string>`. This will be the AWS CloudFormation stack name when you run `slsart deploy`.
+- You can change `service` name to some other unique string as per your need.
+- Format `serverless-artillery-<unique-string>`. For example, `serverless-artillery-myperftestservice`.
+- This will be the AWS CloudFormation stack name when you run `slsart deploy`.
 
 #### Plugins
-You can customize the `serverless.yml` to use required tools/plugins mentioned [below](#addlink)**ASHMITODO**. 
+You can customize the `serverless.yml` to use required tools/plugins mentioned [below](#addlink) **ASHMITODO**. 
 
 In this tutorial you can add [artillery-plugin-cloudwatch](https://github.com/Nordstrom/artillery-plugin-cloudwatch) to record test results to AWS CloudWatch.
 1. To allow the Lambda code to write to CloudWatch, the correct NPM package dependency must be added. This modifies the package.json file to include the necessary dependency.
 ```
 npm install --save artillery-plugin-cloudwatch
 ```
-2. Update the config portion of `script.yml` to add CloudWatch plugin from the example below:
+2. Update the config portion of `script.yml` to add CloudWatch plugin as follows:
 ```
 config:
   plugins:
     cloudwatch:
-      namespace: "<cloud-watch-namespace-example-serverless-artillery-XnBa473psJ-loadtest>"
+      namespace: "<cloud-watch-namespace>"
+```
+For example, you can use
+```
+      namespace: "serverless-artillery-myperftestservice-loadtest"
 ```
 3. In `serverless.yml`, under the following section (already exists)
 ```
