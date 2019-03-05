@@ -62,6 +62,7 @@ Serverless-artillery makes it easy to test your services for load and functional
   - [T3.9. Deploy assets to AWS](#t39-deploy-assets-to-aws)
   - [T3.10. Invoke performance test](#t310-invoke-performance-test)
   - [T3.11. Remove assets from AWS](#t311-remove-assets-from-aws)
+- [Performance test workshop](#performance-test-workshop)
 - [Troubleshooting](#troubleshooting)
   - [Problems installing?](#problems-installing)
   - [Error: npm ERR! code EACCES](#error-npm-err-code-eacces)
@@ -495,6 +496,9 @@ If you used CloudWatch plugin you will be able to view the metrics on the CloudW
 
 ### T3.11. Remove assets from AWS
 This section is same as before. See [here](#t28-remove-assets-from-aws) for details.
+
+# Performance test workshop
+We've created a workshop detailing end-to-end usage of serverless-artillery for performance testing. Check out our conference-style [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for step by step lessons on how to set your system up for successful deployment, invocation, and removal.
 
 # Troubleshooting
 ### Problems installing?
