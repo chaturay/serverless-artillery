@@ -446,7 +446,7 @@ add the following
 ```
 npm install --save artillery-plugin-cloudwatch
 ```
-#### Nordstrom Engineers
+#### Customization for Nordstrom Engineers
 If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Policies`_** in **Confluence** and follow the instructions there.
 
 ### T3.7. Deploy assets to AWS
