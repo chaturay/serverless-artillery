@@ -166,17 +166,22 @@ In order to use serverless-artillery, depending on the AWS account environment y
 # Tutorial 1: Run a quick performance test
 If you want to quickly test your setup or see serverless-artillery in action, do the following to quickly run a **small load/performance test**. Don't worry about what these commands do in detail. This document explains them in detail later.
 
-### T1.1. Deploy
-The following command will deploy required assets (like [load generating Lambda function](docs/LoadGeneratorLambda.md)) to the AWS account you selected in the [previous step](#before-running-serverless-artillery). By default it uses AWS CloudFormation Stack name `serverless-artillery-dev`.
+### T1.1. Setup AWS account environment
+If you haven't already, follow the instruction mentioned [here](#before-running-serverless-artillery) to setup AWS account environment.
+
+### T1.2. Deploy
+The following command will deploy required assets (like [load generating Lambda function](docs/LoadGeneratorLambda.md)) to the AWS account you selected in the previous step.
 ```
 slsart deploy
 ```
-### T1.2. Invoke
-The following command will invoke [load generating Lambda function](docs/LoadGeneratorLambda.md) using default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script. At the end of the test serverless-artillery will generate a report of the test. **Please note that this report is generated only for small load.**
+By default it uses AWS CloudFormation Stack name `serverless-artillery-dev`. You will see the stack created if you go to your AWS account console > CloudFormation.
+### T1.3. Invoke
+The following command will invoke [load generating Lambda function](docs/LoadGeneratorLambda.md) using default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script.
 ```
 slsart invoke
 ```
-### T1.3. Remove
+At the end of the test serverless-artillery will generate a report of the test. **Please note that this report is generated only for small load.**
+### T1.4. Remove
 The following command will remove the AWS CloudFormation Stack deployed in step 1. If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Remove Instructions`_** in **Confluence** and follow the instructions there.
 ```
 slsart remove
