@@ -499,7 +499,7 @@ If you used CloudWatch plugin you will be able to view the metrics on the CloudW
 This section is same as before. See [here](#t28-remove-assets-from-aws) for details.
 
 # Create customized `script.yml`
-Above you used how to use `slsart script` to create the default `script.yml` ([here](#t22-create-scriptyml)) and how to customize it by manually editing it ([here](#t24-customizing-scriptyml)).
+Above you used how to use `slsart script` to create the default `script.yml` (see [here](#t22-create-scriptyml)) and how to customize it by manually editing it (see [here](#t24-customizing-scriptyml)).
 
 `slsart script` command has options to do the above in one command. You can run following command to create custom `script.yml` with **one** load `phase`.
 ```
