@@ -593,11 +593,12 @@ provider:
       - subnetId2
 ```
 
-## Using CSV files to specify variables in your `script.yml` 
-- If you want to use CSV files to specify variables in your `script.yml`, you would need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets).
-- Please refer to Artillery.io's [doc](https://artillery.io/docs/script-reference/#payload-files) to understand how to customize `script.yml` to use CSV files.
-- The CSV files should be under the same directory as `serverless.yml`.
+## Using Payload/CSV files to inject data in scenarios of your `script.yml` 
+- For some scenarios it can be useful to pass different information (example, user ID and password, search term) in the requests sent. Artillery.io allows you to use payload file to accomplish that. Please refer to Artillery.io's [doc](https://artillery.io/docs/script-reference/#payload-files) to understand how to customize `script.yml` to use payload/CSV files.
+- You would need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets) to use payload files in serverless-artillery.
+- The payload/CSV files should be under the same directory as `serverless.yml`.
 - You would need to redeploy everytime the CSV file is changed (unlike `script.yml`).
+- If your payload file is too large, you may need to write some custom code (i.e. write a custom processor or modify the serverless-artillery codebase) that will retrieve the data from S3 for you prior to the execution of any load.
 
 ## Advanced customization use cases
 - You would need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets) when you want to make even more customizations to how serverless-artillery works. It generates a local copy of the serverless function code that can be edited and redeployed with your changed settings.
