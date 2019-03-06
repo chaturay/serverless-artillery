@@ -309,7 +309,7 @@ This section is same as before. See [here](#t23-understanding-scriptyml) for det
 This section is same as before. See [here](#t24-customizing-scriptyml) for details.
 
 ### T3.5. Create custom deployment assets
-Create a local copy of the deployment assets for customization and deployment using following command.
+Create a local copy of the deployment assets for customization and deployment using following command. It generates a local copy of the serverless function code that can be edited and deployed with your changed settings.
 ```
 slsart configure
 ```
@@ -575,6 +575,12 @@ provider:
 - Please refer to Artillery.io's [doc](https://artillery.io/docs/script-reference/#payload-files) to understand how to customize `script.yml` to use CSV files.
 - The CSV files should be under the same directory as `serverless.yml`.
 - You would need to redeploy everytime the CSV file is changed (unlike `script.yml`).
+
+## Advanced customization use cases
+- You would need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets) when you want to make even more customizations to how serverless-artillery works. It generates a local copy of the serverless function code that can be edited and redeployed with your changed settings.
+- You'll want to do this if you need to alter hard-coded limits. 
+- See [Serverless Framework docs](https://serverless.com/framework/docs/providers/aws/) for load generation function configuration related documentation.
+- See [Artillery.io docs](https://artillery.io/docs/script-reference/) for script configuration related documentation.
 
 # Troubleshooting
 ### Problems installing?
