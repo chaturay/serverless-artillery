@@ -472,7 +472,7 @@ This step is optional in the tutorial. If you like you can customize `serverless
 - This will be the AWS CloudFormation stack name when you run `slsart deploy`.
 
 #### Plugins
-You can customize the `serverless.yml` to use required tools/plugins mentioned [below](#addlink) **ASHMITODO**. 
+You can customize the `serverless.yml` to use required tools/plugins mentioned [below](#related-tools-and-plugins). 
 
 In this tutorial you can add [artillery-plugin-cloudwatch](https://github.com/Nordstrom/artillery-plugin-cloudwatch) to record test results to AWS CloudWatch.
 1. To allow the Lambda code to write to CloudWatch, the correct NPM package dependency must be added. This modifies the package.json file to include the necessary dependency.
