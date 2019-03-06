@@ -62,8 +62,8 @@ Serverless-artillery makes it easy to test your services for load and functional
   - [T3.9. Deploy assets to AWS](#t39-deploy-assets-to-aws)
   - [T3.10. Invoke performance test](#t310-invoke-performance-test)
   - [T3.11. Remove assets from AWS](#t311-remove-assets-from-aws)
-- [Create customized `script.yml`](#create-customized-scriptyml)
 - [Performance test workshop](#performance-test-workshop)
+- [Create customized `script.yml`](#create-customized-scriptyml)
 - [Troubleshooting](#troubleshooting)
   - [Problems installing?](#problems-installing)
   - [Error: npm ERR! code EACCES](#error-npm-err-code-eacces)
@@ -505,6 +505,9 @@ If you used CloudWatch plugin you will be able to view the metrics on the CloudW
 ### T3.11. Remove assets from AWS
 This section is same as before. See [here](#t28-remove-assets-from-aws) for details.
 
+# Performance test workshop
+We've created a workshop detailing end-to-end usage of serverless-artillery for performance testing. Check out our conference-style [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for step by step lessons on how to set your system up for successful deployment, invocation, and removal.
+
 # Other commands and use cases
 ## Create customized `script.yml`
 Above you used how to use `slsart script` to create the default `script.yml` (see [here](#t22-create-scriptyml)) and how to customize it by manually editing it (see [here](#t24-customizing-scriptyml)).
@@ -549,8 +552,29 @@ slsart invoke --help
 |[artillery-plugin-datadog](https://www.npmjs.com/package/artillery-plugin-datadog)|to record test results to DataDog.|
 |[serverless-attach-managed-policy](https://www.npmjs.com/package/serverless-attach-managed-policy)|if you have automatic IAM role modification in your corporate/shared AWS account.|
 
-# Performance test workshop
-We've created a workshop detailing end-to-end usage of serverless-artillery for performance testing. Check out our conference-style [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for step by step lessons on how to set your system up for successful deployment, invocation, and removal.
+## Performance testing VPC hosted services
+If your service is hosted in VPC, you would need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets).
+
+Please refer to Serverless Frameworks's [doc](https://serverless.com/framework/docs/providers/aws/guide/functions/#vpc-configuration) to understand how to customize `serverless.yml` to deploy the customized assets to VPC.
+
+You need to add following section to your `serverless.yml` and add appropriate `securityGroupIds` and `subnetIds`.
+```
+provider:
+  name: aws
+  vpc:
+    securityGroupIds:
+      - securityGroupId1
+      - securityGroupId2
+    subnetIds:
+      - subnetId1
+      - subnetId2
+```
+
+## Using CSV files to specify variables in your `script.yml` 
+- If you want to use CSV files to specify variables in your `script.yml`, you would need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets).
+- Please refer to Artillery.io's [doc](https://artillery.io/docs/script-reference/#payload-files) to understand how to customize `script.yml` to use CSV files.
+- The CSV files should be under the same directory as `serverless.yml`.
+- You would need to redeploy everytime the CSV file is changed (unlike `script.yml`).
 
 # Troubleshooting
 ### Problems installing?
