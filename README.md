@@ -477,6 +477,7 @@ This step is optional in the tutorial. If you like you can customize `serverless
 ##### Plugins
 You can customize the `serverless.yml` to use required tools/plugins mentioned [below](#related-tools-and-plugins). 
 
+###### CloudWatch plugin
 In this tutorial you can add [artillery-plugin-cloudwatch](https://github.com/Nordstrom/artillery-plugin-cloudwatch) to record test results to AWS CloudWatch.
 1. To allow the Lambda code to write to CloudWatch, the correct NPM package dependency must be added. This modifies the package.json file to include the necessary dependency.
 ```
@@ -507,6 +508,9 @@ add the following
         - '*'
 ```
 
+###### Datadog plugin
+**ASHMITODO**
+
 ##### Customization for Nordstrom Engineers
 If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Policies`_** in **Confluence** and follow the instructions there.
 
@@ -523,6 +527,9 @@ If you used CloudWatch plugin you will be able to view the metrics on the CloudW
 
 #### T3.11. Remove assets from AWS
 This section is same as before. See [here](#t28-remove-assets-from-aws) for details.
+
+## Tutorial 4: Killing on-going performance test
+**ASHMITODO**
 
 ## Performance test workshop
 We've created a workshop detailing end-to-end usage of serverless-artillery for performance testing. Check out our conference-style [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for step by step lessons on how to set your system up for successful deployment, invocation, and removal.
@@ -579,7 +586,7 @@ You would need to [create custom deployment assets](#tutorial-3-performance-test
 |[serverless-attach-managed-policy](https://www.npmjs.com/package/serverless-attach-managed-policy)|if you have automatic IAM role modification in your corporate/shared AWS account.|
 
 ### Performance testing VPC hosted services
-If your service is hosted in VPC, you would need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets).
+The default deployment assets of serverless-artillery are not deployed in a VPC and hence it can only successfully send requests to public endpoints. If your service is hosted in VPC (service is internal and does not have public endpoint), you would need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets).
 
 Please refer to Serverless Frameworks's [doc](https://serverless.com/framework/docs/providers/aws/guide/functions/#vpc-configuration) to understand how to customize `serverless.yml` to deploy the customized assets to VPC.
 
@@ -601,11 +608,11 @@ provider:
 - You would need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets) to use payload files in serverless-artillery.
 - The payload/CSV files should be under the same directory as `serverless.yml`.
 - You would need to redeploy everytime the CSV file is changed (unlike `script.yml`).
-- If your payload file is too large, you may need to write some custom code (i.e. write a custom processor or modify the serverless-artillery codebase) that will retrieve the data from S3 for you prior to the execution of any load.
+- If your payload file is too large, you may need to write some custom code (i.e. write a custom processor or modify the serverless-artillery codebase) that will retrieve the data from S3 for you prior to the execution of any load. **ASHMITODO verify with greg**
 
 ### Advanced customization use cases
 - You would need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets) when you want to make even more customizations to how serverless-artillery works. It generates a local copy of the serverless function code that can be edited and redeployed with your changed settings.
-- You'll want to do this if you need to alter hard-coded limits. 
+- You'll want to do this if you need to alter hard-coded limits. **ASHMITODO verify with greg**
 - See [Serverless Framework docs](https://serverless.com/framework/docs/providers/aws/) for load generation function configuration related documentation.
 - See [Artillery.io docs](https://artillery.io/docs/script-reference/) for script configuration related documentation.
 
