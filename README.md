@@ -130,20 +130,36 @@ npm uninstall -g serverless-artillery
   * **Monitoring:**
 * When you run `slsart remove`, serverless-artillery would remove these assets from your AWS account.
 
-## Load generating Lambda function on AWS
+## Technologies powering serverless-artillery
 <details><summary>Click to expand/collapse</summary>
 <p>
 
+### Serverless Framework
+- The [Serverless Framework](https://serverless.com) makes managing (deploying/updating/removing) cloud assets easy.
+- It translates a `yaml` file to a the deployable assets of the target cloud provider (like AWS).
+- Serverless-artillery uses it to manage required assets to your cloud account.
+
 ### Artillery.io
-- [Artillery.io](https://artillery.io/) (built by Hassy Veldstra of shoreditch-ops) is an existing open-source node package built for easy load testing and functional testing of an endpoint/URL.
+- [Artillery.io](https://artillery.io/) (built by Hassy Veldstra of shoreditch-ops) is an existing open-source node package built for easy load testing and functional testing of a target/service/endpoint/URL. It provides a simple but powerful means of specifying how much load to create and what requests that load should comprise.
 - It takes in a developer-friendly JSON or YAML load script that specifies 
   - target/URL/endpoint, 
   - load progression,
   - and the scenarios that are important for your service to test.
 - It generates specified load, and measures and reports the resulting latency and return codes.
-- It generates the load by running on your local machine or servers. It is not a serverless load generation tool.
+- It generates the load by running on your local machine or servers.
+- However, if you specify more load in your script than what can be produced on your machine, artillery will throttle down the load specified in your script. While it is simple to distribute artillery across a fleet of servers, you must then manage, coordinate, and retire them. It is not a serverless solution. This is the task that serverless-artillery steps in to remove from your plate.
 
-### Load generating Lambda
+### Serverless-artillery
+- Serverless-artillery allows your script to specify an amount of load far exceeding the capacity of a single server to execute.
+- It breaks that script into smaller chunks sized for a single function and distribute the chunks for execution.
+- Since this is done using a FaaS provider, the ephemeral infrastructure used to execute your load disappears as soon as your load tests are complete.
+
+</p>
+</details>
+
+## Load generating Lambda function on AWS
+<details><summary>Click to expand/collapse</summary>
+<p>
 
 <img src="docs/Architecture.gif">
 
