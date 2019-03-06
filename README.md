@@ -606,6 +606,16 @@ provider:
 - See [Serverless Framework docs](https://serverless.com/framework/docs/providers/aws/) for load generation function configuration related documentation.
 - See [Artillery.io docs](https://artillery.io/docs/script-reference/) for script configuration related documentation.
 
+## Reserved and unsupported flags
+`slsart` commands support most commandline flags of the corresponding `sls` (Serverless Framework) commands. **ASHMITODO verify with Greg**
+### Reserved flags
+Following flags are reserved in `slsart invoke` command.
+- The flags `-t`, `--type`, `-f`, and `--function` are reserved for `serverless-artillery` use.  They cannot be supplied on the command line.
+- The `-t` and `--type` flags are reserved because the tool uses the script you provide it to cacluate whether an `Event` or `RequestResponse` invocation type is more appropriate.  If that argument was supplied, a user might have an expectation-behavior mismatch.
+- The `-f` and `--function` flags are reserved because a part of the value that `serverless-artillery` provides is the automated definition of the function providing load testing and thereby a necessarily strong opinion of the name that function was given.
+### Unsupported flags
+The flag `--raw` is unsupported in `slsart invoke` command because, while arbitrary functions can accept strings, a string does not comprise a valid artillery script.
+
 # Troubleshooting
 ### Problems installing?
 **ASHMITODO:Look into this:**
