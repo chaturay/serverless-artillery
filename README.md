@@ -484,12 +484,12 @@ If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless
 You can customize the `serverless.yml` to use required tools/plugins mentioned [below](#related-tools-and-plugins). 
 
 ##### CloudWatch plugin
-In this tutorial you can add [artillery-plugin-cloudwatch](https://github.com/Nordstrom/artillery-plugin-cloudwatch) to record test results to AWS CloudWatch.
+In this tutorial you can add [artillery-plugin-cloudwatch](https://github.com/Nordstrom/artillery-plugin-cloudwatch) to record test results to [AWS CloudWatch](https://aws.amazon.com/cloudwatch).
 1. To allow the Lambda code to write to CloudWatch, the correct NPM package dependency must be added. This modifies the package.json file to include the necessary dependency.
 ```
 npm install --save artillery-plugin-cloudwatch
 ```
-2. Update the config portion of `script.yml` to add CloudWatch plugin as follows:
+2. Update the `config` portion of `script.yml` to add CloudWatch plugin as follows:
 ```
 config:
   plugins:
@@ -515,7 +515,30 @@ add the following
 ```
 
 ##### Datadog plugin
-**ASHMITODO**
+In this tutorial you can add [artillery-plugin-datadog](https://www.npmjs.com/package/artillery-plugin-datadog) to record test results to [Datadog](https://www.datadoghq.com/).
+1. To allow the Lambda code to write to Datadog, the correct NPM package dependency must be added. This modifies the package.json file to include the necessary dependency.
+```
+npm install --save artillery-plugin-datadog
+```
+2. Update the `config` portion of `script.yml` to add Datadog plugin as follows:
+```
+config:
+  plugins:
+    datadog:
+      # Custom hostname (leave blank if not desired) 
+      host: ''
+      # Custom metric prefix (defaults to 'artillery.') 
+      prefix: 'artillery.'
+      # Additional tags for all metrics 
+      tags:
+        - 'mode:test'
+```
+3. In `serverless.yml`, under `provider` section specify Datadog API key as an environment variable as follows:
+```
+provider:
+  environment:
+    DATADOG_API_KEY: "<your-datadog-api-key>"
+```
 
 ### T3.8. Setup AWS account credentials
 Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding. **It should be running while using any serverless-artillery command that interacts with AWS.**
@@ -611,7 +634,7 @@ slsart invoke --help
 - You are responsible for sending the results (usually via a plugin) to a data store for later review and/or analysis. See the [available plugins](#related-tools-and-plugins) that can be used.
 
 ### Related tools and plugins
-You would need to [create custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets) and customize `serverless.yml` to use a plugin as shown in the example [here](#plugins).
+You would need to [create custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets) and customize `serverless.yml` to use a plugin as shown in the examples [here](#plugins).
 
 |Plugin|Description|
 |:----|:----------|
