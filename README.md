@@ -119,7 +119,7 @@ npm uninstall -g serverless-artillery
 # How it works?
 <img src="docs/HowItWorks.jpg" width="442">
 
-* Serverless-artillery would be installed and run on your local machine.
+* Serverless-artillery would be installed and run on your local machine. Run `slsart --help` to see various serverless-artillery commands.
 * It would take your JSON or YAML load script (`script.yml`) that specifies 
   * test target/URL/endpoint/service, 
   * load progression,
@@ -131,6 +131,7 @@ npm uninstall -g serverless-artillery
   * **Acceptance test:**
   * **Monitoring:**
 * When you run `slsart remove`, serverless-artillery would remove these assets from your AWS account.
+* When you run `slsart kill`, serverless-artillery would kill the in-progress test and remove these assets from your AWS account.
 
 ## Technologies powering serverless-artillery
 <details><summary>Click to expand/collapse</summary>
