@@ -528,13 +528,46 @@ If you used CloudWatch plugin you will be able to view the metrics on the CloudW
 #### T3.11. Remove assets from AWS
 This section is same as before. See [here](#t28-remove-assets-from-aws) for details.
 
-## Tutorial 4: Killing on-going performance test
-**ASHMITODO**
+## Tutorial 4: Killing in-progress performance test
+While running performance/load test it is sometimes necessary to kill the test before it is complete. Read more about the kill command [here]().
+
+### T4.1. Increase `duration`
+Follow [Tutorial 2](#tutorial-2-performance-test-with-custom-script) to create `script.yml`. Edit `script.yml` in your favorite editor and increase the `duration` to `60` seconds.
+
+### T4.2. Invoke performance test
+This section is same as before. See [here](#t27-invoke-performance-test) for details.
+
+### T4.3. Kill the in-progress performance test
+Run the following command to kill the performance test. Read more about the kill command [here]().
+```
+slsart kill
+```
 
 ## Performance test workshop
 We've created a workshop detailing end-to-end usage of serverless-artillery for performance testing. Check out our conference-style [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for step by step lessons on how to set your system up for successful deployment, invocation, and removal.
 
 ## Other commands and use cases
+### Killing in-progress performance test
+While running performance/load test it is sometimes necessary to kill the test before it is complete. For example, it might be done when the test target is not able to handle the current load and you want to stop the test before the service goes down.
+
+You can run the following command to kill the performance test.
+```
+slsart kill
+```
+
+The command will do the followings:
+- It will set the load generating Lambda function's [concurrency level](https://docs.aws.amazon.com/lambda/latest/dg/concurrent-executions.html#per-function-concurrency) to 0.
+- and then _remove_ the deployed assets. It will remove load generating Lambda function, CloudWatch logs, and IAM role. CloudWatch metrics will remain.
+
+Result:
+- Any further invocations of load generating Lambda will be supressed. 
+- The already executing instances of load generating Lambda will continue and complete the assigned load generation workload.
+- The load generating Lambda function by default runs for up to 2 minutes. So that would be the default maximum time before the load generation stops.
+
+**You will want to wait approximately 5 minutes before redeploying to avoid the killed performance test from resuming.** Behind the scenes, AWS creates a queue for Lambda invocations. While processing the invocation requests from the queue, if a function is not available then that message will be placed back onto the queue for further attempts. As a result, redeploying your function can allow those re-queued messages to be used to invoke your re-deployed function. In our observation based on a limited set of tests, messages will be permanently failed out of the queues after 5 minutes. That is the basis of our recommendation.
+
+The default maximum duration of a script chunk (**ASHMITODO what is script chunk**) is 2 minutes (`maxChunkDurationInSeconds`). As a result of this, on average, load will not be produced after 1 minute but it could continue for up to the full 2 minutes. To lower the wait times after killing, this value can be overridden in your `script.yml` within the \_split attribute, as shown [here](#script-splitting-customization) **ASHMITODO**. This value can be as low as 15 seconds and using this value causes each script chunk to run for a maximum duration of 15 seconds. Theoretically, this means that you’d only have to wait 7.5 seconds on average for tests to stop running after killing your test (in practice we have observed roughly 20 seconds lag between killing a function and termination of invocations).
+
 ### Create customized `script.yml`
 Above you used how to use `slsart script` to create the default `script.yml` (see [here](#t22-create-scriptyml)) and how to customize it by manually editing it (see [here](#t24-customizing-scriptyml)).
 
