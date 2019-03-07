@@ -55,9 +55,11 @@ Serverless-artillery makes it easy to test your services for load and functional
     - [Load generating Lambda function name](#load-generating-lambda-function-name)
     - [Load generating Lambda function permissions](#load-generating-lambda-function-permissions)
   - [T3.7. Customizing `serverless.yml`](#t37-customizing-serverlessyml)
+    - [Customization for Nordstrom Engineers](#customization-for-nordstrom-engineers)
     - [Service name](#service-name-1)
     - [Plugins](#plugins)
-    - [Customization for Nordstrom Engineers](#customization-for-nordstrom-engineers)
+      - CloudWatch plugin
+      - Datadog plugin
   - [T3.8. Setup AWS account credentials](#t38-setup-aws-account-credentials)
   - [T3.9. Deploy assets to AWS](#t39-deploy-assets-to-aws)
   - [T3.10. Invoke performance test](#t310-invoke-performance-test)
@@ -469,6 +471,9 @@ The Serverless framework automatically names the Lambda function based on the se
 ### T3.7. Customizing `serverless.yml`
 This step is optional in the tutorial. If you like you can customize `serverless.yml` as follows.
 
+#### Customization for Nordstrom Engineers
+If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Policies`_** in **Confluence** and follow the instructions there.
+
 #### Service name
 - You can change `service` name to some other unique string as per your need.
 - Format `serverless-artillery-<unique-string>`. For example, `serverless-artillery-myperftestservice`.
@@ -510,9 +515,6 @@ add the following
 
 ##### Datadog plugin
 **ASHMITODO**
-
-#### Customization for Nordstrom Engineers
-If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Policies`_** in **Confluence** and follow the instructions there.
 
 ### T3.8. Setup AWS account credentials
 Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding. **It should be running while using any serverless-artillery command that interacts with AWS.**
