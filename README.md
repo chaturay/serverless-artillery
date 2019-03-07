@@ -686,7 +686,16 @@ Following flags are reserved in `slsart invoke` command.
 The flag `--raw` is unsupported in `slsart invoke` command because, while arbitrary functions can accept strings, a string does not comprise a valid artillery script.
 
 # Acceptance mode
+Find defects before performance testing! Acceptance mode runs each scenario/flow in your script exactly once and reports the results. For example, you can run your script in acceptance mode in your CICD to validate that merges don't break the scenarios in your script.
+
 Performance testing framework forms the basis of acceptance mode of serverless-artillery. Hence please go through [performance mode]() **ASHMITODO** section before proceeding.
+
+## `match`
+Acceptance mode requires `match`
+
+Ensure that you have `match` clauses defined for each request in your script's flows to validate responses. (["official" docs](https://github.com/shoreditch-ops/artillery/blob/master/core/lib/engine_util.js#L318), see [#116](https://github.com/Nordstrom/serverless-artillery/issues/116)).
+
+## Tutorial 5: Acceptance mode
 
 # Monitoring mode
 Performance testing framework forms the basis of monitoring mode of serverless-artillery. Hence please go through [performance mode]() **ASHMITODO** section before proceeding.
