@@ -119,7 +119,7 @@ npm uninstall -g serverless-artillery
 # How it works?
 <img src="docs/HowItWorks.jpg" width="442">
 
-* Serverless-artillery would be installed and run on your local machine. Run `slsart --help` to see various serverless-artillery commands.
+* Serverless-artillery would be installed and run on your local machine. From command line run `slsart --help` to see various serverless-artillery commands.
 * It would take your JSON or YAML load script (`script.yml`) that specifies 
   * test target/URL/endpoint/service, 
   * load progression,
