@@ -873,7 +873,7 @@ Open `serverless.yml` in your favorite editor. Under `functions` > `loadGenerato
 Notice instruction 0 and 1 under `BEFORE ENABLING` section if they are applicable for your use case.
 
 ### T6.5. Deploy assets to AWS to start monitoring
-This section is same as before. See [here](#t26-deploy-assets-to-aws) for details. **Note** that in the previous step monitoring was turned on and hence deploying the assets would turn on monitoring.
+This section is same as before. See [here](#t26-deploy-assets-to-aws) for details. **Note** that in the previous step monitoring was turned on and hence just _deploying_ the assets would turn on monitoring. Separate _invoke_ is not needed.
 
 **NOTE:** In performance test and acceptance test, the `script.yml` is passed with `invoke` command and hence redeployment is not needed when you edit `script.yml`. But monitoring mode uses the `script.yml` that is deployed in `slsart deploy` command. Also `invoke` command is not used in monitoring mode. Hence you need to redeploy everytime you edit `script.yml`. During script development you can take advantage of `slsart invoke -m` to [try monitoring](#t63-tryout-monitoring-mode) with your script and avoid having to redeploy each time it is changed.
 
@@ -931,23 +931,31 @@ This section is same as before. See [here](#t631-deploy-assets-to-aws) for detai
 #### T7.5.2. Invoke monitoring once
 This section is same as before. See [here](#t632-invoke-monitoring-once) for details.
 
-### T7.6. Customize deployment assets to turn on monitoring
-This section is same as before. See [here](#t64-customize-deployment-assets-to-turn-on-monitoring) for details.
-
-### T7.7. Deploy assets to AWS to start monitoring
-This section is same as before. See [here](#t65-deploy-assets-to-aws-to-start-monitoring) for details.
-
-### T7.8. Test failure scenario
+### T7.6. Test failure scenario
 We will inject failure scenario so that the `match` fails and monitoring mode sends us an alert.
-#### T7.8.1. Edit `script.yml` to fail `match`
-Edit `script.yml` as mentioned [here](#t541-edit-scriptyml-to-fail-match) to cause `match` to fail.
-#### T7.8.2. Deploy assets to AWS to start monitoring
-In monitoring mode editing `script.yml` each time requires redeployment. See [here](#t65-deploy-assets-to-aws-to-start-monitoring) for details.
 
-Once deployed you should get email alert to notify that there is a problem. Below is sample email.
+#### T7.6.1. Edit `script.yml` to fail `match`
+Edit `script.yml` as mentioned [here](#t541-edit-scriptyml-to-fail-match) to cause `match` to fail.
+
+#### T7.6.2. Invoke monitoring once
+Follow instruction [here](#t632-invoke-monitoring-once) to use `-m` option of `slsart invoke` command to invoke monitoring once to try our modified `script.yml` without having to redeploy assets.
+
+Given default [moitoring behavior configuration](#to-configure-monitoring-behavior), each scenario/flow in your script will be executed five times **only once**. If all five of them fail (we try to avoid notifying you about blips) then you should receive a notification via the configured mechanism (email in the case of this tutorial).
+
+Below is sample email.
 ```
 ASHMITODO add sample email
 ```
+
+### T7.7. Customize deployment assets to turn on monitoring
+This section is same as before. See [here](#t64-customize-deployment-assets-to-turn-on-monitoring) for details.
+
+### T7.8. Deploy assets to AWS to start monitoring
+This section is same as before. See [here](#t65-deploy-assets-to-aws-to-start-monitoring) for details.
+
+In this step, along with deployment asset we are also deploying the modified `script.yml` where `match` will fail. Hence once the assets are deployed, monitoring mode will turn on and send you an email to alert about these failures.
+
+**ASHMITODO how often will you get email**
 
 ### T7.9. Pause monitoring
 This section is same as before. See [here](#t66-pause-monitoring) for details.
