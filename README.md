@@ -691,6 +691,7 @@ The flag `--raw` is unsupported in `slsart invoke` command because, while arbitr
 
 # Acceptance mode
 **ASHMITODO acceptance test is broken in monitoring branch. Update the doc once it is fixed.**
+
 Find defects before performance testing! Acceptance mode runs each scenario/flow in your script exactly once and reports the results. For example, you can run your script in acceptance mode in your CI/CD to ensure that merges don't break the scenarios in your script.
 
 Performance testing framework forms the basis of acceptance mode of serverless-artillery. Hence please go through [performance mode](#performance-mode-performanceload-testing) section before proceeding.
@@ -720,6 +721,17 @@ mode: acceptance
 You can use the same `script.yml` for performance and acceptance testing so you don't have to maintain multiple files. The scenarios that are important for performance test would be used for acceptance testing as well.
 
 Scripts running in acceptance mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via the `-a` flag) and have them anyway.
+
+### To configure acceptance behavior:
+You may configure [sampling](glossary.md#sampling) behavior.  To control the number of samples taken, the time before taking a sample, or the number of errors constituting a failure, you may supply the following (default values listed):
+
+```
+sampling:
+  size: 1            # The size of sample set
+  averagePause: 0.2  # The average number of seconds to pause between samples
+  pauseVariance: 0.1 # The maximum difference of the actual pause from the average pause (in either direction)
+  errorBudget: 0     # The number of observed errors to accept before alerting
+```
 
 ## Tutorial 5: Acceptance mode
 ### T5.1. Customize `script.yml`
@@ -815,7 +827,7 @@ Invoke acceptance test as mentioned [above](#t53-invoke-acceptance-test).
 
 ### T5.5. Remove assets from AWS
 This section is same as before. See [here](#t28-remove-assets-from-aws) for details.
- 
+
 # Monitoring mode
 Performance testing framework forms the basis of monitoring mode of serverless-artillery. Hence please go through [performance mode]() **ASHMITODO** section before proceeding.
 
