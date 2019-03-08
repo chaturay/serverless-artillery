@@ -470,7 +470,7 @@ The Serverless framework automatically names the Lambda function based on the se
 - The `iamRoleStatements` section in the `serverless.yml` gives the load generating Lambda function to invoke itself (`lambda:InvokeFunction`).
 
 ### T3.7. Customizing `serverless.yml`
-This step is optional in the tutorial. If you like you can customize `serverless.yml` as follows.
+Except for [one step for **_Nordstrom_** Engineers](#customization-for-nordstrom-engineers), all customizations are **optional** in the tutorial. If you like you can customize `serverless.yml` as follows.
 
 #### Customization for Nordstrom Engineers
 If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Policies`_** in **Confluence** and follow the instructions there.
@@ -847,8 +847,59 @@ Detect outages quickly. Use serverless-artillery to generate synthetic customer 
 
 Performance testing framework forms the basis of monitoring mode of serverless-artillery. Hence please go through [performance mode]() **ASHMITODO** section before proceeding.
 
-## Tutorial 6: Monitoring mode
-**ASHMITODO** NEXT
+## Tutorial 6: Monitoring mode without serverless-artillery alert
+If you don't need serverless-artillery to send an alert when monitoring detects a problem then follow the tutorial here. You can [forward the test result to your data store](#providing-a-data-store-to-view-the-results-of-your-performance-test) and use alerting service there to noify you.
+
+### T6.1. Create custom deployment assets
+Follow [Tutorial 3 to create custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets).
+
+### T6.2. Setup AWS account credentials
+This section is same as before. See [here](#t25-setup-aws-account-credentials) for details.
+
+### T6.3. Tryout monitoring mode
+#### T6.3.1. Deploy assets to AWS
+This section is same as before. See [here](#t26-deploy-assets-to-aws) for details. **Note** that monitoring is turned off by default and hence the assets deployed in this step would not start monitoring.
+
+#### T6.3.2. Invoke monitoring once
+When `-m` option is used in `slsart invoke` command, serverless-artillery invokes the load generator Lambda in monitoring mode. This is useful also during script development to avoid having to redeploy everytime you edit `script.yml` as mentioned [below](#t65-deploy-assets-to-aws-to-start-monitoring).
+```
+slsart invoke -m
+```
+Given default [moitoring behavior configuration](#to-configure-monitoring-behavior), each scenario/flow in your script will be executed five times **only once**.
+
+### T6.4. Customize assets to turn on monitoring
+Open `serverless.yml` in your favorite editor. Under `functions` > `loadGenerator` > `events` > `schedule` > find `enabled: false`. Set it to `true`.
+
+Notice instruction 0 and 1 under `BEFORE ENABLING` section if they are applicable for your use case.
+
+### T6.5. Deploy assets to AWS to start monitoring
+This section is same as before. See [here](#t26-deploy-assets-to-aws) for details. **Note** that in the previous step monitoring was turned on and hence deploying the assets would turn on monitoring.
+
+**NOTE:** In performance test and acceptance test, the `script.yml` is passed with `invoke` command and hence redeployment is not needed when you edit `script.yml`. But monitoring mode uses the `script.yml` that is deployed in `slsart deploy` command. Also `invoke` command is not used in monitoring mode. Hence you need to redeploy everytime you edit `script.yml`. During script development you can take advantage of `slsart invoke -m` to [try monitoring](#t63-tryout-monitoring-mode) with your script and avoid having to redeploy each time it is changed.
+
+Given default [moitoring behavior configuration](#to-configure-monitoring-behavior), each scenario/flow in your script will be executed five times **every minute**.
+
+### T6.6. Pause monitoring
+- Go to `AWS CloudWatch console` and find `Rules` (under `Events`) and search for the rule `${self:service}-${opt:stage, self:provider.stage}-monitoring` based on your `serverless.yml`.
+- Do required [steps](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/Delete-or-Disable-Rule.html) to `Disable` this rule. This will prevent further invocation of the load generating Lambda function for monitoring.
+  - To enable monitoring again `Enable` this rule.
+- This will turn off monitoring and preserve the load generating Lambda logs.
+
+### T6.7. Remove assets from AWS
+If you want to keep the 24x7 monitoring then you don't need to do this step.
+
+When you want to turn off monitoring then remove the assets from AWS. See [here](#t28-remove-assets-from-aws) for details.
+
+## Tutorial 7: Monitoring mode with serverless-artillery alert
+Here we will look into how to setup monitoring such that serverless-artillery sends alert when it detects a problem.
+
+### T7.1. Create custom deployment assets
+Follow [Tutorial 3 to create custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets).
+
+### T7.2. Setup AWS account credentials
+This section is same as before. See [here](#t25-setup-aws-account-credentials) for details.
+
+### T7.3. **ASHMITODO** NEXT
 
 ## More about monitoring mode
 ### Run `script.yml` exclusively in monitoring mode
@@ -864,7 +915,7 @@ You can use the same `script.yml` for performance, acceptance testing and monito
 
 Scripts running in monitoring mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via a schedule event or with the `-m` flag) and have them anyway. **ASHMITODO ask greg. I am confused. why does it say it is expected that performance tests will be run in this mode? does it mean monitoring test is like running perf test but 5 times every minute?**
 
-### To configure monitoring behavior:
+### To configure monitoring behavior
 You may configure [sampling](glossary.md#sampling) behavior.  To control the number of samples taken, the time before taking a sample, or the number of errors constituting a failure, you may supply the following (default values listed):
 
 ```
