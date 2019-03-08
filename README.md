@@ -706,33 +706,6 @@ slsart invoke -a
 ```
 **ASHMITODO this is broken in MM branch.** Expect a non-zero exit code if a match clause fails.
 
-### Acceptance testing in CI/CD
-For the purposes of facilitating the use of this tool in a CI/CD pipeline, if any of the acceptance tests fail to successfully complete, the process will exit with a non-zero exit code.
-
-### Run `script.yml` exclusively in acceptance mode:
-To hard code the mode into your script add the following in your `script.yml`:
-```
-mode: acceptance
-...
-```
-*note: 'acceptance' may be abbreviated to 'acc' in the script*
-
-### Use same `script.yml` for performance and acceptance testing
-You can use the same `script.yml` for performance and acceptance testing so you don't have to maintain multiple files. The scenarios that are important for performance test would be used for acceptance testing as well.
-
-Scripts running in acceptance mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via the `-a` flag) and have them anyway.
-
-### To configure acceptance behavior:
-You may configure [sampling](glossary.md#sampling) behavior.  To control the number of samples taken, the time before taking a sample, or the number of errors constituting a failure, you may supply the following (default values listed):
-
-```
-sampling:
-  size: 1            # The size of sample set
-  averagePause: 0.2  # The average number of seconds to pause between samples
-  pauseVariance: 0.1 # The maximum difference of the actual pause from the average pause (in either direction)
-  errorBudget: 0     # The number of observed errors to accept before alerting
-```
-
 ## Tutorial 5: Acceptance mode
 ### T5.1. Customize `script.yml`
 Follow [Tutorial 2 to create custom `script.yml`](#tutorial-2-performance-test-with-custom-script) and customize your `script.yml` by copy pasting the following content in it. Note the `match` clauses.
@@ -828,8 +801,66 @@ Invoke acceptance test as mentioned [above](#t53-invoke-acceptance-test).
 ### T5.5. Remove assets from AWS
 This section is same as before. See [here](#t28-remove-assets-from-aws) for details.
 
+## More about acceptance mode
+### Acceptance testing in CI/CD
+For the purposes of facilitating the use of this tool in a CI/CD pipeline, if any of the acceptance tests fail to successfully complete, the process will exit with a non-zero exit code.
+
+### Run `script.yml` exclusively in acceptance mode:
+To hard code acceptance mode into your script add the following in your `script.yml`:
+```
+mode: acceptance
+...
+```
+*note: 'acceptance' may be abbreviated to 'acc' in the script*
+
+### Use same `script.yml` for performance and acceptance testing and monitoring
+You can use the same `script.yml` for performance, acceptance testing and monitoring so you don't have to maintain multiple files. The scenarios that are important for performance test would be used for acceptance testing and monitoring as well.
+
+Scripts running in acceptance mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via the `-a` flag) and have them anyway. **ASHMITODO ask greg. I am confused. why does it say it is expected that performance tests will be run in this mode? does it mean acceptance test is like running perf test but only once?**
+
+### To configure acceptance behavior:
+You may configure [sampling](glossary.md#sampling) behavior.  To control the number of samples taken, the time before taking a sample, or the number of errors constituting a failure, you may supply the following (default values listed):
+
+```
+sampling:
+  size: 1            # The size of sample set
+  averagePause: 0.2  # The average number of seconds to pause between samples
+  pauseVariance: 0.1 # The maximum difference of the actual pause from the average pause (in either direction)
+  errorBudget: 0     # The number of observed errors to accept before alerting
+```
+
 # Monitoring mode
+Detect outages quickly. Use serverless-artillery to generate synthetic customer activity to continously validate the expected system behavior and optionally alert you immediately if your users will be impacted.
+
 Performance testing framework forms the basis of monitoring mode of serverless-artillery. Hence please go through [performance mode]() **ASHMITODO** section before proceeding.
+
+## Tutorial 6: Monitoring mode
+**ASHMITODO** NEXT
+
+## More about monitoring mode
+### Run `script.yml` exclusively in monitoring mode
+To hard code monitoring mode into your script add the following in your `script.yml`:
+```
+mode: monitoring
+...
+```
+*note: 'monitoring' may be abbreviated to 'mon' in the script*
+
+### Use same `script.yml` for performance and acceptance testing and monitoring
+You can use the same `script.yml` for performance, acceptance testing and monitoring so you don't have to maintain multiple files. The scenarios that are important for performance test would be used for acceptance testing and monitoring as well.
+
+Scripts running in monitoring mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via a schedule event or with the `-m` flag) and have them anyway. **ASHMITODO ask greg. I am confused. why does it say it is expected that performance tests will be run in this mode? does it mean monitoring test is like running perf test but 5 times every minute?**
+
+### To configure monitoring behavior:
+You may configure [sampling](glossary.md#sampling) behavior.  To control the number of samples taken, the time before taking a sample, or the number of errors constituting a failure, you may supply the following (default values listed):
+
+```
+sampling:
+  size: 5            # The size of sample set
+  averagePause: 0.2  # The average number of seconds to pause between samples
+  pauseVariance: 0.1 # The maximum difference of the actual pause from the average pause (in either direction)
+  errorBudget: 4     # The number of observed errors to accept before alerting
+```
 
 # Troubleshooting
 ### Problems installing?
