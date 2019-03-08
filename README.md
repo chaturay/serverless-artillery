@@ -190,7 +190,7 @@ If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless
 In order to use serverless-artillery, depending on the AWS account environment you're working in, you may need to define `AWS_PROFILE` to declare the AWS credentials to use and possibly `HTTP_PROXY` in order to escape your corporate proxy.  See the [Serverless Framework docs](https://serverless.com/framework/docs/) or [serverless-artillery workshop](https://github.com/Nordstrom/serverless-artillery-workshop)'s [Lesson 0](https://github.com/Nordstrom/serverless-artillery-workshop/tree/master/Lesson0%20-%20Before%20the%20workshop) for details of how to set your system up for successful deployment, invocation, and removal. 
 
 # Performance mode (performance/load testing)
-You can use serverless-artillery to performance test or load test your service/target/endpoint/URL. Performance testing framework forms the basis of the other two modes of serverless-artillery. i.e. acceptance mode and monitoring mode.
+You can use serverless-artillery to performance test or load test your service/target/endpoint/URL. Performance testing framework forms the basis of the other two modes of serverless-artillery, i.e. acceptance mode and monitoring mode.
 
 ## Tutorial 1: Run a quick performance test
 If you want to quickly test your setup or see serverless-artillery in action, do the following to quickly run a **small load/performance test**. Don't worry about what these commands do in detail. This document explains them in detail later.
