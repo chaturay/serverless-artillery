@@ -690,17 +690,132 @@ Following flags are reserved in `slsart invoke` command.
 The flag `--raw` is unsupported in `slsart invoke` command because, while arbitrary functions can accept strings, a string does not comprise a valid artillery script.
 
 # Acceptance mode
-Find defects before performance testing! Acceptance mode runs each scenario/flow in your script exactly once and reports the results. For example, you can run your script in acceptance mode in your CICD to validate that merges don't break the scenarios in your script.
+**ASHMITODO acceptance test is broken in monitoring branch. Update the doc once it is fixed.**
+Find defects before performance testing! Acceptance mode runs each scenario/flow in your script exactly once and reports the results. For example, you can run your script in acceptance mode in your CI/CD to ensure that merges don't break the scenarios in your script.
 
-Performance testing framework forms the basis of acceptance mode of serverless-artillery. Hence please go through [performance mode]() **ASHMITODO** section before proceeding.
+Performance testing framework forms the basis of acceptance mode of serverless-artillery. Hence please go through [performance mode](#performance-mode-performanceload-testing) section before proceeding.
 
-## `match`
-Acceptance mode requires `match`
+## `match` clause
+Ensure that you have `match` clauses defined for each request in your script's flows to validate the responses. You can read about how to use `match` in [Artillery.io docs](https://artillery.io/docs/http-reference/?#extracting-and-reusing-parts-of-a-response-request-chaining) and ["official" docs](https://github.com/shoreditch-ops/artillery/blob/master/core/lib/engine_util.js#L318). Also see, [serverless-artillery issue #116](https://github.com/Nordstrom/serverless-artillery/issues/116).
 
-Ensure that you have `match` clauses defined for each request in your script's flows to validate responses. (["official" docs](https://github.com/shoreditch-ops/artillery/blob/master/core/lib/engine_util.js#L318), see [#116](https://github.com/Nordstrom/serverless-artillery/issues/116)).
+## Acceptance test command
+When `-a` option is used in `slsart invoke` command, serverless-artillery invokes the load generator Lambda in acceptance mode.
+```
+slsart invoke -a
+```
+**ASHMITODO this is broken in MM branch.** Expect a non-zero exit code if a match clause fails.
+
+### Acceptance testing in CI/CD
+For the purposes of facilitating the use of this tool in a CI/CD pipeline, if any of the acceptance tests fail to successfully complete, the process will exit with a non-zero exit code.
+
+### Run `script.yml` exclusively in acceptance mode:
+To hard code the mode into your script add the following in your `script.yml`:
+```
+mode: acceptance
+...
+```
+*note: 'acceptance' may be abbreviated to 'acc' in the script*
+
+### Use same `script.yml` for performance and acceptance testing
+You can use the same `script.yml` for performance and acceptance testing so you don't have to maintain multiple files. The scenarios that are important for performance test would be used for acceptance testing as well.
+
+Scripts running in acceptance mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via the `-a` flag) and have them anyway.
 
 ## Tutorial 5: Acceptance mode
+### T5.1. Customize `script.yml`
+Follow [Tutorial 2 to create custom `script.yml`](#tutorial-2-performance-test-with-custom-script) and customize your `script.yml` by copy pasting the following content in it. Note the `match` clauses.
 
+```
+# Thank you for trying serverless-artillery!
+# This default script is intended to get you started quickly.
+# There is a lot more that Artillery can do.
+# You can find great documentation of the possibilities at:
+# https://artillery.io/docs/
+config:
+  # this hostname will be used as a prefix for each URI in the flow unless a complete URI is specified
+  target: "https://postman-echo.com/headers"
+  phases:
+    -
+      duration: 1
+      arrivalRate: 1
+  defaults:
+    headers:
+      my-sample-header: "my-sample-header-value"
+scenarios:
+  -
+    flow:
+      -
+        get:
+          url: "/"
+          match:
+            - json: "$.headers.my-sample-header"
+              value: "my-sample-header-value"
+              #value: "failvalue"
+            - json: "$.headers.host"
+              value: "postman-echo.com"
+              #value: "failvalue"
+            - json: "$.headers.x-forwarded-proto"
+              value: "https"
+              #value: "failvalue"
+```
+
+The script is using target `https://postman-echo.com/headers` which at the time of writing this document is designed to return JSON response with headers that are passed in the request. 
+
+Run the following to try that out.
+```
+curl --location --request GET "https://postman-echo.com/headers" --header "my-sample-header: my-sample-header-value"
+```
+
+The JSON response will be as follows.
+```
+{
+  "headers": {
+    "x-forwarded-proto": "https",
+    "host": "postman-echo.com",
+    "accept": "*/*",
+    "my-sample-header": "my-sample-header-value",
+    "user-agent": "curl/7.54.0",
+    "x-forwarded-port": "443"
+  }
+}
+```
+
+The `match` clauses check if the return value is same as what is expected.
+
+### T5.2. Deploy assets to AWS
+This section is same as before. See [setup AWS account credentials](#t25-setup-aws-account-credentials) and [deploy assets to AWS](#t26-deploy-assets-to-aws) for details.
+
+Note that you don't need to _deploy_ the assets everytime `script.yml` changes.
+
+### T5.3. Invoke acceptance test
+Run following command to run acceptance test.
+```
+slsart invoke -a
+```
+**ASHMITODO add what to observe where**
+
+### T5.4. Test failure scenario
+#### T5.4.1. Edit `script.yml` to fail `match`
+Edit `match` section in `script.yml` to look for wrong return value to simulate failure scenario.
+```
+          match:
+            - json: "$.headers.my-sample-header"
+              #value: "my-sample-header-value"
+              value: "failvalue"
+            - json: "$.headers.host"
+              #value: "postman-echo.com"
+              value: "failvalue"
+            - json: "$.headers.x-forwarded-proto"
+              #value: "https"
+              value: "failvalue"
+```
+#### T5.4.2. Invoke acceptance test
+Invoke acceptance test as mentioned [above](#t53-invoke-acceptance-test).
+**ASHMITODO where to observe failure**
+
+### T5.5. Remove assets from AWS
+This section is same as before. See [here](#t28-remove-assets-from-aws) for details.
+ 
 # Monitoring mode
 Performance testing framework forms the basis of monitoring mode of serverless-artillery. Hence please go through [performance mode]() **ASHMITODO** section before proceeding.
 
