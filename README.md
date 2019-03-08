@@ -808,7 +808,7 @@ Edit `match` section in `script.yml` to look for wrong return value to simulate 
               value: "failvalue"
 ```
 #### T5.4.2. Invoke acceptance test
-Invoke acceptance test as mentioned [above](#t53-invoke-acceptance-test).
+Invoke acceptance test as mentioned [above](#t54-invoke-acceptance-test).
 **ASHMITODO where to observe failure**
 
 ### T5.5. Remove assets from AWS
@@ -867,7 +867,7 @@ slsart invoke -m
 ```
 Given default [moitoring behavior configuration](#to-configure-monitoring-behavior), each scenario/flow in your script will be executed five times **only once**.
 
-### T6.4. Customize assets to turn on monitoring
+### T6.4. Customize deployment assets to turn on monitoring
 Open `serverless.yml` in your favorite editor. Under `functions` > `loadGenerator` > `events` > `schedule` > find `enabled: false`. Set it to `true`.
 
 Notice instruction 0 and 1 under `BEFORE ENABLING` section if they are applicable for your use case.
@@ -880,10 +880,16 @@ This section is same as before. See [here](#t26-deploy-assets-to-aws) for detail
 Given default [moitoring behavior configuration](#to-configure-monitoring-behavior), each scenario/flow in your script will be executed five times **every minute**.
 
 ### T6.6. Pause monitoring
+Monitoring mode will run 24x7 until turned off or paused. If you need to pause monitoring you can do the following.
+#### T6.6.1. Method 1: Using CloudWatch Rules
 - Go to `AWS CloudWatch console` and find `Rules` (under `Events`) and search for the rule `${self:service}-${opt:stage, self:provider.stage}-monitoring` based on your `serverless.yml`.
 - Do required [steps](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/Delete-or-Disable-Rule.html) to `Disable` this rule. This will prevent further invocation of the load generating Lambda function for monitoring.
   - To enable monitoring again `Enable` this rule.
 - This will turn off monitoring and preserve the load generating Lambda logs.
+#### T6.6.2. Method 2: Turn monitoring off in `serverless.yml`
+- Open `serverless.yml` in your favorite editor.
+- Under `functions` > `loadGenerator` > `events` > `schedule` > find `enabled: true`. Set it to `false`.
+- Redeploy assets using same instructions as before. See [here](#t26-deploy-assets-to-aws) for details.
 
 ### T6.7. Remove assets from AWS
 If you want to keep the 24x7 monitoring then you don't need to do this step.
@@ -899,7 +905,55 @@ Follow [Tutorial 3 to create custom deployment assets](#tutorial-3-performance-t
 ### T7.2. Setup AWS account credentials
 This section is same as before. See [here](#t25-setup-aws-account-credentials) for details.
 
-### T7.3. **ASHMITODO** NEXT
+### T7.3. Customize script to have `match` clause
+Ensure that you have `match` clauses defined for each request in your script's flows to validate the responses. See [here](#match- clause) to learn more about `match`.
+
+For the purpose of this tutorial you can copy paste the script from [here](#t51-customize-scriptyml).
+
+### T7.4. Customize deployment assets to add at least one subscription
+Open `serverless.yml` in your favorite editor.
+- Uncomment the line of `Subscription` section.
+```
+#        Subscription: # docs at https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-sns-subscription.html
+```
+- Add at least one subscription. In this tutorial we will use email subscription.
+  - Uncomment following two lines.
+```
+#          - Endpoint: <target>@<host> # the endpoint is an email address
+#            Protocol: email
+```
+  - Replace `<target>@<host>` with your email address. Example, `mymail@myhost.com`.
+
+### T7.5. Tryout monitoring mode
+#### T7.5.1. Deploy assets to AWS
+This section is same as before. See [here](#t631-deploy-assets-to-aws) for details.
+
+#### T7.5.2. Invoke monitoring once
+This section is same as before. See [here](#t632-invoke-monitoring-once) for details.
+
+### T7.6. Customize deployment assets to turn on monitoring
+This section is same as before. See [here](#t64-customize-deployment-assets-to-turn-on-monitoring) for details.
+
+### T7.7. Deploy assets to AWS to start monitoring
+This section is same as before. See [here](#t65-deploy-assets-to-aws-to-start-monitoring) for details.
+
+### T7.8. Test failure scenario
+We will inject failure scenario so that the `match` fails and monitoring mode sends us an alert.
+#### T7.8.1. Edit `script.yml` to fail `match`
+Edit `script.yml` as mentioned [here](#t541-edit-scriptyml-to-fail-match) to cause `match` to fail.
+#### T7.8.2. Deploy assets to AWS to start monitoring
+In monitoring mode editing `script.yml` each time requires redeployment. See [here](#t65-deploy-assets-to-aws-to-start-monitoring) for details.
+
+Once deployed you should get email alert to notify that there is a problem. Below is sample email.
+```
+ASHMITODO add sample email
+```
+
+### T7.9. Pause monitoring
+This section is same as before. See [here](#t66-pause-monitoring) for details.
+
+### T7.10. Remove assets from AWS
+This section is same as before. See [here](#t67-remove-assets-from-aws) for details.
 
 ## More about monitoring mode
 ### Run `script.yml` exclusively in monitoring mode
