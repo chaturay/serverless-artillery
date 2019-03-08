@@ -541,7 +541,7 @@ provider:
 ```
 
 ### T3.8. Setup AWS account credentials
-Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding. **It should be running while using any serverless-artillery command that interacts with AWS.**
+This section is same as before. See [here](#t25-setup-aws-account-credentials) for details.
 
 ### T3.9. Deploy assets to AWS
 This section is same as before. See [here](#t26-deploy-assets-to-aws) for details.
@@ -558,13 +558,23 @@ This section is same as before. See [here](#t28-remove-assets-from-aws) for deta
 While running performance/load test it is sometimes necessary to kill the test before it is complete. Read more about the kill command [here]().
 
 ### T4.1. Increase `duration`
-Follow [Tutorial 2](#tutorial-2-performance-test-with-custom-script) to create `script.yml`. Edit `script.yml` in your favorite editor and increase the `duration` to `60` seconds.
+If you are a **_Nordstrom_** engineer, please follow [Tutorial 3](#tutorial-3-performance-test-with-custom-deployment-assets) to create custom script and custom deployment assets. Make sure you do [customization for Nordstrom Engineers](#customization-for-nordstrom-engineers). Other optional customizations are not necessary for this tutorial.
 
-### T4.2. Invoke performance test
+Others can follow [Tutorial 2](#tutorial-2-performance-test-with-custom-script) to create `script.yml`.
+
+Edit `script.yml` in your favorite editor and increase the `duration` to `60` seconds.
+
+### T4.2. Setup AWS account credentials
+This section is same as before. See [here](#t25-setup-aws-account-credentials) for details.
+
+### T4.3. Deploy assets to AWS
+This section is same as before. See [here](#t26-deploy-assets-to-aws) for details.
+
+### T4.4. Invoke performance test
 This section is same as before. See [here](#t27-invoke-performance-test) for details.
 
-### T4.3. Kill the in-progress performance test
-Run the following command to kill the performance test. Read more about the kill command [here]().
+### T4.5. Kill the in-progress performance test
+Run the following command to kill the performance test. Read more about the kill command [here](#killing-in-progress-performance-test). **Note** that _kill_ command will also _remove_ the deployed assets. Hence running `slsart remove` after this is not needed. 
 ```
 slsart kill
 ```
@@ -767,12 +777,15 @@ The JSON response will be as follows.
 
 The `match` clauses check if the return value is same as what is expected.
 
-### T5.2. Deploy assets to AWS
-This section is same as before. See [setup AWS account credentials](#t25-setup-aws-account-credentials) and [deploy assets to AWS](#t26-deploy-assets-to-aws) for details.
+### T5.2. Setup AWS account credentials
+This section is same as before. See [here](#t25-setup-aws-account-credentials) for details.
 
-Note that you don't need to _deploy_ the assets everytime `script.yml` changes.
+### T5.3. Deploy assets to AWS
+This section is same as before. See [here](#t26-deploy-assets-to-aws) for details.
 
-### T5.3. Invoke acceptance test
+**Note** that you don't need to _deploy_ the assets everytime `script.yml` changes.
+
+### T5.4. Invoke acceptance test
 Run following command to run acceptance test.
 ```
 slsart invoke -a
