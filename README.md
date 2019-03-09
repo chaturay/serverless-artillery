@@ -1259,7 +1259,6 @@ Options:
 
 # Troubleshooting
 ### Problems installing?
-**ASHMITODO:Look into this:**
 #### Error: npm ERR! code EACCES
 If you are installing into a node_modules owned by root and getting error `npm ERR! code EACCES`, [read this](root-owns-node-modules.md).
 
