@@ -553,7 +553,7 @@ This section is same as before. See [here](#t26-deploy-assets-to-aws) for detail
 ### T3.10. Invoke performance test
 This section is same as before. See [here](#t27-invoke-performance-test) for details.
 
-If you used CloudWatch plugin you will be able to view the metrics on the CloudWatch dashboard. You can learn more about using CloudWatch dashboard [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html). **Note that it can take few minutes for the data to propogate to CloudWatch.**
+If you used CloudWatch/Datadog plugins you will be able to view the metrics on the CloudWatch/Datadog dashboard. You can learn more about using CloudWatch dashboard [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html). **Note that it can take few minutes for the data to propogate to CloudWatch/Datadog.**
 
 ### T3.11. Remove assets from AWS
 This section is same as before. See [here](#t28-remove-assets-from-aws) for details.
