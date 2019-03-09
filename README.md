@@ -173,8 +173,8 @@ npm uninstall -g serverless-artillery
   - Each lambda function can only generate a certain amount of load, and can only run for up to five minutes (five minutes was a built-in limitation of AWS Lambda) (now 15 minutes). 
   - Given these limitations, it is often necessary to invoke more lambdas - both to scale horizontally (to generate higher load) as well as handing off the work to a new generation of lambdas before their run-time has expired.
 - Above diagram shows how Serverless Artillery solves this problem.
-  - It first runs the Lamdba function in a **control** mode. It examines the submitted load config JSON/YAML script (this is identical to the original “servered” [Artillery.io](https://artillery.io/) script). If the load exceeds what a single lambda is configured to handle, then the load config is chopped up into workloads achievable by a single lambda. 
-  - Control lambda then invokes as many **worker** lambdas as necessary to generate the load. 
+  - It first runs the Lamdba function in a **control** mode. It examines the submitted load config JSON/YAML script (this is identical to the original “servered” [Artillery.io](https://artillery.io/) script). This script is also referred to as original script. If the load exceeds what a single lambda is configured to handle, then the load config is chopped up into workloads achievable by a single lambda.
+  - Control lambda then invokes as many **worker** lambdas as necessary to generate the load. Controller lambda basses a script to worker lambda that is created by chopping up the original script.
   - Towards the end of the Lambda runtime the controller lambda invokes a new controller lambda to produce load for the remaining duration.
 - The result of the load test can be reported to CloudWatch, InfluxDB or Datadog through plugins and then visualized with CloudWatch, Grafana or Datadog dashboard.
 
@@ -182,7 +182,7 @@ npm uninstall -g serverless-artillery
 </details>
 
 # Before running serverless-artillery
-Serverless-artillery needs to _deploy_ assets like [load generating Lambda function](docs/LoadGeneratorLambda.md) to AWS, _invoke_ the function to run the tests and _remove_ these assets from AWS when not needed. Hence you need an AWS account and setup credentials with which to deploy, invoke and remove the assets from AWS.
+Serverless-artillery needs to _deploy_ assets like [load generating Lambda function](#load-generating-lambda-function-on-aws) to AWS, _invoke_ the function to run the tests and _remove_ these assets from AWS when not needed. Hence you need an AWS account and setup credentials with which to deploy, invoke and remove the assets from AWS.
 
 ## Setup for Nordstrom Technology
 If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Setup`_** in **Confluence** and follow the instructions there.
@@ -199,14 +199,14 @@ If you want to quickly test your setup or see serverless-artillery in action, do
 Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding. **It should be running while using any serverless-artillery command that interacts with AWS.**
 
 ### T1.2. Deploy
-The following command will deploy required assets (like [load generating Lambda function](docs/LoadGeneratorLambda.md)) to the AWS account you selected in the previous step.
+The following command will deploy required assets (like [load generating Lambda function](#load-generating-lambda-function-on-aws)) to the AWS account you selected in the previous step.
 ```
 slsart deploy
 ```
 By default it uses AWS CloudFormation Stack name `serverless-artillery-dev`. You will see the stack created if you go to your AWS account console > CloudFormation.
 
 ### T1.3. Invoke
-The following command will invoke [load generating Lambda function](docs/LoadGeneratorLambda.md) using default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script.
+The following command will invoke [load generating Lambda function](#load-generating-lambda-function-on-aws) using default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script.
 ```
 slsart invoke
 ```
@@ -284,7 +284,7 @@ This step is optional in the tutorial. If you like you can customize `script.yml
 Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding. **It should be running while using any serverless-artillery command that interacts with AWS.**
 
 ### T2.6. Deploy assets to AWS
-We need to deploy assets (like [load generating Lambda function](docs/LoadGeneratorLambda.md)) to your AWS account before we can use it to start our test.
+We need to deploy assets (like [load generating Lambda function](#load-generating-lambda-function-on-aws)) to your AWS account before we can use it to start our test.
 
 Use the following command to deploy the assets.
 ```
@@ -331,7 +331,7 @@ This section is same as before. See [here](#t23-understanding-scriptyml) for det
 This section is same as before. See [here](#t24-customizing-scriptyml) for details.
 
 ### T3.5. Create custom deployment assets
-Create a local copy of the deployment assets for customization and deployment using following command. It generates a local copy of the serverless function code that can be edited and deployed with your changed settings.
+Create a _local copy_ of the deployment assets for customization and deployment using following command. It generates a local copy of the serverless function code that can be edited and deployed with your changed settings if needed.
 ```
 slsart configure
 ```
@@ -340,10 +340,14 @@ The important files among other files created by this command are as follows.
 |File|Description|
 |:----|:----------|
 |`package.json`|Node.js dependencies for the load generator Lambda. Add Artillery.io plugins you want to use here.|
-|`serverless.yml`|Serverless service definition. Change AWS-specific settings here.|
+|`serverless.yml`|Serverless-artillery's service definition using Serverless Framework. Change AWS-specific settings here.|
 |`handler.js`|Load generator Lambda code. **EDIT AT YOUR OWN RISK.**|
 
+**Note** that everytime you make changes to these local copy of deployment assets, you need to redeploy using `slsart deploy` command.
+
 ### T3.6. Understanding `serverless.yml`
+`serverless.yml` contains serverless-artillery's service definition using Serverless Framework.
+
 Open `serverless.yml` with your favorite editor to see what it contains.
 <details><summary>Click to expand/collapse</summary>
 <p>
@@ -602,7 +606,7 @@ Result:
 
 **You will want to wait approximately 5 minutes before redeploying to avoid the killed performance test from resuming.** Behind the scenes, AWS creates a queue for Lambda invocations. While processing the invocation requests from the queue, if a function is not available then that message will be placed back onto the queue for further attempts. As a result, redeploying your function can allow those re-queued messages to be used to invoke your re-deployed function. In our observation based on a limited set of tests, messages will be permanently failed out of the queues after 5 minutes. That is the basis of our recommendation.
 
-The default maximum duration of a script chunk (**ASHMITODO what is script chunk**) is 2 minutes (`maxChunkDurationInSeconds`). As a result of this, on average, load will not be produced after 1 minute but it could continue for up to the full 2 minutes. To lower the wait times after killing, this value can be overridden in your `script.yml` within the \_split attribute, as shown [here](#script-splitting-customization) **ASHMITODO**. This value can be as low as 15 seconds and using this value causes each script chunk to run for a maximum duration of 15 seconds. Theoretically, this means that you’d only have to wait 7.5 seconds on average for tests to stop running after killing your test (in practice we have observed roughly 20 seconds lag between killing a function and termination of invocations).
+The default maximum duration of a [script chunk](#splitting) is 2 minutes (`maxChunkDurationInSeconds`). As a result of this, on average, load will not be produced after 1 minute but it could continue for up to the full 2 minutes. To lower the wait times after killing, this value can be overridden in your `script.yml` within the \_split attribute, as shown [here](#script-splitting-customization) **ASHMITODO**. This value can be as low as 15 seconds and using this value causes each script chunk to run for a maximum duration of 15 seconds. Theoretically, this means that you’d only have to wait 7.5 seconds on average for tests to stop running after killing your test (in practice we have observed roughly 20 seconds lag between killing a function and termination of invocations).
 
 ### Create customized `script.yml`
 Above you used how to use `slsart script` to create the default `script.yml` (see [here](#t22-create-scriptyml)) and how to customize it by manually editing it (see [here](#t24-customizing-scriptyml)).
@@ -637,6 +641,16 @@ For more options see,
 ```
 slsart invoke --help
 ```
+
+### Reserved and unsupported flags
+`slsart` commands support most commandline flags of the corresponding `sls` (Serverless Framework) commands.
+#### Reserved flags
+Following flags are reserved in `slsart invoke` command.
+- The flags `-t`, `--type`, `-f`, and `--function` are reserved for `serverless-artillery` use.  They cannot be supplied on the command line.
+- The `-t` and `--type` flags are reserved because the tool uses the script you provide it to cacluate whether an `Event` or `RequestResponse` invocation type is more appropriate.  If that argument was supplied, a user might have an expectation-behavior mismatch.
+- The `-f` and `--function` flags are reserved because a part of the value that `serverless-artillery` provides is the automated definition of the function providing load testing and thereby a necessarily strong opinion of the name that function was given.
+#### Unsupported flags
+The flag `--raw` is unsupported in `slsart invoke` command because, while arbitrary functions can accept strings, a string does not comprise a valid artillery script.
 
 ### Providing a data store to view the results of your performance test
 - If your script specifies a small load that can be generated by single invocation of [load generating lambda function](#load-generating-lambda-function-on-aws) then the results are reported back at the end of `slsart invoke` command.
@@ -684,20 +698,100 @@ provider:
   - If your payload file is too large, you may need to write some custom code (i.e. write a custom processor or modify the serverless-artillery codebase) that will retrieve the data from S3 for you prior to the execution of any load.
 
 ### Advanced customization use cases
-- You would need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets) when you want to make even more customizations to how serverless-artillery works. It generates a local copy of the serverless function code that can be edited and redeployed with your changed settings.
-- You'll need to do this if you need to make any code change to load generator Lambda (example, alter hard-coded limits).
-- See [Serverless Framework docs](https://serverless.com/framework/docs/providers/aws/) for load generation function configuration related documentation.
-- See [Artillery.io docs](https://artillery.io/docs/script-reference/) for script configuration related documentation.
+#### Deployment assets and settings customization
+- Above we discussed how you need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets) and [`slsart configure` command] (#t35-create-custom-deployment-assets) when your testing needs are not met by the default deployment assets that are used in [Tutorial 1](#tutorial-1-run-a-quick-performance-test) and [Tutorial 2](#tutorial-2-performance-test-with-custom-script).
+- For example,
+  - when the endpoints you need to slam are in the VPC. See [here](#performance-testing-vpc-hosted-services) for details.
+  - when you need to view the results in your data store. See [here](#providing-a-data-store-to-view-the-results-of-your-performance-test) for details.
+  - when you need to automatically attach an AWS Managed IAM Policy (or Policies) to all IAM Roles created by serverless-artillery due to company policy. See `serverless-attach-managed-policy` plugin [here](#related-tools-and-plugins) for details.
+  - when you need to separate out various versions of the load testing function in order to maintain least privilege. **ASHMITODO ask Greg for clarification**
+  - when you want to use payload/CSV files to feed data into the request being sent to the target. See [here](#using-payloadcsv-files-to-inject-data-in-scenarios-of-your-scriptyml) for details.
+  - when you want to add custom IAM rights (see Serverless Framework [docs](https://serverless.com/framework/docs/providers/aws/guide/iam/)) to the service(?) (load generating Lambda?) to maintain least privilege. **ASHMITODO ask Greg for clarification**
+- For such cases you need to create a local copy of the deployment assets using [`slsart configure` command](#t35-create-custom-deployment-assets), customize them for your use case and deploy them using `slsart deploy` command as shown in [Tutorial 3](#tutorial-3-performance-test-with-custom-deployment-assets).
+- Full documentation of what is in the `serverless.yml` and the options you have available can be found at https://docs.serverless.com/framework/docs/.
+- You would need to use custom deployment assets when you want to make even more customizations to how serverless-artillery works. It generates a local copy of the serverless function code that can be edited and redeployed with your changed settings. For example, if you need to make any code change to load generator Lambda (example, alter hard-coded limits).
+- Please see [Serverless Framework docs](https://serverless.com/framework/docs/providers/aws/) for load generation function configuration related documentation.
+- Please see [Artillery.io docs](https://artillery.io/docs/script-reference/) for script configuration related documentation.
+- **Note** that everytime you make changes to the local copy of deployment assets, you need to redeploy using `slsart deploy` command.
 
-### Reserved and unsupported flags
-`slsart` commands support most commandline flags of the corresponding `sls` (Serverless Framework) commands.
-#### Reserved flags
-Following flags are reserved in `slsart invoke` command.
-- The flags `-t`, `--type`, `-f`, and `--function` are reserved for `serverless-artillery` use.  They cannot be supplied on the command line.
-- The `-t` and `--type` flags are reserved because the tool uses the script you provide it to cacluate whether an `Event` or `RequestResponse` invocation type is more appropriate.  If that argument was supplied, a user might have an expectation-behavior mismatch.
-- The `-f` and `--function` flags are reserved because a part of the value that `serverless-artillery` provides is the automated definition of the function providing load testing and thereby a necessarily strong opinion of the name that function was given.
-#### Unsupported flags
-The flag `--raw` is unsupported in `slsart invoke` command because, while arbitrary functions can accept strings, a string does not comprise a valid artillery script.
+#### Test script and execution customization using Artillery.io
+- The test script, `script.yml`, allows you to add plugins for various capabilities. For example,
+  - when you need to test against an authenticated AWS API Gateway endpoint. See `artillery-plugin-aws-sigv4` plugin [here](#related-tools-and-plugins) for details.
+  - when you need to view the results in your data store. See [here](#providing-a-data-store-to-view-the-results-of-your-performance-test) for details.
+- Also see [Artillery.io's plugin docs](https://github.com/artilleryio/artillery/blob/master/docs/plugins.md) about how to write your plugin.
+- You can also use payload/CSV files to feed data into the request being sent to the target. See [here](#using-payloadcsv-files-to-inject-data-in-scenarios-of-your-scriptyml) for details.
+- The HTTP engine has support for "hooks", which allow for custom JS functions to be called at certain points during the execution of a scenario. See [here](https://artillery.io/docs/http-reference/#advanced-writing-custom-logic-in-javascript) for details.
+
+#### Script splitting customization
+As mentioned [here](#load-generating-lambda-function-on-aws), the controller mode load generating Lambda function splits the work to generate the required load between multiple worker mode load generating Lambdas. The following controls are available to control how splitting is done. That said, the defaults are good and you generally won't need them until you have gotten deeper into implementation.  
+To use these, define a `_split` attribute within your `script.yml`. The values of that object will be used to alter the splitting of your script.
+```
+{
+  _split: {
+    maxScriptDurationInSeconds: 86400,  # Default listed.  Hard-coded max is 518400
+    maxChunkDurationInSeconds: 120,     # Default listed.  Hard-coded max is 285, min is 15
+    maxScriptRequestsPerSecond: 5000,   # Default listed.  Hard-coded max is 50000
+    maxChunkRequestsPerSecond: 25,      # Default listed.  Hard-coded max is 500
+    timeBufferInMilliseconds: 15000,    # Default listed.  Hard-coded max is 30000
+  }
+  ...
+}
+```
+See the [Splitting and Distribution Logic Customization](#splitting-and-distribution-logic-customization) section for an in depth discussion of how splitting is implemented and what you control with these parameters as well as the concerns involved in making decisions about them.  See the comments in [`~/lambda/handler.js`](lib/lambda/handler.js) for detailed documentation of the semantics the code has with regard to them (search for '`const constants`').  By the way, you now have the source code to change those hard-coded limits and can change them at will if you so desire - we wanted to provide a margin of safety and guardrails but not restrictions.
+
+#### Debugging and Tracing Behavior Customization
+There are two primary tools for debugging and tracing the load generating Lambda function and how it splits and executes the task it has been given.  Define the following in your `script.yml`:
+```
+{
+  _trace: true,
+  _simulation: true,
+  ...
+}
+```
+
+##### `_trace`
+`_trace` causes the load generating Lambda function to report the actions it is taking with your script and the chunks that it breaks your script into. Expect statements such as this:
+```
+scheduling self invocation for 1234567890123 in 2345678901234 with a 3456789012345 ms delay
+```
+
+This would be produced by the following line in the source code:
+```
+console.log(`scheduling self invocation for ${event._genesis} in ${event._start} with a ${timeDelay} ms delay`);
+```
+
+Here are definitions that will help you understand these statements. In the code you will see `_genesis`, `_start`, `now`, and `timeDelay`:
+- `_genesis`: the datetime stamp immediately taken by the first instance of load generating Lambda function that received the original script. `_genesis` is added to the original script so that all child function executions of the original handler have a datetime stamp of when the original "load execution request" was received. If you are not running many load tests simultaneously then this can serve as a unique ID for the current load execution. This can be useful for correlation. An improvement could include adding a unique factor to avoid collisions in such usage.  
+- `_start`: the datetime stamp immediately taken by the current function that is executing on either the original script or a chunk of that original script. This allows relative time reporting and evaluation with a function execution.  
+- `now`: the datetime stamp taken when the log entry was produced.  
+- `timeDelay`: a time delta (in milliseconds) between the current time of the current function and when it has scheduled to take the action reported in the current log entry.  
+
+`_trace` is very useful in identifying what the system is doing or where something is going wrong.  #bugs-happen
+
+##### `_simulation`
+Setting the `_simulation` attribute to a truthy value will cause the load generating Lambda function to split the script without taking action on the script. Functionally, this comprises splitting the given script into pieces without invoking functions to handle the split chunks and/or execute the load described by those chunks. Concretely, when it comes time to invoke new function instances for distributing the load, it simply invokes (or schedules an invokation of) itself. Likewise, when it comes time to invoke the `artillery-core` (**ASHMITODO talk to greg what needs to change here as it mentions artillery core**) entry point for generating load from the chunk, it instead invokes the simulation shim that reports what would have been executed and immediately completes.
+
+This mode, in combination with `_trace` related behavior is very helpful in debugging script splitting behavior and identifying what the logic declares should occur.
+
+#### Splitting and Distribution Logic Customization
+You've got the code.  Have at!  Have fun and consider contributing improvements back into the tool. Thank you!
+
+Some helpful notions used in the code and discussion of them follows.
+##### Scripts
+An artillery script is composed of a number of phases which occur one after the other. Each of these phases has its own duration and maximum load. The duration is straightforwardly how long the phase lasts. The maximum load of the phase is the maximum Requests Per Second (RPS) that are declared for the entirety of that phase (e.g. a phase declaring a ramp from 0 to 500 RPS {or 500 to 0 **ASHMITODO greg does this sound like ramp down?**} has a maximum load of 500 RPS). Phases are declared in serial in order to provide warming or not as appropriate for the load testing scenario that interests you.
+
+The duration of the script is the sum of the durations of its phases. The maximum load of the script is the maximum RPS that any of its phases declares.
+
+##### Splitting
+The splitting of a script comprises taking "chunks" off of the script.
+
+First, we take chunks from the script by duration. This is driven by the maximum duration of the underlying function as a service (FaaS) provider that we are using. For AWS Lambda, this at the time of original implementation was 5 minutes (now 15 minutes). However, we need to allow for cold starts and as such must provide a buffer of time before we begin the execution of any specific load job. Following the execution of a load job, the artillery-core (**ASHMITODO greg ask him to verify the statement as it contains artillery core**) framework calculates a summary and invokes custom analyzers (via the plugin capabilities it offers). As a result, a tailing buffer is also needed to ensure execution can properly complete.
+
+The result is a script chunk that can be executed within the duration limited period the FaaS provider allows (no guarantees yet exist on whether a single function can execute the demanded load). This chunk will be called the script for referential simplicity. We also may have a remainder script that must be executed by a new function instance as the current splitting function nears its timeout.
+
+Next, we take chunks from the script by maximum load. This is driven by the maximum requests per second that a single execution of the underlying function as a service (FaaS) provider is capable of pushing with high fidelity. For AWS Lambda (with the default 1024 MB configuration), we found 25 RPS to be a good level. This is lower than the absolute ceiling that Lambda is capable of pushing for a reason. First, each connection will be a separate opened and closed socket. Second, if we are producing too many connections, we can be in the middle of making a request when we receive the response of a separate request. Given that this is implemented in NodeJS, we have one thread and that means the timestamping of the receipt of that response is artificially and incorrectly delayed. We found that at RPS above 25 we observed an increase in the volatility of observed latencies. That written, if you do not intend to record your latencies, then you could bump this up to the limit of the FaaS service (i.e. `_split.maxChunkRequestsPerSecond = 300` or so). If you don't care about having separate sockets per request, you can alter that with artillery configuration as well **ASHMITODO greg this in past didnt work well for me. should we remove this statement?**.
+
+Anyway...  The result is a script chunk that is less than the limited period and also executable by a single function instance.  Therefore, we invoke a single function with the chunk to execute it.
 
 # Acceptance mode
 **ASHMITODO acceptance test is broken in monitoring branch. Update the doc once it is fixed.**
@@ -988,6 +1082,181 @@ sampling:
   errorBudget: 4     # The number of observed errors to accept before alerting
 ```
 
+# Detailed Usage
+```
+$ slsart --help
+
+slsart <command>
+
+Commands:
+  slsart deploy     Deploy a default version of the function that will execute
+                    your Artillery scripts.  See
+                    https://serverless.com/framework/docs/providers/aws/cli-refe
+                    rence/deploy/ for reference.
+  slsart invoke     Invoke your function with your Artillery script.  Will
+                    prefer a script given by `-d`, `--data`, `-p`, or `--path`
+                    over a `script.[yml|json]` file in the current directory
+                    over the default script.  Invocation mode will default to
+                    "performance" but adding the `-a` flag will run the script
+                    in "acceptance" mode.  See
+                    https://serverless.com/framework/docs/providers/aws/cli-refe
+                    rence/invoke/ for reference.
+  slsart kill       Stop a currently running load test and remove the function.
+  slsart remove     Remove the function and the associated resources created for
+                    or by it.  See
+                    https://serverless.com/framework/docs/providers/aws/cli-refe
+                    rence/remove/ for reference.
+  slsart script     Create a local Artillery script so that you can customize it
+                    for your specific load requirements.  See
+                    https://artillery.io for documentation.
+  slsart configure  Create a local copy of the deployment assets for
+                    modification and deployment.  See
+                    https://docs.serverless.com for documentation. (ASHMITODO greg this link needs to change to https://serverless.com/framework/docs/)
+  slsart upgrade    Upgrade local assets to latest version.
+
+Options:
+  --help         Show help                                             [boolean]
+  --version      Show version number                                   [boolean]
+  -D, --debug    Execute the command in debug mode.  It will be chatty about
+                 what it is happening in the code.
+  -V, --verbose  Execute the command in verbose mode.  It will be chatty about
+                 what it is attempting to accomplish.
+```
+
+## Commands
+### deploy
+```
+$ slsart deploy --help
+
+slsart deploy
+
+Deploy a default version of the function that will execute your Artillery
+scripts.  See
+https://serverless.com/framework/docs/providers/aws/cli-reference/deploy/ for
+reference.
+
+Options:
+  --help         Show help                                             [boolean]
+  --version      Show version number                                   [boolean]
+  -D, --debug    Execute the command in debug mode.  It will be chatty about
+                 what it is happening in the code.
+  -V, --verbose  Execute the command in verbose mode.  It will be chatty about
+                 what it is attempting to accomplish.
+```
+
+### invoke
+```
+$ slsart invoke --help
+
+slsart invoke
+
+Invoke your function with your Artillery script.  Will prefer a script given by
+`-d`, `--data`, `-p`, or `--path` over a `script.[yml|json]` file in the current
+directory over the default script.  Invocation mode will default to
+"performance" but adding the `-a` flag will run the script in "acceptance" mode.
+See https://serverless.com/framework/docs/providers/aws/cli-reference/invoke/
+for reference.
+
+Options:
+  --help            Show help                                          [boolean]
+  --version         Show version number                                [boolean]
+  -D, --debug       Execute the command in debug mode.  It will be chatty about
+                    what it is happening in the code.
+  -V, --verbose     Execute the command in verbose mode.  It will be chatty
+                    about what it is attempting to accomplish.
+  -a, --acceptance  Execute the script in acceptance mode.  It will execute each
+                    flow once, reporting failures.
+  -m, --monitoring  Execute the script in monitoring mode.  It will execute each
+                    flow a multiple of times, alerting if the number of errors
+                    exceeds the configured threshold.
+  -d, --data        A stringified script to execute
+  -p, --path        A path to the file containing the script to execute
+  --si, --stdIn     Have serverless read the event to invoke the remote function
+                    with from the "standard in" stream
+  --jo, --jsonOnly  Only write JSON to console.log to facilitate piping the
+                    invocation result into a tool such as jq
+```
+
+### kill
+```
+$ slsart kill --help
+
+slsart kill
+
+Stop a currently running load test and remove the function.
+
+Options:
+  --help         Show help                                             [boolean]
+  --version      Show version number                                   [boolean]
+  -D, --debug    Execute the command in debug mode.  It will be chatty about
+                 what it is happening in the code.
+  -V, --verbose  Execute the command in verbose mode.  It will be chatty about
+                 what it is attempting to accomplish.
+```
+
+### remove
+```
+$ slsart remove --help
+
+slsart remove
+
+Remove the function and the associated resources created for or by it.  See
+https://serverless.com/framework/docs/providers/aws/cli-reference/remove/ for
+reference.
+
+Options:
+  --help         Show help                                             [boolean]
+  --version      Show version number                                   [boolean]
+  -D, --debug    Execute the command in debug mode.  It will be chatty about
+                 what it is happening in the code.
+  -V, --verbose  Execute the command in verbose mode.  It will be chatty about
+                 what it is attempting to accomplish.
+```
+
+### script
+```
+$ slsart script --help
+
+slsart script
+
+Create a local Artillery script so that you can customize it for your specific
+load requirements.  See https://artillery.io for documentation.
+
+Options:
+  --help          Show help                                            [boolean]
+  --version       Show version number                                  [boolean]
+  -D, --debug     Execute the command in debug mode.  It will be chatty about
+                  what it is happening in the code.
+  -V, --verbose   Execute the command in verbose mode.  It will be chatty about
+                  what it is attempting to accomplish.
+  -e, --endpoint  The endpoint to load with traffic.                    [string]
+  -d, --duration  The duration, in seconds, to load the given endpoint. [number]
+  -r, --rate      The rate, in requests per second, at which to load the given
+                  endpoint.                                             [number]
+  -t, --rampTo    The rate to adjust towards away from the given rate, in
+                  requests per second at which to load the given endpoint. ASHMITODO greg should we specify ramp up here?
+                                                                        [number]
+  -o, --out       The file to output the generated script in to.        [string]
+```
+
+### configure
+```
+$ slsart configure
+
+slsart configure
+
+Create a local copy of the deployment assets for modification and deployment.
+See https://docs.serverless.com for documentation.
+
+Options:
+  --help         Show help                                             [boolean]
+  --version      Show version number                                   [boolean]
+  -D, --debug    Execute the command in debug mode.  It will be chatty about
+                 what it is happening in the code.
+  -V, --verbose  Execute the command in verbose mode.  It will be chatty about
+                 what it is attempting to accomplish.
+```
+
 # Troubleshooting
 ### Problems installing?
 **ASHMITODO:Look into this:**
@@ -1006,4 +1275,33 @@ If you are installing into a node_modules owned by root and getting error `npm E
 - monitoring
 - deployment assets. default vs custom
 - local deployment assets and remote deployment assets
-- 
+
+# External References
+1. [artillery.io](https://artillery.io) for documentation about how to define your load shape, volume, targets, inputs, et cetera
+2. [serverless.com](https://serverless.com/framework/docs/) for documentation about how to create a custom function configuration
+3. [serverless-artillery](https://github.com/Nordstrom/serverless-artillery) README for documentation on the use of this tool
+4. [serverless-star](https://github.com/Nordstrom/serverless-star) Next generation implementation and generalization of the arbitrarily wide work distribution capability
+
+# Background and motivation
+We were motivated to create this project in order to facilitate moving performance testing earlier and more frequently into our CI/CD pipelines such that the question wasn't '`whether...`' but '`why wouldn't...`' '`...you automatically (acceptance and) perf test your system every time you check in?`'.
+
+With acceptance testing in pocket we asked, '`why wouldn't you schedule that to sample and thereby monitor your service?`'.  So we added monitoring mode.
+
+# The future of serverless-artillery
+Wait.  There's a general pattern here of distributed load execution!
+
+Yes!
+
+We know!
+
+We're excited too!
+
+We've already begun writing a plugin-driven generalization of this pattern. Any task that a declaration can be provided for which itself can be executed in parallel and broken into parallelizable chunks can be driven using this capabiltiy.
+
+Watch for that effort here: https://github.com/Nordstrom/serverless-star
+
+We expect to retro-fit this project with the serverless-star project as its first use case and proof-of-not-a-painful-waste-of-our-time-ness™.
+
+# If you've read this far
+We're happy to buy you a drink at any conference we both attend. Hit us up!
+
