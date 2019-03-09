@@ -531,8 +531,8 @@ config:
     datadog:
       # Custom hostname (leave blank if not desired) 
       host: ''
-      # Custom metric prefix (defaults to 'artillery.') 
-      prefix: 'artillery.'
+      # Custom metric prefix (example, to 'serverless-artillery') 
+      prefix: 'artillery'
       # Additional tags for all metrics 
       tags:
         - 'mode:test'
