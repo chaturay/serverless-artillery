@@ -532,7 +532,7 @@ config:
       # Custom hostname (leave blank if not desired) 
       host: ''
       # Custom metric prefix (example, to 'serverless-artillery') 
-      prefix: 'artillery'
+      prefix: 'serverless-artillery'
       # Additional tags for all metrics 
       tags:
         - 'mode:test'
