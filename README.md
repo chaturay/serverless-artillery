@@ -939,7 +939,7 @@ sampling:
 # Monitoring mode
 Detect outages quickly. Use serverless-artillery to generate synthetic customer activity to continously validate the expected system behavior and optionally alert you immediately if your users will be impacted.
 
-Performance testing framework forms the basis of monitoring mode of serverless-artillery. Hence please go through [performance mode]() **ASHMITODO** section before proceeding.
+Performance testing framework forms the basis of monitoring mode of serverless-artillery. Hence please go through [performance mode](#performance-mode-performanceload-testing) section before proceeding.
 
 ## Tutorial 6: Monitoring mode without serverless-artillery alert
 If you don't need serverless-artillery to send an alert when monitoring detects a problem then follow the tutorial here. You can [forward the test result to your data store](#providing-a-data-store-to-view-the-results-of-your-performance-test) and use alerting service there to noify you.
