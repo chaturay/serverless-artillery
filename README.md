@@ -128,8 +128,8 @@ npm uninstall -g serverless-artillery
 * Running the tests
   * **Performance test:** When you run `slsart invoke`, serverless-artillery would invoke the function.
     * It would generate the number of requests as specified in `script.yml` to specified test target in order to run the specified scenarios.
-  * **Acceptance test:** **ASHMITODO**
-  * **Monitoring:** **ASHMITODO**
+  * **Acceptance test:** When you run `slsart invoke -a`, serverless-artillery would invoke the function in acceptance test mode where it runs each scenario in your script exactly once and reports the results.
+  * **Monitoring:** When you customize the deployment assets to turn on monitoring and deploy those assets using `slsart deploy` command, the function is invoked in monitoring mode once a minute 24x7 where it runs each scenario in your script 5 times and sends an alert if it detects a problem. 
 * When you run `slsart remove`, serverless-artillery would remove these assets from your AWS account.
 * When you run `slsart kill`, serverless-artillery would kill the in-progress test and remove these assets from your AWS account.
 
