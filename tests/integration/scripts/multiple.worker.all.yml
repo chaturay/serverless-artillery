@@ -20,5 +20,5 @@ expectations:
     max: 310
   - from: 30
     to: 60
-    min: 420
+    min: 385
     max: 460

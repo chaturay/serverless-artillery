@@ -17,20 +17,30 @@ const urlsForScript = ({ testUrl, listUrl }) =>
 
 describe('./tests/integration', () => {
   // Uses Serverless to deploy both SA and test target stack
-  const deploying =
-    deployNewTestResources()
-      .then(result => ({
-        urlsForName: urlsForScript(result),
-        tempFolder: result.tempFolder,
-        slsartTempFolder: result.slsartTempFolder,
-      }))
+  const deploying = () => {
+    console.log('Deploying test serverless project. This will take a few minutes...')
+    return deployNewTestResources()
+      .then(result => {
+        const deployInfo = {
+          urlsForName: urlsForScript(result),
+          tempFolder: result.tempFolder,
+          slsartTempFolder: result.slsartTempFolder,
+        }
+
+        console.log('Deployment complete.')
+        console.log(`Test URL: ${result.testUrl}`)
+        console.log(`List URL: ${result.listUrl}`)
+
+        return deployInfo
+      })
       .catch(err => console.error(`Failed to deploy test stack: ${err.message}`))
+  }
 
   const scriptsPath = join(__dirname, 'scripts')
   const testScripts = readdirSync(scriptsPath)
   const testParameters = {}
 
-  before(() => deploying.then(({ urlsForName, tempFolder, slsartTempFolder }) => {
+  before(() => deploying().then(({ urlsForName, tempFolder, slsartTempFolder }) => {
     readdirSync(scriptsPath)
       .forEach((scriptName) => {
         testParameters[scriptName] = {
@@ -45,27 +55,31 @@ describe('./tests/integration', () => {
       })
   }))
 
-  describe('run the tests', () => {
+  describe('making test requests to target endpoint', () => {
     testScripts.forEach((testScript) => {
-      it(`provides load as defined in ${testScript}`, () => {
+      it(`provides load defined in ${testScript}`, () => {
         const params = testParameters[testScript]
         return test(params)
       })
     })
   })
 
-  describe('waits for cloud watch', () => {
+  describe('waits for CloudWatch', () => {
     it('waits for logs to propagate', () => new Promise(resolve => setTimeout(resolve, 120 * 1000)))
   })
 
-  describe('validate the results', () => {
+  describe('check actual load provided', () => {
     testScripts.forEach((testScript) => {
-      it(`validates the load as defined in ${testScript}`, () => {
+      it(`validates load defined in ${testScript}`, () => {
         const params = testParameters[testScript]
         return verify(params)
       })
     })
   })
 
-  after(() => cleanupDeployments())
+  after(() => {
+    console.log('Removing test projects. This will take a few minutes...')
+    return cleanupDeployments()
+      .then(() => console.log('Removal complete.'))
+  })
 })
