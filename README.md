@@ -1277,26 +1277,6 @@ If you are installing into a node_modules owned by root and getting error `npm E
 3. [serverless-artillery](https://github.com/Nordstrom/serverless-artillery) README for documentation on the use of this tool
 4. [serverless-star](https://github.com/Nordstrom/serverless-star) Next generation implementation and generalization of the arbitrarily wide work distribution capability
 
-# Background and motivation
-We were motivated to create this project in order to facilitate moving performance testing earlier and more frequently into our CI/CD pipelines such that the question wasn't '`whether...`' but '`why wouldn't...`' '`...you automatically (acceptance and) perf test your system every time you check in?`'.
-
-With acceptance testing in pocket we asked, '`why wouldn't you schedule that to sample and thereby monitor your service?`'.  So we added monitoring mode.
-
-# The future of serverless-artillery
-Wait.  There's a general pattern here of distributed load execution!
-
-Yes!
-
-We know!
-
-We're excited too!
-
-We've already begun writing a plugin-driven generalization of this pattern. Any task that a declaration can be provided for which itself can be executed in parallel and broken into parallelizable chunks can be driven using this capabiltiy.
-
-Watch for that effort here: https://github.com/Nordstrom/serverless-star
-
-We expect to retro-fit this project with the serverless-star project as its first use case and proof-of-not-a-painful-waste-of-our-time-ness™.
-
 # If you've read this far
-We're happy to buy you a drink at any conference we both attend. Hit us up!
+Please let us know any feedback on this tool. We would love to hear from you. Thank you!
 
