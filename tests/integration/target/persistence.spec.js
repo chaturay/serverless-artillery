@@ -56,7 +56,7 @@ describe('./tests/integration/target/persistence', () => {
 
     it('paginates query to retrieve all requests', () =>
       persistance(logGroupName, {
-        // Mock of DynamoDB query to validate parameters and return results
+        // Mock of CloudWatchLogs filterLogEvents to validate parameters and return results
         filterLogEvents: params => ({
           promise: () => {
             const nextToken = 'this-is-a-token'
