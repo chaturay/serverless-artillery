@@ -196,7 +196,7 @@ You can use serverless-artillery to performance test or load test your service/t
 If you want to quickly test your setup or see serverless-artillery in action, do the following to quickly run a **small load/performance test**. Don't worry about what these commands do in detail. This document explains them in detail later.
 
 ### T1.1. Setup AWS account credentials
-Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding. **It should be running while using any serverless-artillery command that interacts with AWS.**
+Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding.
 
 ### T1.2. Deploy
 The following command will deploy required assets (like [load generating Lambda function](#load-generating-lambda-function-on-aws)) to the AWS account you selected in the previous step.
