@@ -6,7 +6,9 @@ script:
     phases:
       - duration: 30
         arrivalRate: 1
-        rampTo: 10
+        rampTo: 5
+      - duration: 30
+        arrivalRate: 5
   scenarios:
     - flow:
       - get:
@@ -14,5 +16,13 @@ script:
 expectations:
   - from: 0
     to: 30
-    min: 155
-    max: 175
+    min: 95
+    max: 110
+  - from: 30
+    to: 60
+    min: 130
+    max: 150
+  - from: 0
+    to: 60
+    min: 240
+    max: 255

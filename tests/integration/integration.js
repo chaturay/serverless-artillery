@@ -22,49 +22,41 @@ const executeScript = (tempFolder, slsartTempFolder, name, { script }, { testUrl
   return exec(`slsart invoke -p ${scriptFileName}`, { cwd: slsartTempFolder })
 }
 
-// return the expected duration of the script + 10% (in seconds)
+// return the expected duration of the script
 const approximateScriptDuration = ({ script: { config: { phases } } }) =>
-  phases.reduce((total, { duration }) => total + duration, 0) * 1.1
+  phases.reduce((total, { duration }) => total + duration, 0)
 
 // return a promise that will resolve when the script has had time to finish
 const awaitScriptDuration = script =>
   new Promise(resolve => setTimeout(resolve, approximateScriptDuration(script)))
 
-// return an array of calls as { timestamp: 77777777, eventId: 123abc }
 //  sorted by timestamp earliest -> latest
-const fetchListOfCalls = ({ listUrl }) => {
-  log('fetching list of calls from', listUrl)
-  return fetch(listUrl)
-    .then(response => Promise.resolve(response.json()))
-    .then(listOfCalls => Promise.resolve(listOfCalls.sort((callA, callB) => callA.timestamp - callB.timestamp)))
+const fetchListOfCalls = ({ listUrl }) =>
+  fetch(listUrl)
+    .then(response => response.json())
+    .then(json => JSON.parse(json))
     .catch(err => log('failed to fetch list of calls: ', err.stack))
-}
 
 // from a chronological list of calls, assert that the count of calls within the
 //  given time range is within the given min and max
 const assertExpectation = (listOfCalls, from, to, min, max) => {
   log('asserting that from', from, 'to', to, 'seconds saw', min, 'to', max, 'requests')
-  const firstTimestamp = listOfCalls[0].timestamp
+
+  ok(listOfCalls.length > 0, 'must be at least one request each phase')
+
+  const firstTimestamp = parseInt(listOfCalls[0].timestamp, 10)
   const startTime = firstTimestamp + (from * 1000)
   const finishTime = firstTimestamp + (to * 1000)
 
   const relevantCalls = listOfCalls
     .filter(call => call.timestamp >= startTime && call.timestamp < finishTime)
     .length
-  log(`saw ${relevantCalls} requests made`)
-  ok(relevantCalls >= min && relevantCalls <= max)
-}
 
-// generate an it() call for the given expectation
-const testExpectation = finishing =>
-  ({
-    from, to, min, max,
-  }) =>
-    it(
-      `should send ${min} to ${max} requests between ${from} and ${to} seconds`,
-      () => finishing
-        .then(listOfCalls => assertExpectation(listOfCalls, from, to, min, max))
-    )
+  log(`saw ${relevantCalls} requests made`)
+
+  ok(relevantCalls >= min, `${relevantCalls} is less than minimum of ${min}`)
+  ok(relevantCalls <= max, `${relevantCalls} is more than maximum of ${max}`)
+}
 
 // from a script, execute a test and assertions
 const test = ({
@@ -72,23 +64,25 @@ const test = ({
   script,
   resources,
 }) => {
-  const executing = resources
-    .then(({ urls, tempFolder, slsartTempFolder }) =>
-      executeScript(tempFolder, slsartTempFolder, name, script, urls))
-
-  const finishing = executing
+  const { urls, tempFolder, slsartTempFolder } = resources
+  return executeScript(tempFolder, slsartTempFolder, name, script, urls)
     .then(() => awaitScriptDuration(script))
-    .then(() => resources)
-    .then(({ urls }) => fetchListOfCalls(urls))
+}
 
-  describe(name, () => {
-    // todo: consider getting this text dynamically from the test script
-    it('should execute the test', () => executing)
-
-    script.expectations.map(testExpectation(finishing))
-  })
+const verify = ({
+  script,
+  resources,
+}) => {
+  const { urls } = resources
+  return fetchListOfCalls(urls)
+    .then((listOfCalls) => {
+      script.expectations
+        .forEach(({ from, to, min, max }) => // eslint-disable-line object-curly-newline
+          assertExpectation(listOfCalls, from, to, min, max))
+    })
 }
 
 module.exports = {
   test,
+  verify,
 }

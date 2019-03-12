@@ -10,10 +10,11 @@
   "scripts": {
     "test": "./node_modules/.bin/nyc ./node_modules/.bin/_mocha -r aws-sdk \"./tests/**/*.spec.js\"",
     "light": "./node_modules/.bin/nyc ./node_modules/.bin/_mocha -r aws-sdk \"./tests/**/!(serverless-artillery|npm).spec.js\"",
-    "integration": "node ./tests/integration/run.integration.js",
+    "integration": "./node_modules/.bin/_mocha --timeout=1200000 ./tests/integration/index",
     "integration:upgrade": "./node_modules/.bin/_mocha --timeout 90000 ./tests/integration/versioning/upgrade.js",
     "coverage": "./node_modules/.bin/nyc report --reporter=text-lcov | coveralls",
     "lint": "./node_modules/.bin/eslint . bin/serverless-artillery",
+    "fix": "./node_modules/.bin/eslint --fix . bin/serverless-artillery",
     "postinstall": "node ./postinstall.js",
     "publish": "./node_modules/.bin/np"
   },
@@ -44,9 +45,11 @@
     "diff": "^3.5.0",
     "get-stdin": "^6.0.0",
     "js-yaml": "^3.12.1",
+    "node-fetch": "^2.3.0",
     "rimraf": "^2.6.3",
     "semver": "^5.5.0",
     "shortid": "^2.2.14",
+    "xmlhttprequest": "^1.8.0",
     "yargs": "^11.1.0"
   },
   "devDependencies": {
