@@ -14,9 +14,6 @@ Serverless-artillery makes it easy to test your services for load and functional
 1. You want to constantly monitor your services over time to make sure the latency of your services is under control (i.e. monitoring mode).
 
 # Table of Contents
-<details><summary>Click to expand/collapse</summary>
-<p>
-
 - [Installation](#installation)
   - [Installing on local machine](#installing-on-local-machine)
     - [Prerequisite](#prerequisite)
@@ -75,9 +72,6 @@ Serverless-artillery makes it easy to test your services for load and functional
   - []()
   - []()
   - []()
-
-</p>
-</details>
 
 # Installation
 
