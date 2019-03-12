@@ -25,4 +25,4 @@ expectations:
   - from: 0
     to: 60
     min: 240
-    max: 255
+    max: 260
