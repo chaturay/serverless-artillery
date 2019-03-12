@@ -345,6 +345,8 @@ The important files among other files created by this command are as follows.
 
 **Note** that everytime you make changes to these local copy of deployment assets, you need to redeploy using `slsart deploy` command.
 
+**Note** that if you change package.json then you need to run `npm install` and then redeploy using `slsart deploy` command.
+
 ### T3.6. Understanding `serverless.yml`
 `serverless.yml` contains serverless-artillery's service definition using Serverless Framework.
 
