@@ -331,7 +331,7 @@ This section is same as before. See [here](#t23-understanding-scriptyml) for det
 This section is same as before. See [here](#t24-customizing-scriptyml) for details.
 
 ### T3.5. Create custom deployment assets
-Create a _local copy_ of the deployment assets for customization and deployment using following command. It generates a local copy of the serverless function code that can be edited and deployed with your changed settings if needed.
+Create a _local copy_ of the deployment assets for customization and deployment using following command. It generates a local copy of the load generator lambda function code (along with other assets) that can be edited and deployed with your changed settings if needed.
 ```
 slsart configure
 ```
