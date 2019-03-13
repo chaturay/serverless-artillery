@@ -1,187 +1,75 @@
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
-const sinon = require('sinon')
-const sinonChai = require('sinon-chai')
 
-chai.use(sinonChai)
 chai.use(chaiAsPromised)
 
 const { assert } = chai
-const { stub } = sinon
 
-const {
-  pure: {
-    createParams,
-    s3,
-    readObject,
-    writeObject,
-    streamObjects,
-  },
-} = require('./persistence')
+const persistance = require('./persistence')
 
 describe('./tests/integration/target/persistence', () => {
-  describe('#createParams', () => {
-    const bucketName = 'slsart-integration-target-reqs'
-    process.env.SLSART_INTEGRATION_BUCKET = bucketName
-    it('should set Bucket', () =>
-      assert.deepStrictEqual(createParams(), { Bucket: bucketName }))
-    it('should incorporate options', () =>
-      assert.deepStrictEqual(
-        createParams({ Bar: 'baz' }),
-        { Bucket: bucketName, Bar: 'baz' }
-      ))
-    it('should not override bucket', () =>
-      assert.deepStrictEqual(
-        createParams({ Bucket: 'wrong!' }),
-        { Bucket: bucketName }
-      ))
+  const logGroupName = '/this/is/the/log/group'
+  const path = 'this/is/a/test'
+
+  describe('#recordRequest', () => {
+    it('writes a request', () =>
+      persistance({},
+        message => assert.equal(message, `REQUEST ${path}`, 'must log request path')
+      ).recordRequest(path)
+    )
   })
 
-  describe('s3', () => {
-    describe('#writeFile', () => {
-      it('should put the object', () => {
-        const putObjectStub = stub()
-          .returns({ promise: () => Promise.resolve() })
-        const params = {}
-        const createParamsStub = stub().returns(params)
-        return s3({ putObject: putObjectStub }, createParamsStub).writeFile()
-          .then(() =>
-            assert.ok(putObjectStub.calledOnce &&
-              putObjectStub.calledWithExactly(params)))
-      })
-    })
+  describe('#getRequests', () => {
+    const message = `2018-07-17T18:39:15.973Z\tb065119e-89f0-11e8-9622-99e8e46d8b8b\tREQUEST ${path}\n`
 
-    describe('#listFiles', () => {
-      it('should list the files', () => {
-        const listObjectsV2Stub = stub().returns({
-          promise: () => Promise.resolve({ Contents: [{ Key: 'foo' }, { Key: 'bar' }] }),
-        })
-        const createParamsStub = stub().returns(Promise.resolve({}))
-        return s3({ listObjectsV2: listObjectsV2Stub }, createParamsStub)
-          .listFiles()
-          .then(({ keys }) =>
-            assert.deepStrictEqual(keys, ['foo', 'bar']))
-      })
-      it('should not provide a next function when there are no more files', () => {
-        const listObjectsV2Stub = stub().returns({
-          promise: () => Promise.resolve({ Contents: [{ Key: 'foo' }, { Key: 'bar' }] }),
-        })
-        const createParamsStub = stub().returns(Promise.resolve({}))
-        return s3({ listObjectsV2: listObjectsV2Stub }, createParamsStub)
-          .listFiles()
-          .then(({ next }) => assert(!next))
-      })
-      it('should provide a next function when there are more files to list', () => {
-        const continuationToken = {}
-        const listObjectsV2Stub = stub().returns({
-          promise: () => Promise.resolve({
-            Contents: [{ Key: 'foo' }, { Key: 'bar' }],
-            IsTruncated: true,
-            NextContinuationToken: continuationToken,
-          }),
-        })
-        const createParamsStub = stub().returns(Promise.resolve({}))
-        return s3({ listObjectsV2: listObjectsV2Stub }, createParamsStub)
-          .listFiles()
-          .then(({ next }) => assert(next && (typeof next === 'function')))
-      })
-      it('should list remaining files when calling next', () => {
-        const continuationToken = {}
-        const listObjectsV2Stub = stub()
-          .onFirstCall().returns({
-            promise: () => Promise.resolve({
-              Contents: [{ Key: 'foo' }, { Key: 'bar' }],
-              IsTruncated: true,
-              NextContinuationToken: continuationToken,
-            }),
-          })
-          .onSecondCall()
-          .returns({
-            promise: () => Promise.resolve({
-              Contents: [{ Key: 'baz' }, { Key: 'biz' }],
-            }),
-          })
-        const createParamsStub = stub().returns(Promise.resolve({}))
-        return s3({ listObjectsV2: listObjectsV2Stub }, createParamsStub)
-          .listFiles()
-          .then(({ next }) => next())
-          .then(({ keys, next }) => {
-            assert(!next)
-            assert.deepStrictEqual(keys, ['baz', 'biz'])
-          })
-      })
-    })
+    const items = [
+      { path, timestamp: 100 },
+      { path, timestamp: 500 },
+    ]
+    const items2 = [
+      { path, timestamp: 100 },
+      { path, timestamp: 500 },
+      { path, timestamp: 1000 },
+      { path, timestamp: 1500 },
+    ]
+    const logEvents = [
+      { message, timestamp: 100 },
+      { message, timestamp: 500 },
+    ]
+    const logEvents2 = [
+      { message, timestamp: 1000 },
+      { message, timestamp: 1500 },
+    ]
 
-    describe('#readFile', () => {
-      it('should get the object', () => {
-        const expected = 'foo'
-        const getObjectStub = stub()
-          .returns({
-            promise: () =>
-              Promise.resolve({ Body: Buffer.from(expected) }),
-          })
-        const params = {}
-        const createParamsStub = stub().returns(Promise.resolve(params))
-        return s3({ getObject: getObjectStub }, createParamsStub).readFile()
-          .then(data =>
-            assert.strictEqual(data, expected))
-      })
-    })
-  })
+    it('reads requests within a range', () =>
+      persistance(logGroupName, {
+        // Mock of CloudWatchLogs filterLogEvents to validate parameters and return results
+        filterLogEvents: (params) => {
+          assert.equal(params.logGroupName, logGroupName, 'correct log group is queried')
+          assert.equal(params.filterPattern, `REQUEST ${path}`, 'uses path to find requests')
 
-  describe('#readObject', () => {
-    it('should read json', () =>
-      assert.eventually.deepStrictEqual(
-        readObject(key =>
-          (key === 'my-object'
-            ? Promise.resolve('{"foo":"bar"}')
-            : Promise.reject(new Error('not found')))
-        )('my-object'),
-        { foo: 'bar' }
-      ))
-  })
+          return { promise: () => Promise.resolve({ events: logEvents }) }
+        },
+      }).getRequests(path)
+        .then(result => assert.equal(result, JSON.stringify(items), 'returns records found'))
+    )
 
-  describe('#writeObject', () => {
-    it('should write json', () => {
-      const writeFileStub = stub()
-      const key = 'my-object'
-      writeObject(writeFileStub)(key, { foo: 'bar' })
-      assert.ok(writeFileStub.calledWithExactly(key, '{"foo":"bar"}'))
-    })
-  })
-
-  describe('#streamObjects', () => {
-    it('should stream objects', () => {
-      const keys1 = ['foo', 'bar']
-      const keys2 = ['baz', 'biz']
-      const listFilesStub = stub().returns(Promise.resolve({
-        keys: keys1,
-        next: () => Promise.resolve({ keys: keys2 }),
-      }))
-      const expected = {
-        foo: { i: 1 },
-        bar: { i: 2 },
-        baz: { i: 3 },
-        biz: { i: 4 },
-      }
-      const readObjectsStub = stub().callsFake(key =>
-        Promise.resolve(expected[key]))
-      const prefix = 'dir/'
-      return new Promise((resolve) => {
-        const streamed = []
-        streamObjects(listFilesStub, readObjectsStub)(prefix, (o) => {
-          o
-            ? streamed.push(o)
-            : resolve(streamed)
-        })
-      })
-        .then((objects) => {
-          assert.ok(listFilesStub.calledWithExactly(prefix))
-          assert.deepStrictEqual(
-            objects,
-            Object.keys(expected).map(k => expected[k])
-          )
-        })
-    })
+    it('paginates query to retrieve all requests', () =>
+      persistance(logGroupName, {
+        // Mock of CloudWatchLogs filterLogEvents to validate parameters and return results
+        filterLogEvents: params => ({
+          promise: () => {
+            const nextToken = 'this-is-a-token'
+            if (!params.nextToken) {
+              return Promise.resolve({ events: logEvents, nextToken })
+            } else {
+              assert.equal(params.nextToken, nextToken, 'uses the last key')
+              return Promise.resolve({ events: logEvents2 })
+            }
+          },
+        }),
+      }).getRequests(path)
+        .then(result => assert.equal(result, JSON.stringify(items2), 'returns records found'))
+    )
   })
 })

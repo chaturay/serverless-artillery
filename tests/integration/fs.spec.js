@@ -1,6 +1,6 @@
 const {
   assert: {
-    strictEqual, deepStrictEqual, fail, ok,
+    strictEqual, deepStrictEqual, ok,
   },
 } = require('chai')
 const { sep } = require('path')
@@ -15,7 +15,6 @@ const {
     cp,
     copyTofolder,
     copyAll,
-    writeFile,
     rm,
     rmdir,
     rmAny,
@@ -207,18 +206,6 @@ describe('./tests/integration/deployToTemp', () => {
       copyAll(copyTofolderOk)(destination)(sourceFiles)
         .then(() => strictEqual(expectedSourceFiles.length, 0))
         .then(missing))
-  })
-
-  describe('#writeFile', () => {
-    const writeFileArgs = [values.destination, values.data]
-    const writeFileOk = mockedCallback(writeFileArgs)
-    const writeFileFail = mockedCallback(writeFileArgs, values.err)
-    it('should resolve empty on success', () =>
-      writeFile(writeFileOk)(values.destination, values.data)
-        .then(missing))
-    it('should reject with the error on fail', () =>
-      writeFile(writeFileFail)(values.destination, values.data)
-        .then(() => fail('should reject'), isValue('err')))
   })
 
   describe('#rm', () => {

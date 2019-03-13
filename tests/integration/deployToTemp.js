@@ -2,7 +2,6 @@ const { tmpdir } = require('os')
 const { join } = require('path')
 const childProcess = require('child_process')
 
-const { randomString } = require('./target/handler')
 const fs = require('./fs')
 
 const defaultTargetSourcePath = join(__dirname, 'target')
@@ -32,16 +31,23 @@ const pathsFromTempDirectory = tempFolder => ({
 
 const urlsFromDeployTargetOutput = (output) => {
   const lines = output.split('\n')
-  const startIndex = lines.indexOf('endpoints:') + 1
-  const urls = lines.slice(startIndex, startIndex + 3)
+  const startIndex = lines.findIndex(line => /endpoints:/.test(line)) + 1
+  const urls = lines.slice(startIndex, startIndex + 2)
     .map(line => line.split(' - '))
     .map(([, url]) => url.trim())
   return {
     testUrl: urls[0],
     listUrl: urls[1],
-    deleteUrl: urls[2],
   }
 }
+
+const defaultLog = process.env.DEBUG
+  ? console.log
+  : () => {}
+
+const defaultWarn = process.env.DEBUG
+  ? console.warn
+  : () => {}
 
 const impl = {
   findTargetSourceFiles: (ls = fs.ls, sourcePath = defaultTargetSourcePath) =>
@@ -50,42 +56,45 @@ const impl = {
         .then(filterOutSpecFiles)
         .then(namesToFullPaths(sourcePath)),
 
-  writeConfig: (writeFile = fs.writeFile) =>
-    (destination, instanceId) =>
-      writeFile(join(destination, 'config.yml'), `instanceId: ${instanceId}`),
-
   stageTarget: (
     findTargetSourceFiles = impl.findTargetSourceFiles(),
-    copyAll = fs.copyAll,
-    writeConfig = impl.writeConfig()
+    copyAll = fs.copyAll
+  ) => destination =>
+    findTargetSourceFiles()
+      .then(copyAll(destination)),
+
+  findSlsartSourceFiles: (
+    sourcePath = defaultSlsartSourcePath,
+    ls = fs.ls
   ) =>
-    (destination, instanceId) =>
-      findTargetSourceFiles()
-        .then(copyAll(destination))
-        .then(writeConfig(destination, instanceId)),
+    () =>
+      ls(sourcePath)
+        .then(namesToFullPaths(sourcePath)),
 
   stageSlsart: (
-    sourcePath = defaultSlsartSourcePath,
-    listAbsolutePathsRecursively = fs.listAbsolutePathsRecursively,
-    copyAll = fs.copyAll
-  ) =>
-    destination =>
-      listAbsolutePathsRecursively(sourcePath)
-        .then(copyAll(destination)),
+    findSlsartSourceFiles = impl.findSlsartSourceFiles(),
+    copyAll = fs.copyAll,
+    exec = impl.execAsync()
+  ) => destination =>
+    findSlsartSourceFiles()
+      .then(copyAll(destination))
+      .then(() => exec('npm i', { cwd: destination })),
 
-  execAsync: (exec = childProcess.exec) =>
+  execAsync: (exec = childProcess.exec,
+    log = defaultLog,
+    warn = defaultWarn) =>
     (command, options = {}) =>
       new Promise((resolve, reject) =>
         exec(command, options, (err, stdout, stderr) =>
           (err
-            ? reject(execError(err, stderr))
-            : resolve(stdout)))),
+            ? warn('execAsync ERROR: ', err, stderr, stdout) || reject(execError(err, stderr))
+            : log('execAsync SUCCESS: ', stdout) || resolve(stdout)))),
 
   deploy: (exec = impl.execAsync()) =>
     directory =>
-      exec('sls deploy', { cwd: directory }),
+      (process.env.DEBUG ? exec('sls deploy -v', { cwd: directory }) : exec('sls deploy', { cwd: directory })),
 
-  tempLocation: (random = () => randomString(8), root = defaultRoot) =>
+  tempLocation: (random = () => `${Date.now()}`, root = defaultRoot) =>
     (instanceId = random()) =>
       ({ instanceId, destination: join(root, instanceId) }),
 
@@ -95,8 +104,8 @@ const impl = {
     stageTarget = impl.stageTarget(),
     stageSlsart = impl.stageSlsart(),
     deploy = impl.deploy(),
-    log = console.log,
-    warn = console.error
+    log = defaultLog,
+    warn = defaultWarn
   ) =>
     ({ instanceId, destination } = tempLocation()) => {
       const paths = pathsFromTempDirectory(destination)
@@ -106,7 +115,7 @@ const impl = {
       } = paths
       return mkdirp(slsartTempFolder)
         .then(() => log('staging slsart', instanceId, 'to', slsartTempFolder))
-        .then(() => stageSlsart(slsartTempFolder))
+        .then(() => stageSlsart(slsartTempFolder, instanceId))
         .then(() => log('deploying slsart', slsartTempFolder))
         .then(() => deploy(slsartTempFolder))
         .then(() => mkdirp(targetTempFolder))
@@ -122,16 +131,15 @@ const impl = {
     },
 
   remove: (exec = impl.execAsync()) =>
-    directory =>
-      exec('sls remove', { cwd: directory }),
+    directory => exec('sls remove', { cwd: directory }),
 
   removeTempDeployment: (
-    log = console.log,
+    log = defaultLog,
     remove = impl.remove(),
-    warn = console.error,
+    warn = defaultWarn,
     rmrf = fs.rmrf
   ) =>
-    directory =>{
+    (directory) => {
       const {
         targetTempFolder,
         slsartTempFolder,
@@ -139,10 +147,14 @@ const impl = {
       log('  removing temp deployment', directory)
       log('    removing', targetTempFolder)
       return remove(targetTempFolder)
-        .catch(() => warn('    failed to sls remove', targetTempFolder))
+        .catch(err => warn('    failed to sls remove', targetTempFolder, err.message))
+        .then(() => rmrf(targetTempFolder))
+        .then(() => log('    removing', slsartTempFolder))
         .then(() => remove(slsartTempFolder))
-        .catch(() => warn('    failed to sls remove', slsartTempFolder))
-        .then(() => log('    deleting', directory) || rmrf(directory))
+        .catch(err => warn('    failed to sls remove', slsartTempFolder, err.message))
+        .then(() => rmrf(slsartTempFolder))
+        .then(() => log('    deleting', directory))
+        .then(() => rmrf(directory))
         .then(() => log('  done'))
     },
 
@@ -155,7 +167,7 @@ const impl = {
   cleanupDeployments: (
     list = impl.listTempDeployments(),
     remove = impl.removeTempDeployment(),
-    log = console.log,
+    log = defaultLog,
     root = defaultRoot
   ) =>
     () =>
@@ -171,4 +183,5 @@ module.exports = {
   deployNewTestResources: impl.deployNewTestResources(),
   removeTempDeployment: impl.removeTempDeployment(),
   cleanupDeployments: impl.cleanupDeployments(),
+  exec: impl.execAsync(),
 }

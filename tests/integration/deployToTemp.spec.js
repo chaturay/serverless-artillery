@@ -11,9 +11,7 @@ const { sep } = require('path')
 const {
   impl: {
     findTargetSourceFiles,
-    writeConfig,
     stageTarget,
-    stageSlsart,
     execAsync,
     deploy,
     tempLocation,
@@ -91,20 +89,6 @@ describe('./tests/integration/deployToTemp', () => {
         .then(fullPaths => deepStrictEqual(fullPaths, expected)))
   })
 
-  describe('#writeConfig', () => {
-    const instanceId = 1234
-    const expectedData = 'instanceId: 1234'
-    const destination = 'foo'
-    const expectedDestination = `foo${sep}config.yml`
-    const writeFileOk = (actualDestination, data) =>
-      deepStrictEqual(
-        [actualDestination, data],
-        [expectedDestination, expectedData]
-      )
-    it('should write the yaml instance id', () =>
-      writeConfig(writeFileOk)(destination, instanceId))
-  })
-
   describe('#stageTarget', () => {
     const sourceFiles = ['foo/first.js', 'foo/second.js']
     const findTargetSourceFilesOk = () => Promise.resolve(sourceFiles)
@@ -112,37 +96,10 @@ describe('./tests/integration/deployToTemp', () => {
       files =>
         deepStrictEqual([destination, files], [values.destination, sourceFiles])
         || Promise.resolve(values.result)
-    const writeConfigOk = (destination, instanceId) =>
-      previous =>
-        deepStrictEqual(
-          [previous, destination, instanceId],
-          [values.result, values.destination, values.instanceId]
-        ) || Promise.resolve()
-    const writeConfigFail = () =>
-      () => Promise.reject(values.err)
     const stageTargetOk =
-      stageTarget(findTargetSourceFilesOk, copyAllOk, writeConfigOk)
-    const stageTargetFail =
-      stageTarget(findTargetSourceFilesOk, copyAllOk, writeConfigFail)
+      stageTarget(findTargetSourceFilesOk, copyAllOk)
     it('should copy all source files and write config', () =>
       stageTargetOk(values.destination, values.instanceId))
-    it('should reject on failure to write config', () =>
-      stageTargetFail(values.destination, values.instanceId)
-        .then(() => fail('should reject'), isValue('err')))
-  })
-
-
-  describe('#stageSlsart', () => {
-    const sourceFiles = ['foo/first.js', 'foo/second.js']
-    const listAbsolutePathsRecursively = () => Promise.resolve(sourceFiles)
-    const copyAllOk = destination =>
-      files =>
-        deepStrictEqual([destination, files], [values.destination, sourceFiles])
-        || Promise.resolve(values.result)
-    const stageSlsartOk =
-      stageSlsart(values.sourcePath, listAbsolutePathsRecursively, copyAllOk)
-    it('should copy all source files', () =>
-      stageSlsartOk(values.destination))
   })
 
   describe('#execAsync', () => {

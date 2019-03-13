@@ -143,20 +143,20 @@ const checkUpgradeResults = ([expectedDiff, actualDiff]) => {
 }
 
 // Given paths to the test project, upgrade it then compare to our reference upgraded project (the solution).
-const upgradeProjectAndDiff = ({solutionPath, testProjectPath}) =>
+const upgradeProjectAndDiff = ({ solutionPath, testProjectPath }) =>
   performUpgradeOnTestProject(testProjectPath)
     .then(() => diffProjects(solutionPath, testProjectPath))
 
 // Given the upgrade path and the upgrade test name, upgrade the project and produce a diff.
 const copyProjectUpgradeAndDiff = (upgradePath, testName) =>
-  setupTempProject(upgradePath,testName)
+  setupTempProject(upgradePath, testName)
     .then(upgradeProjectAndDiff)
 
 // Perform a test for a given upgrade path (e.g. 0.0.0-to-0.0.1) and test name (e.g. default).
 const upgradeTest = (upgradePath, testName) =>
   Promise.all([
     diffTestProjectToSolution(upgradePath, testName),
-    copyProjectUpgradeAndDiff(upgradePath, testName)
+    copyProjectUpgradeAndDiff(upgradePath, testName) // eslint-disable-line comma-dangle
   ]).then(checkUpgradeResults)
 
 describe('upgrade integration tests', () => {

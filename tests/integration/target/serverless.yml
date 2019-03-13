@@ -1,25 +1,14 @@
-service: slsart-integration-target-${self:custom.instanceId}
-custom: ${file(./config.yml)}
+service: slsart-integration-target
 
 provider:
   name: aws
   runtime: nodejs6.10
-  endpointType: private
+  endpointType: regional
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - s3:ListBucket
-      Resource: arn:aws:s3:::slsart-integration-target-${self:custom.instanceId}-reqs
-    - Effect: Allow
-      Action:
-        - s3:PutObject
-        - s3:GetObject
-        - s3:DeleteObject
-      Resource: arn:aws:s3:::slsart-integration-target-${self:custom.instanceId}-reqs/*
-  usagePlan:
-    throttle:
-      burstLimit: 10
-      rateLimit: 1
+        - logs:FilterLogEvents
+      Resource: arn:aws:logs:*:*:log-group:/aws/lambda/slsart-integration-target-${self:provider.stage}-test:*
 
 functions:
   test:
@@ -28,8 +17,6 @@ functions:
       - http:
           path: test/{id}
           method: get
-    environment:
-      SLSART_INTEGRATION_BUCKET: slsart-integration-target-${self:custom.instanceId}-reqs
 
   list:
     handler: handler.list
@@ -38,29 +25,9 @@ functions:
           path: list/{id}
           method: get
     environment:
-      SLSART_INTEGRATION_BUCKET: slsart-integration-target-${self:custom.instanceId}-reqs
-
-  deleteList:
-    handler: handler.deleteList
-    events:
-      - http:
-          path: list/{id}
-          method: delete
-    environment:
-      SLSART_INTEGRATION_BUCKET: slsart-integration-target-${self:custom.instanceId}-reqs
+      TEST_LOG_GROUP: /aws/lambda/slsart-integration-target-${self:provider.stage}-test
 
 resources:
-  Resources:
-
-    TestBucket:
-      Type: AWS::S3::Bucket
-      Properties:
-        BucketName: slsart-integration-target-${self:custom.instanceId}-reqs
-        LifecycleConfiguration:
-          Rules:
-            - ExpirationInDays: 1
-              Status: Enabled
-
   Outputs:
      TestApi:
        Description: The URL of the ApiGateway at which to invoke the get function
@@ -74,9 +41,3 @@ resources:
         Ref: ApiGatewayRestApi
        Export:
         Name: ${self:service}-list-api
-     DeleteListApi:
-       Description: The URL of the ApiGateway at which to invoke the get function
-       Value:
-        Ref: ApiGatewayRestApi
-       Export:
-        Name: ${self:service}-deletelist-api
