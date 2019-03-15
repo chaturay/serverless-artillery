@@ -193,11 +193,21 @@ If you want to quickly test your setup or see serverless-artillery in action, do
 Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding.
 
 ### T1.2. Deploy
-The following command will deploy required assets (like [load generating Lambda function](#load-generating-lambda-function-on-aws)) to the AWS account you selected in the previous step.
+The `slsart deploy` command deploys required assets (like [load generating Lambda function](#load-generating-lambda-function-on-aws)) to the AWS account you selected in the previous step. 
+
+By _default_ it uses `stage` name `dev`. And hence the _default_ AWS CloudFormation Stack name becomes `serverless-artillery-dev` which you will see if you go to your AWS account console > CloudFormation after running the command.
+
+Since multiple developers could share an AWS account we recommend creating a unique stack for your use. For that we recommend either using custom deployment assets as shown in [Tutorial 3](#tutorial-3-performance-test-with-custom-deployment-assets) or use the _optional_ `stage` argument as shown in the following command.
 ```
-slsart deploy
+slsart deploy --stage <your-unique-stage-name>
 ```
-By default it uses AWS CloudFormation Stack name `serverless-artillery-dev`. You will see the stack created if you go to your AWS account console > CloudFormation.
+The AWS CloudFormation Stack name would be `serverless-artillery-<your-unique-stage-name>`.
+
+For example,
+```
+slsart deploy --stage test1
+```
+The AWS CloudFormation Stack name in this case would be `serverless-artillery-test1`. 
 
 ### T1.3. Invoke
 The following command will invoke [load generating Lambda function](#load-generating-lambda-function-on-aws) using default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script.
@@ -278,13 +288,21 @@ This step is optional in the tutorial. If you like you can customize `script.yml
 Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding. **It should be running while using any serverless-artillery command that interacts with AWS.**
 
 ### T2.6. Deploy assets to AWS
-We need to deploy assets (like [load generating Lambda function](#load-generating-lambda-function-on-aws)) to your AWS account before we can use it to start our test.
+The `slsart deploy` command deploys required assets (like [load generating Lambda function](#load-generating-lambda-function-on-aws)) to the AWS account you selected in the previous step. 
 
-Use the following command to deploy the assets.
+By _default_ it uses `stage` name `dev`. And hence the _default_ AWS CloudFormation Stack name becomes `serverless-artillery-dev` which you will see if you go to your AWS account console > CloudFormation after running the command.
+
+Since multiple developers could share an AWS account we recommend creating a unique stack for your use. For that we recommend either using custom deployment assets as shown in [Tutorial 3](#tutorial-3-performance-test-with-custom-deployment-assets) or use the _optional_ `stage` argument as shown in the following command.
 ```
-slsart deploy
+slsart deploy --stage <your-unique-stage-name>
 ```
-You can go to your AWS account console > CloudFormation, and see AWS stack `serverless-artillery-dev` created there if the command is successful.
+The AWS CloudFormation Stack name would be `serverless-artillery-<your-unique-stage-name>`.
+
+For example,
+```
+slsart deploy --stage test1
+```
+The AWS CloudFormation Stack name in this case would be `serverless-artillery-test1`. 
 
 ### T2.7. Invoke performance test
 Now you are all set to invoke performance test using following command.
@@ -545,6 +563,14 @@ This section is same as before. See [here](#t25-setup-aws-account-credentials) f
 
 ### T3.9. Deploy assets to AWS
 This section is same as before. See [here](#t26-deploy-assets-to-aws) for details.
+
+We need to deploy required assets (like [load generating Lambda function](#load-generating-lambda-function-on-aws)) to the AWS account you selected in the previous step. 
+
+Use the following command to deploy the assets.
+```
+slsart deploy
+```
+You can go to your AWS account console > CloudFormation, and see AWS stack `serverless-artillery-*` created there depending on the customizations explained in the steps above.
 
 ### T3.10. Invoke performance test
 This section is same as before. See [here](#t27-invoke-performance-test) for details.
