@@ -192,9 +192,10 @@ If you want to quickly test your setup or see serverless-artillery in action, do
 ### T1.1. Setup AWS account credentials
 Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding.
 
-### T1.2. Deploy
+### T1.2. Command line
 Go to command line for all the following steps in this tutorial. You can run the steps of this tutorial from anywhere in command line since the commands you run in this tutorial will not create any files on your local machine.
 
+### T1.2. Deploy
 The `slsart deploy` command deploys required assets (like [load generating Lambda function](#load-generating-lambda-function-on-aws)) to the AWS account you selected in the previous step. 
 
 By _default_ it uses `stage` name `dev`. And hence the _default_ AWS CloudFormation Stack name becomes `serverless-artillery-dev` which you will see if you go to your AWS account console > CloudFormation after running the command.
