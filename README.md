@@ -193,6 +193,8 @@ If you want to quickly test your setup or see serverless-artillery in action, do
 Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding.
 
 ### T1.2. Deploy
+Go to command line for all the following steps in this tutorial. You can run the steps of this tutorial from anywhere in command line since the commands you run in this tutorial will not create any files on your local machine.
+
 The `slsart deploy` command deploys required assets (like [load generating Lambda function](#load-generating-lambda-function-on-aws)) to the AWS account you selected in the previous step. 
 
 By _default_ it uses `stage` name `dev`. And hence the _default_ AWS CloudFormation Stack name becomes `serverless-artillery-dev` which you will see if you go to your AWS account console > CloudFormation after running the command.
@@ -210,16 +212,18 @@ slsart deploy --stage test1
 The AWS CloudFormation Stack name in this case would be `serverless-artillery-test1`. 
 
 ### T1.3. Invoke
-The following command will invoke [load generating Lambda function](#load-generating-lambda-function-on-aws) using default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script.
+The following command will invoke [load generating Lambda function](#load-generating-lambda-function-on-aws) using default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script. Note that this default load script is part of the global install of serverless-artillery and not in the local folder from where you are running the command.
 ```
-slsart invoke
+slsart invoke --stage <your-unique-stage-name>
 ```
 At the end of the test serverless-artillery will generate a report of the test. **Please note that this report is generated only for small load.** See [here](#providing-a-data-store-to-view-the-results-of-your-performance-test) for details.
+
+If you go to AWS Lambda console > find the `loadGenerator` Lambda corresponding to your stack > `Monitoring` tab > `Invocations` graph, you will see that the Lambda function was invoked to generate the load. You can also see the logs produced by the Lambda in CloudWatch Logs.
 
 ### T1.4. Remove
 The following command will remove the AWS CloudFormation Stack deployed in step 1. If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Remove Instructions`_** in **Confluence** and follow the instructions there.
 ```
-slsart remove
+slsart remove --stage <your-unique-stage-name>
 ```
 
 ## Tutorial 2: Performance test with custom script
