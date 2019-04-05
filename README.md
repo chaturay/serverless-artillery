@@ -311,7 +311,7 @@ The AWS CloudFormation Stack name in this case would be `serverless-artillery-te
 ### T2.7. Invoke performance test
 Now you are all set to invoke performance test using following command.
 ```
-slsart invoke
+slsart invoke --stage <your-unique-stage-name>
 ```
 At the end of the test serverless-artillery will generate a report of the test. **Please note that this report is generated only for small load.** See [here](#providing-a-data-store-to-view-the-results-of-your-performance-test) for details.
 
@@ -320,7 +320,7 @@ At the end of the test serverless-artillery will generate a report of the test. 
 ### T2.8. Remove assets from AWS
 After the test is done, you can remove the assets from AWS using following command. If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Remove Instructions`_** in **Confluence** and follow the instructions there.
 ```
-slsart remove
+slsart remove --stage <your-unique-stage-name>
 ```
 
 ## Tutorial 3: Performance test with custom deployment assets
