@@ -289,7 +289,7 @@ This step is optional in the tutorial. If you like you can customize `script.yml
 - You can also change the [load `phase`](https://artillery.io/docs/script-reference/#load-phases) and [`scenarios` section](https://artillery.io/docs/script-reference/#scenarios) as per your need. We recommend using a low load to try the tool first.
 
 ### T2.5. Setup AWS account credentials
-Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding. **It should be running while using any serverless-artillery command that interacts with AWS.**
+Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding.
 
 ### T2.6. Deploy assets to AWS
 The `slsart deploy` command deploys required assets (like [load generating Lambda function](#load-generating-lambda-function-on-aws)) to the AWS account you selected in the previous step. 
