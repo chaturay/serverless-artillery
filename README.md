@@ -477,9 +477,11 @@ Please refer to [`serverless.yml` documentation](https://serverless.com/framewor
 #### Service name
 - In above `serverless.yml` the `service` name is set to `serverless-artillery-XnBa473psJ`. In your `serverless.yml` the string at the end (`XnBa473psJ`) would be different.
 - This will be the AWS CloudFormation stack name when you run `slsart deploy`.
-- The `slsart configure` command adds a random string at the end so you get a unique stack name that does not conflict with anyone else also deploying to the same AWS account.
+  - If you specify the optional stage name with the deploy command, i.e. `slsart deploy --stage <your-unique-stage-name>`, then the AWS CloudFormation stack name would be `<service-name>-<your-unique-stage-name>`
+- The `slsart configure` command adds a random string at the end of the `service` name so you get a unique stack name that does not conflict with anyone else also deploying to the same AWS account, if you were to not specify the optional stage name with the deploy command.
 - You can change `service` name to some other unique string as per your need. Format `serverless-artillery-<unique-string>`. For example, `serverless-artillery-myperftestservice`.
 - The rest of the `serverless.yml` refers to the service name by using `${self:service}`.
+
 #### [Load generating Lambda function](#load-generating-lambda-function-on-aws) name
 The Serverless framework automatically names the Lambda function based on the service, stage and function name as follows.
 - The function `loadGenerator` when deployed is named as `${self:service}-${opt:stage, self:provider.stage}-loadGenerator`.
