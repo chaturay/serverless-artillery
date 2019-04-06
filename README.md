@@ -580,11 +580,15 @@ slsart deploy
 You can go to your AWS account console > CloudFormation, and see AWS stack `serverless-artillery-*` created there depending on the customizations explained in the steps above.
 
 ### T3.10. Invoke performance test
+ASHMITODO: Do you want to use slsart deploy without stage for this tutorial?
+
 This section is same as before. See [here](#t27-invoke-performance-test) for details.
 
 If you used CloudWatch/Datadog plugins you will be able to view the metrics on the CloudWatch/Datadog dashboard. You can learn more about using CloudWatch dashboard [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html). **Note that it can take few minutes for the data to propogate to CloudWatch/Datadog.**
 
 ### T3.11. Remove assets from AWS
+ASHMITODO: Do you want to use slsart remove without stage for this tutorial?
+
 This section is same as before. See [here](#t28-remove-assets-from-aws) for details.
 
 ## Tutorial 4: Killing in-progress performance test
