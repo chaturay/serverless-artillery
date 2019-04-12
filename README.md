@@ -6,7 +6,7 @@
 # Introduction
 Combine [`serverless`](https://serverless.com) with [`artillery`](https://artillery.io) and you get `serverless-artillery` (a.k.a. `slsart`). 
 
-Serverless-artillery makes it easy to test your services for load and functionality quickly, with almost no code and without having to maintain any servers or testing infrastructure.
+Serverless-artillery makes it easy to test your services for performance and functionality quickly, easily and without having to maintain any servers or testing infrastructure.
 
 ### Use serverless-artillery if
 1. You want to know if your services (either internal or public) can handle different amount of traffic load (i.e. performance or load testing).
@@ -98,7 +98,7 @@ slsart --version
 You should see serverless-artillery print its version if the installation has been successful.
 
 ## Installing in Docker
-If you prefer using Docker, refer to [example Dockerfile](Dockerfile) for installation. Please note that, post installation causes permission issues when installing in a Docker image. To successfully install in Docker make sure to add the following to your Dockerfile before the serverless and serverless-artillery install.
+If you prefer using Docker, refer to [example Dockerfile](Dockerfile) for installation. Please note that, post installation causes permission issues when installing in a Docker image. To successfully install in Docker make sure to add the following to your Dockerfile before the Serverless Framework CLI (a.k.a. Serverless) and serverless-artillery install.
 ```
 ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
 ENV PATH=$PATH:/home/node/.npm-global/bin
@@ -114,18 +114,18 @@ npm uninstall -g serverless-artillery
 <img src="docs/HowItWorks.jpg" width="442">
 
 * Serverless-artillery would be installed and run on your local machine. From command line run `slsart --help` to see various serverless-artillery commands.
-* It would take your JSON or YAML load script (`script.yml`) that specifies 
-  * test target/URL/endpoint/service, 
-  * load progression,
+* It takes your JSON or YAML load script (`script.yml`) that specifies 
+  * test target/URL/endpoint/service
+  * load progression
   * and the scenarios that are important for your service to test.
-* When you run `slsart deploy`, serverless-artillery would deploy a **load generating Lambda function**, on your AWS account along with other assets.
+* When you run `slsart deploy` command, serverless-artillery deploys a **load generating Lambda function**, on your AWS account along with other assets.
 * Running the tests
-  * **Performance test:** When you run `slsart invoke`, serverless-artillery would invoke the function.
+  * **Performance test:** When you run `slsart invoke` command, serverless-artillery would invoke the load generating Lambda function.
     * It would generate the number of requests as specified in `script.yml` to specified test target in order to run the specified scenarios.
-  * **Acceptance test:** When you run `slsart invoke -a`, serverless-artillery would invoke the function in acceptance test mode where it runs each scenario in your script exactly once and reports the results.
-  * **Monitoring:** When you customize the deployment assets to turn on monitoring and deploy those assets using `slsart deploy` command, the function is invoked in monitoring mode once a minute 24x7 where it runs each scenario in your script 5 times and sends an alert if it detects a problem. 
-* When you run `slsart remove`, serverless-artillery would remove these assets from your AWS account.
-* When you run `slsart kill`, serverless-artillery would kill the in-progress test and remove these assets from your AWS account.
+  * **Acceptance test:** When you run `slsart invoke -a` command, serverless-artillery would invoke the load generating Lambda function in acceptance test mode where it runs each scenario in your script exactly once and reports the results.
+  * **Monitoring:** When you customize the deployment assets to turn on monitoring and deploy those assets using `slsart deploy` command, the load generating Lambda function is invoked in monitoring mode once a minute 24x7 where it runs each scenario in your script 5 times and sends an alert if it detects a problem. 
+* When you run `slsart remove` command, serverless-artillery would remove these assets from your AWS account.
+* When you run `slsart kill` command, serverless-artillery would kill the in-progress test and remove these assets from your AWS account.
 
 ## Technologies powering serverless-artillery
 <details><summary>Click to expand/collapse</summary>
@@ -137,10 +137,10 @@ npm uninstall -g serverless-artillery
 - Serverless-artillery uses it to manage required assets to your cloud account.
 
 ### Artillery.io
-- [Artillery.io](https://artillery.io/) (built by Hassy Veldstra of shoreditch-ops) is an existing open-source node package built for easy load testing and functional testing of a target/service/endpoint/URL. It provides a simple but powerful means of specifying how much load to create and what requests that load should comprise.
+- [Artillery.io](https://artillery.io/) (built by Hassy Veldstra of shoreditch-ops) is an existing open-source node package, built for easy load testing and functional testing of a target/service/endpoint/URL. It provides a simple but powerful means of specifying how much load to create and what requests that load should comprise.
 - It takes in a developer-friendly JSON or YAML load script that specifies 
-  - target/URL/endpoint, 
-  - load progression,
+  - target/URL/endpoint
+  - load progression
   - and the scenarios that are important for your service to test.
 - It generates specified load, and measures and reports the resulting latency and return codes.
 - It generates the load by running on your local machine or servers.
@@ -148,7 +148,7 @@ npm uninstall -g serverless-artillery
 
 ### Serverless-artillery
 - Serverless-artillery allows your script to specify an amount of load far exceeding the capacity of a single server to execute.
-- It breaks that script into smaller chunks sized for a single function and distribute the chunks for execution.
+- It breaks that script into smaller chunks (sized for a single function) and distribute the chunks for execution.
 - Since this is done using a FaaS provider, the ephemeral infrastructure used to execute your load disappears as soon as your load tests are complete.
 
 </p>
