@@ -133,7 +133,7 @@ npm uninstall -g serverless-artillery
 
 ### Serverless Framework
 - The [Serverless Framework](https://serverless.com) makes managing (deploying/updating/removing) cloud assets easy.
-- It translates a `yaml` file to a the deployable assets of the target cloud provider (like AWS).
+- It translates a `yaml` file to deployable assets of the target cloud provider (like AWS).
 - Serverless-artillery uses it to manage required assets to your cloud account.
 
 ### Artillery.io
@@ -148,7 +148,7 @@ npm uninstall -g serverless-artillery
 
 ### Serverless-artillery
 - Serverless-artillery allows your script to specify an amount of load far exceeding the capacity of a single server to execute.
-- It breaks that script into smaller chunks (sized for a single function) and distribute the chunks for execution.
+- It breaks that script into smaller chunks (sized for a single instance of load generating Lambda function) and distribute the chunks for execution across multiple instances of load generating Lambda function.
 - Since this is done using a FaaS provider, the ephemeral infrastructure used to execute your load disappears as soon as your load tests are complete.
 
 </p>
@@ -160,15 +160,15 @@ npm uninstall -g serverless-artillery
 
 <img src="docs/Architecture.gif">
 
-- Serverless-artillery generates the requests to run the specified tests using load generating Lambda function, that is deployed and invoked on AWS along with other assets.
-  -  Naming format is `serverless-artillery-<optional-unique-string-><stage default:dev>-loadGenerator`. For example, `serverless-artillery-dev-loadGenerator` or `serverless-artillery-XnBa473psJ-dev-loadGenerator`.
+- Serverless-artillery generates the requests to run the specified tests using load generating Lambda function, which is deployed and invoked on AWS along with other assets.
+  -  Naming format is `<customized-service-name default:serverless-artillery>-<optional-unique-string-><stage default:dev>-loadGenerator`. For example, `serverless-artillery-dev-loadGenerator` or `serverless-artillery-XnBa473psJ-dev-loadGenerator`.
 - It has an ephimeral architecture. It only exists as long as you need it.
 - It runs Artillery.io node package in AWS Lambda function.
-  - Each lambda function can only generate a certain amount of load, and can only run for up to five minutes (five minutes was a built-in limitation of AWS Lambda) (now 15 minutes). 
+  - Each lambda function can only generate a certain amount of load, and can only run for up to five minutes (five minutes was a built-in limitation of AWS Lambda. Now it has been raised to 15 minutes). 
   - Given these limitations, it is often necessary to invoke more lambdas - both to scale horizontally (to generate higher load) as well as handing off the work to a new generation of lambdas before their run-time has expired.
 - Above diagram shows how Serverless Artillery solves this problem.
-  - It first runs the Lamdba function in a **control** mode. It examines the submitted load config JSON/YAML script (this is identical to the original “servered” [Artillery.io](https://artillery.io/) script). This script is also referred to as original script. If the load exceeds what a single lambda is configured to handle, then the load config is chopped up into workloads achievable by a single lambda.
-  - Control lambda then invokes as many **worker** lambdas as necessary to generate the load. Controller lambda basses a script to worker lambda that is created by chopping up the original script.
+  - It first runs the Lamdba function in a **controller** mode. It examines the submitted load config JSON/YAML script (this is identical to the original “servered” [Artillery.io](https://artillery.io/) script). This script is also referred to as original script. If the load in the original script exceeds what a single lambda is configured to handle, then the load config is chopped up into workloads achievable by a single lambda.
+  - Controller lambda then invokes as many **worker** lambdas as necessary to generate the load. Controller lambda passes a script to worker lambda that is created by chopping up the original script.
   - Towards the end of the Lambda runtime the controller lambda invokes a new controller lambda to produce load for the remaining duration.
 - The result of the load test can be reported to CloudWatch, InfluxDB or Datadog through plugins and then visualized with CloudWatch, Grafana or Datadog dashboard.
 
