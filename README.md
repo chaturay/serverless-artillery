@@ -181,7 +181,7 @@ Serverless-artillery needs to _deploy_ assets like [load generating Lambda funct
 ## Setup for Nordstrom Technology
 If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Setup`_** in **Confluence** and follow the instructions there.
 ## Setup for everyone else
-In order to use serverless-artillery, depending on the AWS account environment you're working in, you may need to define `AWS_PROFILE` to declare the AWS credentials to use and possibly `HTTP_PROXY` in order to escape your corporate proxy.  See the [Serverless Framework docs](https://serverless.com/framework/docs/) or serverless-artillery workshop's [Lesson 0](https://github.com/Nordstrom/serverless-artillery-workshop/tree/master/Lesson0%20-%20Before%20the%20workshop) followed by [**Step 1** of Lesson 1](https://github.com/Nordstrom/serverless-artillery-workshop/tree/master/Lesson1%20-%20Hello%2C%20artillery#step-1-serverless-artillery-requires-aws-credentials) for details of how to set your system up for successful deployment, invocation, and removal. 
+In order to use serverless-artillery, depending on the AWS account environment you're working in, you may need to define `AWS_PROFILE` to declare the AWS credentials to use and possibly `HTTP_PROXY` in order to escape your corporate proxy.  See the [Serverless Framework docs](https://serverless.com/framework/docs/) or serverless-artillery workshop's [Lesson 0](https://github.com/Nordstrom/serverless-artillery-workshop/tree/master/Lesson0%20-%20Before%20the%20workshop) followed by [**Step 1** of Lesson 1](https://github.com/Nordstrom/serverless-artillery-workshop/tree/master/Lesson1%20-%20Hello%2C%20artillery#step-1-serverless-artillery-requires-aws-credentials) for details of how to set your local machine for successful deployment, invocation, and removal of assets from your AWS accounts. 
 
 # Performance mode (performance/load testing)
 You can use serverless-artillery to performance test or load test your service/target/endpoint/URL. Performance testing framework forms the basis of the other two modes of serverless-artillery, i.e. acceptance mode and monitoring mode.
@@ -189,18 +189,18 @@ You can use serverless-artillery to performance test or load test your service/t
 ## Tutorial 1: Run a quick performance test
 If you want to quickly test your setup or see serverless-artillery in action, do the following to quickly run a **small load/performance test**. Don't worry about what these commands do in detail. This document explains them in detail later.
 
-### T1.1. Setup AWS account credentials
+### 1. Setup AWS account credentials
 Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding.
 
-### T1.2. Command line
+### 2. Command line
 Go to command line for all the following steps in this tutorial. You can run the steps of this tutorial from anywhere in command line since the commands you run in this tutorial will not create any files on your local machine.
 
-### T1.2. Deploy
+### 3. Deploy
 The `slsart deploy` command deploys required assets (like [load generating Lambda function](#load-generating-lambda-function-on-aws)) to the AWS account you selected in the previous step. 
 
-By _default_ it uses `stage` name `dev`. And hence the _default_ AWS CloudFormation Stack name becomes `serverless-artillery-dev` which you will see if you go to your AWS account console > CloudFormation after running the command.
+By _default_ it uses `service` name `serverless-artillery` and `stage` name `dev`. And hence the _default_ AWS CloudFormation Stack name becomes `serverless-artillery-dev` (format: `<service-name>-<stage-name>`). You will see that if you go to your AWS account console > CloudFormation after running the command.
 
-Since multiple developers could share an AWS account we recommend creating a unique stack for your use. For that we recommend either using custom deployment assets as shown in [Tutorial 3](#tutorial-3-performance-test-with-custom-deployment-assets) or use the _optional_ `stage` argument as shown in the following command.
+Since multiple developers could share an AWS account, we recommend creating a unique stack for your use. For that we recommend either using custom deployment assets as shown in [Tutorial 3](#tutorial-3-performance-test-with-custom-deployment-assets) or use the _optional_ `stage` argument as shown in the following command.
 ```
 slsart deploy --stage <your-unique-stage-name>
 ```
@@ -212,8 +212,8 @@ slsart deploy --stage test1
 ```
 The AWS CloudFormation Stack name in this case would be `serverless-artillery-test1`. 
 
-### T1.3. Invoke
-The following command will invoke [load generating Lambda function](#load-generating-lambda-function-on-aws) using default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script. Note that this default load script is part of the global install of serverless-artillery and not in the local folder from where you are running the command.
+### 4. Invoke
+The following command will invoke [load generating Lambda function](#load-generating-lambda-function-on-aws) using the default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script. Note that this default load script is part of the global install of serverless-artillery and not in the local folder from where you are running the command.
 ```
 slsart invoke --stage <your-unique-stage-name>
 ```
@@ -221,8 +221,8 @@ At the end of the test serverless-artillery will generate a report of the test. 
 
 If you go to AWS Lambda console > find the `loadGenerator` Lambda corresponding to your stack > `Monitoring` tab > `Invocations` graph, you will see that the Lambda function was invoked to generate the load. You can also see the logs produced by the Lambda in CloudWatch Logs.
 
-### T1.4. Remove
-The following command will remove the AWS CloudFormation Stack deployed in step 1. If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Remove Instructions`_** in **Confluence** and follow the instructions there.
+### 5. Remove
+The following command will remove the AWS CloudFormation Stack deployed in step 3. If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Remove Instructions`_** in **Confluence** and follow the instructions there.
 ```
 slsart remove --stage <your-unique-stage-name>
 ```
