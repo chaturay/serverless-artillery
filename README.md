@@ -187,7 +187,7 @@ In order to use serverless-artillery, depending on the AWS account environment y
 You can use serverless-artillery to performance test or load test your service/target/endpoint/URL. Performance testing framework forms the basis of the other two modes of serverless-artillery, i.e. acceptance mode and monitoring mode.
 
 ## Tutorial 1: Run a quick performance test
-If you want to quickly test your setup or see serverless-artillery in action, do the following to quickly run a **small load/performance test**. Don't worry about what these commands do in detail. This document explains them in detail later.
+If you want to quickly test your setup or see serverless-artillery in action, do the following to quickly run a **small load/performance test**.
 
 ### 1. Setup AWS account credentials
 Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding.
@@ -230,13 +230,13 @@ slsart remove --stage <your-unique-stage-name>
 ## Tutorial 2: Performance test with custom script
 Throughout this tutorial we will walk you towards performance testing the AWS website, https://aws.amazon.com/.
 
-We would test with our custom script but would use default deployment assets.
+We would test with our _custom_ script but would use _default_ deployment assets.
 
-### T2.1. Create new directory
+### 1. Create new directory
 Start by creating a new directory for this tutorial and go to that directory in command line.
 
-### T2.2. Create `script.yml`
-Serverless-artillery needs to know information about the performance test that user wants to run. It needs information like, the target URL of the service that user wants to test, load progression, user's interaction with the service (scenarios) etc. All these are described in a `script.yml` file. It is the same `script.yml` that Artillery.io uses. 
+### 2. Create `script.yml`
+Serverless-artillery needs to know information about the performance test that user wants to run. It needs information like, the target URL of the service that user wants to test, load progression, user's interaction with the service (scenarios) etc. All these are described in a `yml` file. It is the same `yml` that Artillery.io uses. 
 - **Please see [here for basic concepts for Artillery.io usage](https://artillery.io/docs/basic-concepts/#basic-concepts).**
 - **Please see [here for Artillery.io's test script reference](https://artillery.io/docs/script-reference/).**
 
@@ -244,8 +244,9 @@ Run the following command to create the initial `script.yml` file.
 ```
 slsart script
 ```
+The command by default gives the file name `script.yml`. If you want to give a different name to your `yml` file then you can use the `-o` option of the `slsart script` command. See `slsart script --help` for more details.
 
-### T2.3. Understanding `script.yml`
+### 3. Understanding `script.yml`
 Open `script.yml` with your favorite editor to see what it contains.
 <details><summary>Click to expand/collapse</summary>
 <p>
@@ -275,50 +276,40 @@ scenarios:
 </p>
 </details>
 
-- The script has [`config` section](https://artillery.io/docs/script-reference/#the-config-section)
+- The script has [`config` block](https://artillery.io/docs/script-reference/#the-config-section)
   - under which it specifies http://aws.amazon.com as the `target` for the test
     - and that requests should be made using [HTTP protocol](https://artillery.io/docs/http-reference/)
   - There is one [load `phase`](https://artillery.io/docs/script-reference/#load-phases) of `duration` of 5 sec and `arrivalRate` of 2 new virtual users arriving every second.
-- The script has [`scenarios` section](https://artillery.io/docs/script-reference/#scenarios)
+- The script has [`scenarios` block](https://artillery.io/docs/script-reference/#scenarios)
   - which contains one scenario
     - which contains one flow
       - which has one [flow action](https://artillery.io/docs/http-reference/#flow-actions) to send [GET request](https://artillery.io/docs/http-reference/#get-post-put-patch-delete-requests) for the specified `target`.
 
-### T2.4. Customizing `script.yml`
+### 4. Customizing `script.yml`
 This step is optional in the tutorial. If you like you can customize `script.yml` as follows.
 - If you have a public endpoint/service/URL that you would like to load test then you can change `target` to point to that.
-- You can also change the [load `phase`](https://artillery.io/docs/script-reference/#load-phases) and [`scenarios` section](https://artillery.io/docs/script-reference/#scenarios) as per your need. We recommend using a low load to try the tool first.
+- You can also change the [load `phase`](https://artillery.io/docs/script-reference/#load-phases) and [`scenarios` block](https://artillery.io/docs/script-reference/#scenarios) as per your need. We recommend using a low load to try the tool first.
 
-### T2.5. Setup AWS account credentials
+### 5. Setup AWS account credentials
 Make sure you have [setup your AWS account credentials](#before-running-serverless-artillery) before proceeding.
 
-### T2.6. Deploy assets to AWS
-The `slsart deploy` command deploys required assets (like [load generating Lambda function](#load-generating-lambda-function-on-aws)) to the AWS account you selected in the previous step. 
+### 6. Deploy assets to AWS
+This section is same as before. See [here](#3-deploy) for details.
 
-By _default_ it uses `stage` name `dev`. And hence the _default_ AWS CloudFormation Stack name becomes `serverless-artillery-dev` which you will see if you go to your AWS account console > CloudFormation after running the command.
-
-Since multiple developers could share an AWS account we recommend creating a unique stack for your use. For that we recommend either using custom deployment assets as shown in [Tutorial 3](#tutorial-3-performance-test-with-custom-deployment-assets) or use the _optional_ `stage` argument as shown in the following command.
-```
-slsart deploy --stage <your-unique-stage-name>
-```
-The AWS CloudFormation Stack name would be `serverless-artillery-<your-unique-stage-name>`.
-
-For example,
-```
-slsart deploy --stage test1
-```
-The AWS CloudFormation Stack name in this case would be `serverless-artillery-test1`. 
-
-### T2.7. Invoke performance test
+### 7. Invoke performance test
 Now you are all set to invoke performance test using following command.
 ```
 slsart invoke --stage <your-unique-stage-name>
 ```
+Please note that by default `slsart invoke` command will look for `script.yml` file in your local folder. If you gave a different name to your `yml` file or if it is not located in the folder from where you are running the command, then you need to use `-p` option of `slsart invoke` command and pass the required file name/path. See `slsart invoke --help` for more details.
+
 At the end of the test serverless-artillery will generate a report of the test. **Please note that this report is generated only for small load.** See [here](#providing-a-data-store-to-view-the-results-of-your-performance-test) for details.
+
+If you go to AWS Lambda console > find the `loadGenerator` Lambda corresponding to your stack > `Monitoring` tab > `Invocations` graph, you will see that the Lambda function was invoked to generate the load. You can also see the logs produced by the Lambda in CloudWatch Logs.
 
 **NOTE** that for performance testing, the command will take the `script.yml` from your local machine (and not the one deployed in AWS account) to run the performance test. Hence if you edit it on your local machine after deploying assets to AWS, you don't need to deploy again in order to run the performance test again. Also note that this is true only for performance test and acceptance test and not monitoring.
 
-### T2.8. Remove assets from AWS
+### 8. Remove assets from AWS
 After the test is done, you can remove the assets from AWS using following command. If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Remove Instructions`_** in **Confluence** and follow the instructions there.
 ```
 slsart remove --stage <your-unique-stage-name>
