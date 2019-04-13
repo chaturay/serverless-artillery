@@ -198,7 +198,7 @@ Go to command line for all the following steps in this tutorial. You can run the
 ### 3. Deploy
 The `slsart deploy` command deploys required assets (like [load generating Lambda function](#load-generating-lambda-function-on-aws)) to the AWS account you selected in the previous step. 
 
-By _default_ it uses `service` name `serverless-artillery` and `stage` name `dev`. And hence the _default_ AWS CloudFormation Stack name becomes `serverless-artillery-dev` (format: `<service-name>-<stage-name>`). You will see that if you go to your AWS account console > CloudFormation after running the command.
+By _default_ it uses `service` name `serverless-artillery` and `stage` name `dev`. And hence the _default_ AWS CloudFormation Stack name becomes `serverless-artillery-dev` (format: `<service-name default:serverless-artillery>-<stage-name default:dev>`). You will see that if you go to your AWS account console > CloudFormation after running the command.
 
 Since multiple developers could share an AWS account, we recommend creating a unique stack for your use. For that we recommend either using custom deployment assets as shown in [Tutorial 3](#tutorial-3-performance-test-with-custom-deployment-assets) or use the _optional_ `stage` argument as shown in the following command.
 ```
@@ -319,27 +319,22 @@ slsart remove --stage <your-unique-stage-name>
 
 Throughout this tutorial we will walk you towards performance testing the AWS website, https://aws.amazon.com/.
 
-We would test with our custom script and custom deployment assets.
+We would test with our _custom_ script and _custom_ deployment assets.
 
-### T3.1. Create new directory
+### 1. Create new directory
 Start by creating a new directory for this tutorial and go to that directory in command line.
 
-### T3.2. Create `script.yml`
-This section is same as before. See [here](#t22-create-scriptyml) for details.
+### 2. Create `script.yml`
+This section is same as before. See [here](#2-create-scriptyml) for details.
 
-Run the following command to create the initial `script.yml` file.
-```
-slsart script
-```
+### 3. Understanding `script.yml`
+This section is same as before. See [here](#3-understanding-scriptyml) for details.
 
-### T3.3. Understanding `script.yml`
-This section is same as before. See [here](#t23-understanding-scriptyml) for details.
+### 4. Customizing `script.yml`
+This section is same as before. See [here](#4-customizing-scriptyml) for details.
 
-### T3.4. Customizing `script.yml`
-This section is same as before. See [here](#t24-customizing-scriptyml) for details.
-
-### T3.5. Create custom deployment assets
-Create a _local copy_ of the deployment assets for customization and deployment using following command. The command generates a local copy of the load generator lambda function code (along with other assets) that can be edited and deployed with your changed settings if needed. It also runs `npm install` after creating local copy of the deployment assets.
+### 5. Create custom deployment assets
+Create a _local copy_ of the deployment assets for your customization and then deployment to AWS, using following command. The command generates a local copy of the load generator lambda function code (along with other assets) that can be edited and deployed with your changed settings if needed. It also runs `npm install` after creating local copy of the deployment assets.
 ```
 slsart configure
 ```
@@ -348,15 +343,15 @@ The important files among other files created by this command are as follows.
 |File|Description|
 |:----|:----------|
 |`package.json`|Node.js dependencies for the load generator Lambda. Add Artillery.io plugins you want to use here.|
-|`serverless.yml`|Serverless-artillery's service definition using Serverless Framework. Change AWS-specific settings here.|
+|`serverless.yml`|Serverless-artillery's service definition/configuration using Serverless Framework. Change AWS-specific settings here.|
 |`handler.js`|Load generator Lambda code. **EDIT AT YOUR OWN RISK.**|
 
-**Note** that everytime you make changes to these local copy of deployment assets, you need to redeploy using `slsart deploy` command.
+**Note** that everytime you make changes to these local copy of deployment assets or `serverless.yml` file, you need to redeploy using `slsart deploy` command.
 
-**Note** that if you change package.json then you need to run `npm install` and then redeploy using `slsart deploy` command.
+**Note** that if you change `package.json` then you need to run `npm install` and then redeploy using `slsart deploy` command.
 
-### T3.6. Understanding `serverless.yml`
-`serverless.yml` contains serverless-artillery's service definition using Serverless Framework.
+### 6. Understanding `serverless.yml`
+`serverless.yml` contains serverless-artillery's service definition/configuration using Serverless Framework.
 
 Open `serverless.yml` with your favorite editor to see what it contains.
 <details><summary>Click to expand/collapse</summary>
@@ -464,50 +459,54 @@ resources:
 </p>
 </details>
 
-Please refer to [`serverless.yml` documentation](https://serverless.com/framework/docs/providers/aws/guide/serverless.yml/) for details. It contains assets needed for monitoring (turned off by default) as well which we will discuss later.
-#### Service name
+Please refer to [`serverless.yml` documentation](https://serverless.com/framework/docs/providers/aws/guide/serverless.yml/) for details. It defines assets needed for monitoring (turned off by default) as well which we will discuss later.
+#### a. Service name
 - In above `serverless.yml` the `service` name is set to `serverless-artillery-XnBa473psJ`. In your `serverless.yml` the string at the end (`XnBa473psJ`) would be different.
-- This will be the AWS CloudFormation stack name when you run `slsart deploy`.
-  - If you specify the optional stage name with the deploy command, i.e. `slsart deploy --stage <your-unique-stage-name>`, then the AWS CloudFormation stack name would be `<service-name>-<your-unique-stage-name>`
-- The `slsart configure` command adds a random string at the end of the `service` name so you get a unique stack name that does not conflict with anyone else also deploying to the same AWS account, if you were to not specify the optional stage name with the deploy command.
-- You can change `service` name to some other unique string as per your need. Format `serverless-artillery-<unique-string>`. For example, `serverless-artillery-myperftestservice`.
+- This will be the AWS CloudFormation stack name when you run `slsart deploy`. Format of the AWS CloudFormation stack name would be `<service-name default:serverless-artillery>-<stage-name default:dev>`.
+  - If you specify the optional stage name with the deploy command, i.e. `slsart deploy --stage <your-unique-stage-name>`, then the AWS CloudFormation stack name would be `<service-name default:serverless-artillery>-<your-unique-stage-name>`
+- The `slsart configure` command adds a random string at the end of the `service` name so you get a unique stack name that does not conflict with anyone else also deploying to the same AWS account, in case you were to not specify the optional stage name with the deploy command.
+- You can change `service` name to some other unique string as per your need. For example, `serverless-artillery-myperftestservice` or `myloadtestservice`.
 - The rest of the `serverless.yml` refers to the service name by using `${self:service}`.
 
-#### [Load generating Lambda function](#load-generating-lambda-function-on-aws) name
-The Serverless framework automatically names the Lambda function based on the service, stage and function name as follows.
+#### b. [Load generating Lambda function](#load-generating-lambda-function-on-aws) name
+The Serverless Framework automatically names the Lambda function based on the service, stage and function name as follows.
 - The function `loadGenerator` when deployed is named as `${self:service}-${opt:stage, self:provider.stage}-loadGenerator`.
   - `${self:service}` is name of the service. In this `serverless.yml` it is `serverless-artillery-XnBa473psJ`.
   - `${opt:stage, self:provider.stage}` will either use `${opt:stage}` or `${self:provider.stage}`.
     - `${opt:stage}` refers to the (optional) stage name passed in `slsart deploy [--stage <stage-name>]` command. For example, if you run `slsart deploy --stage prod` then `prod` would be used for `${opt:stage}`.
-    - If no stage name is passed in the deploy command then `${self:provider.stage}` would be used. It is the `stage` name set under `provider` section in the `serverless.yml`. If one is not provided (like in above example) it is set to `dev`. See [here](https://serverless.com/framework/docs/providers/aws/guide/serverless.yml/).
+    - If no stage name is passed in the deploy command then `${self:provider.stage}` would be used. It is the `stage` name set under `provider` block in the `serverless.yml`. If one is not provided (like in above example) it is set to `dev`. See [here](https://serverless.com/framework/docs/providers/aws/guide/serverless.yml/).
 - In this example function name will be set to `serverless-artillery-XnBa473psJ-dev-loadGenerator` while running `slsart deploy` command (note no stage name specified).
-#### [Load generating Lambda function](#load-generating-lambda-function-on-aws) permissions
+#### c. [Load generating Lambda function](#load-generating-lambda-function-on-aws) permissions
 - In order to generate load the load generating Lambda needs to invoke itself.
-- The `iamRoleStatements` section in the `serverless.yml` gives the load generating Lambda function to invoke itself (`lambda:InvokeFunction`).
+- The `iamRoleStatements` block in the `serverless.yml` gives the load generating Lambda function to invoke itself (`lambda:InvokeFunction`).
 
-### T3.7. Customizing `serverless.yml`
+### 7. Customizing `serverless.yml`
 Except for [one step for **_Nordstrom_** Engineers](#customization-for-nordstrom-engineers), all customizations are **optional** in the tutorial. If you like you can customize `serverless.yml` as follows.
 
-#### Customization for Nordstrom Engineers
+#### a. Customization for Nordstrom Engineers
 If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Policies`_** in **Confluence** and follow the instructions there.
 
-#### Service name
+#### b. Service name
 - You can change `service` name to some other unique string as per your need.
-- Format `serverless-artillery-<unique-string>`. For example, `serverless-artillery-myperftestservice`.
-- This will be the AWS CloudFormation stack name when you run `slsart deploy`.
+- For example, `serverless-artillery-myperftestservice` or `myloadtestservice`.
+- Format of the AWS CloudFormation stack name would be `<service-name default:serverless-artillery>-<stage-name default:dev>` after you deploy.
 
-#### Plugins
+#### c. Plugins
 You can customize the `serverless.yml` to use required tools/plugins mentioned [below](#related-tools-and-plugins). 
 
-##### CloudWatch plugin
+##### i. CloudWatch plugin
 In this tutorial you can add [artillery-plugin-cloudwatch](https://github.com/Nordstrom/artillery-plugin-cloudwatch) to record test results to [AWS CloudWatch](https://aws.amazon.com/cloudwatch).
 1. To allow the Lambda code to write to CloudWatch, the correct NPM package dependency must be added. This modifies the package.json file to include the necessary dependency.
 ```
 npm install --save artillery-plugin-cloudwatch
 ```
-2. Update the `config` portion of `script.yml` to add CloudWatch plugin as follows:
+
+2. In `script.yml`, at the end of the `config` block (which already exists)
 ```
 config:
+```
+add CloudWatch plugin as follows:
+```
   plugins:
     cloudwatch:
       namespace: "<cloud-watch-namespace>"
@@ -516,12 +515,13 @@ For example, you can use
 ```
       namespace: "serverless-artillery-myperftestservice-loadtest"
 ```
-3. In `serverless.yml`, under the following section (already exists)
+
+3. In `serverless.yml`, at the end of the following block (which already exists)
 ```
 provider:
   iamRoleStatements:
 ```
-add the following
+add the following:
 ```
     - Effect: 'Allow'
       Action:
@@ -529,13 +529,15 @@ add the following
       Resource:
         - '*'
 ```
-
-##### Datadog plugin
+========== ASHMI NEXT
+##### ii. Datadog plugin
 In this tutorial you can add [artillery-plugin-datadog](https://www.npmjs.com/package/artillery-plugin-datadog) to record test results to [Datadog](https://www.datadoghq.com/).
+
 1. To allow the Lambda code to write to Datadog, the correct NPM package dependency must be added. This modifies the package.json file to include the necessary dependency.
 ```
 npm install --save artillery-plugin-datadog
 ```
+
 2. Update the `config` portion of `script.yml` to add Datadog plugin as follows:
 ```
 config:
@@ -549,6 +551,7 @@ config:
       tags:
         - 'mode:test'
 ```
+
 3. In `serverless.yml`, under `provider` section specify Datadog API key as an environment variable as follows:
 ```
 provider:
@@ -556,10 +559,10 @@ provider:
     DATADOG_API_KEY: "<your-datadog-api-key>"
 ```
 
-### T3.8. Setup AWS account credentials
+### 8. Setup AWS account credentials
 This section is same as before. See [here](#t25-setup-aws-account-credentials) for details.
 
-### T3.9. Deploy assets to AWS
+### 9. Deploy assets to AWS
 This section is same as before. See [here](#t26-deploy-assets-to-aws) for details.
 
 We need to deploy required assets (like [load generating Lambda function](#load-generating-lambda-function-on-aws)) to the AWS account you selected in the previous step. 
@@ -570,14 +573,14 @@ slsart deploy
 ```
 You can go to your AWS account console > CloudFormation, and see AWS stack `serverless-artillery-*` created there depending on the customizations explained in the steps above.
 
-### T3.10. Invoke performance test
+### 10. Invoke performance test
 ASHMITODO: Do you want to use slsart deploy without stage for this tutorial?
 
 This section is same as before. See [here](#t27-invoke-performance-test) for details.
 
 If you used CloudWatch/Datadog plugins you will be able to view the metrics on the CloudWatch/Datadog dashboard. You can learn more about using CloudWatch dashboard [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html). **Note that it can take few minutes for the data to propogate to CloudWatch/Datadog.**
 
-### T3.11. Remove assets from AWS
+### 11. Remove assets from AWS
 ASHMITODO: Do you want to use slsart remove without stage for this tutorial?
 
 This section is same as before. See [here](#t28-remove-assets-from-aws) for details.
