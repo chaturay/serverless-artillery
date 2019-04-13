@@ -244,7 +244,6 @@ Run the following command to create the initial `script.yml` file.
 ```
 slsart script
 ```
-The command by default gives the file name `script.yml`. If you want to give a different name to your `yml` file then you can use the `-o` option of the `slsart script` command. See `slsart script --help` for more details.
 
 ### 3. Understanding `script.yml`
 Open `script.yml` with your favorite editor to see what it contains.
@@ -301,7 +300,6 @@ Now you are all set to invoke performance test using following command.
 ```
 slsart invoke --stage <your-unique-stage-name>
 ```
-Please note that by default `slsart invoke` command will look for `script.yml` file in your local folder. If you gave a different name to your `yml` file or if it is not located in the folder from where you are running the command, then you need to use `-p` option of `slsart invoke` command and pass the required file name/path. See `slsart invoke --help` for more details.
 
 At the end of the test serverless-artillery will generate a report of the test. **Please note that this report is generated only for small load.** See [here](#providing-a-data-store-to-view-the-results-of-your-performance-test) for details.
 
@@ -596,21 +594,34 @@ This section is same as before. See [here](#7-invoke-performance-test) for detai
 ### 5. Kill the in-progress performance test
 Run the following command to kill the performance test. Read more about the kill command [here](#killing-in-progress-performance-test). **Note** that _kill_ command will also _remove_ the deployed assets. Hence running `slsart remove` after this is not needed. 
 ```
-slsart kill
+slsart kill --stage <your-unique-stage-name> --region=<region-used-for-deploy>
 ```
+
+You must specify a `region` when running this command:
+- Use `--region` option, e.g. `--region=us-east-1`
+- or set AWS_REGION in environment, e.g. `AWS_REGION=us-east-1`
+- or configure a default region using the guide below.
+Serverless will use the `us-east-1` region by default.
+
+### 6. Wait before re-deploying
+Wait for ~5 minutes before re-deploying to let the Lambda invocation queue drain.
 
 ## Performance test workshop
 We've created a workshop detailing end-to-end usage of serverless-artillery for performance testing. Check out our conference-style [workshop](https://github.com/Nordstrom/serverless-artillery-workshop) for step by step lessons on how to set your system up for successful deployment, invocation, and removal.
 
-========ASHMI NEXT
 ## Other commands and use cases
 ### Killing in-progress performance test
 While running performance/load test it is sometimes necessary to kill the test before it is complete. For example, it might be done when the test target is not able to handle the current load and you want to stop the test before the service goes down.
 
 You can run the following command to kill the performance test.
 ```
-slsart kill
+slsart kill --stage <your-unique-stage-name> --region=<region-used-for-deploy>
 ```
+You must specify a `region` when running this command:
+- Use `--region` option, e.g. `--region=us-east-1`
+- or set AWS_REGION in environment, e.g. `AWS_REGION=us-east-1`
+- or configure a default region using the guide below.
+Serverless will use the `us-east-1` region by default.
 
 The command will do the followings:
 - It will set the load generating Lambda function's [concurrency level](https://docs.aws.amazon.com/lambda/latest/dg/concurrent-executions.html#per-function-concurrency) to 0.
@@ -644,11 +655,19 @@ slsart script --help
 ```
 
 ### Performance test using script file with different name/path
-By default `slsart invoke` command will look for `script.yml` to run performance test. You can use `-p` option to specify script file with different name/path as follows.
+The `slsart script` command by default gives the file name `script.yml`. If you want to give a different name to your `yml` file then you can use the `-o` option of the `slsart script` command. See`slsart script --help` for more details.
+```
+slsart script -o <preferred-filename.yml>
+```
+Example,
+```
+slsart script -o myservicetests.yml
+```
+
+By default `slsart invoke` command will look for `script.yml` under the local folder to run performance test. You can use `-p` option to specify script file with different name/path as follows.
 ```
 slsart invoke -p <path-to-your-script-file>
 ```
-
 For example, following command will *invoke* performance test using the specified file.
 ```
 slsart invoke -p /my/path/to/myotherscript.yml
@@ -658,7 +677,7 @@ For more options see,
 ```
 slsart invoke --help
 ```
-
+=========ASHMI
 ### Reserved and unsupported flags
 `slsart` commands support most commandline flags of the corresponding `sls` (Serverless Framework) commands.
 #### Reserved flags
