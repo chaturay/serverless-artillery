@@ -529,7 +529,6 @@ add the following:
       Resource:
         - '*'
 ```
-========== ASHMI NEXT
 ##### ii. Datadog plugin
 In this tutorial you can add [artillery-plugin-datadog](https://www.npmjs.com/package/artillery-plugin-datadog) to record test results to [Datadog](https://www.datadoghq.com/).
 
@@ -538,7 +537,7 @@ In this tutorial you can add [artillery-plugin-datadog](https://www.npmjs.com/pa
 npm install --save artillery-plugin-datadog
 ```
 
-2. Update the `config` portion of `script.yml` to add Datadog plugin as follows:
+2. Update the `config` portion of `script.yml` to add Datadog plugin as follows and customize the `host`, `prefix` and `tags` as per your requirement.
 ```
 config:
   plugins:
@@ -552,7 +551,7 @@ config:
         - 'mode:test'
 ```
 
-3. In `serverless.yml`, under `provider` section specify Datadog API key as an environment variable as follows:
+3. In `serverless.yml`, under `provider` section specify Datadog API key as an environment variable as follows. **NOTE** that you should not save sensitive information like Datadog API Key in plain text in a source control. Below is just for the tutorial.
 ```
 provider:
   environment:
@@ -560,51 +559,41 @@ provider:
 ```
 
 ### 8. Setup AWS account credentials
-This section is same as before. See [here](#t25-setup-aws-account-credentials) for details.
+This section is same as before. See [here]((#before-running-serverless-artillery)) for details.
 
 ### 9. Deploy assets to AWS
-This section is same as before. See [here](#t26-deploy-assets-to-aws) for details.
+This section is same as before. See [here](#3-deploy) for details.
 
-We need to deploy required assets (like [load generating Lambda function](#load-generating-lambda-function-on-aws)) to the AWS account you selected in the previous step. 
-
-Use the following command to deploy the assets.
-```
-slsart deploy
-```
-You can go to your AWS account console > CloudFormation, and see AWS stack `serverless-artillery-*` created there depending on the customizations explained in the steps above.
+You can go to your AWS account console > CloudFormation, and see AWS stack `<service-name default:serverless-artillery>-<stage-name default:dev>` created there depending on the customizations explained in the steps above.
 
 ### 10. Invoke performance test
-ASHMITODO: Do you want to use slsart deploy without stage for this tutorial?
-
-This section is same as before. See [here](#t27-invoke-performance-test) for details.
+This section is same as before. See [here](#7-invoke-performance-test) for details.
 
 If you used CloudWatch/Datadog plugins you will be able to view the metrics on the CloudWatch/Datadog dashboard. You can learn more about using CloudWatch dashboard [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Dashboards.html). **Note that it can take few minutes for the data to propogate to CloudWatch/Datadog.**
 
 ### 11. Remove assets from AWS
-ASHMITODO: Do you want to use slsart remove without stage for this tutorial?
-
-This section is same as before. See [here](#t28-remove-assets-from-aws) for details.
+This section is same as before. See [here](#8-remove-assets-from-aws) for details.
 
 ## Tutorial 4: Killing in-progress performance test
-While running performance/load test it is sometimes necessary to kill the test before it is complete. Read more about the kill command [here]().
+While running performance/load test it is sometimes necessary to kill the test before it is complete. Read more about the [kill command](#killing-in-progress-performance-test).
 
-### T4.1. Increase `duration`
+### 1. Increase `duration`
 If you are a **_Nordstrom_** engineer, please follow [Tutorial 3](#tutorial-3-performance-test-with-custom-deployment-assets) to create custom script and custom deployment assets. Make sure you do [customization for Nordstrom Engineers](#customization-for-nordstrom-engineers). Other optional customizations are not necessary for this tutorial.
 
-Others can follow [Tutorial 2](#tutorial-2-performance-test-with-custom-script) to create `script.yml`.
+Others can follow [Tutorial 2](#tutorial-2-performance-test-with-custom-script) to create custom `script.yml`.
 
 Edit `script.yml` in your favorite editor and increase the `duration` to `60` seconds.
 
-### T4.2. Setup AWS account credentials
-This section is same as before. See [here](#t25-setup-aws-account-credentials) for details.
+### 2. Setup AWS account credentials
+This section is same as before. See [here](#before-running-serverless-artillery) for details.
 
-### T4.3. Deploy assets to AWS
-This section is same as before. See [here](#t26-deploy-assets-to-aws) for details.
+### 3. Deploy assets to AWS
+This section is same as before. See [here](#3-deploy) for details.
 
-### T4.4. Invoke performance test
-This section is same as before. See [here](#t27-invoke-performance-test) for details.
+### 4. Invoke performance test
+This section is same as before. See [here](#7-invoke-performance-test) for details.
 
-### T4.5. Kill the in-progress performance test
+### 5. Kill the in-progress performance test
 Run the following command to kill the performance test. Read more about the kill command [here](#killing-in-progress-performance-test). **Note** that _kill_ command will also _remove_ the deployed assets. Hence running `slsart remove` after this is not needed. 
 ```
 slsart kill
