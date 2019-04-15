@@ -41,7 +41,7 @@ let Payload = '{}'
 class AwsInvoke {
   log() {} // eslint-disable-line class-methods-use-this
 }
-let slsFakeInit = () => Promise.resolve()
+const slsFakeInit = () => Promise.resolve()
 class ServerlessFake {
   constructor() {
     this.version = '1.0.3'
@@ -73,8 +73,8 @@ quibble(path.join('..', '..', 'lib', 'serverless-fx'), ServerlessFake)
 quibble('get-stdin', () => BbPromise.resolve(testJsonScriptStringified))
 quibble('shortid', { generate: () => shortidResult })
 
-const func = require(path.join('..', '..', 'lib', 'lambda', 'func.js')) // eslint-disable-line import/no-dynamic-require
-const task = require(path.join('..', '..', 'lib', 'lambda', 'task.js')) // eslint-disable-line import/no-dynamic-require
+const sampling = require(path.join('..', '..', 'lib', 'lambda', 'sampling.js')) // eslint-disable-line import/no-dynamic-require
+const modes = require(path.join('..', '..', 'lib', 'lambda', 'modes.js')) // eslint-disable-line import/no-dynamic-require
 const slsart = require(path.join('..', '..', 'lib', 'index.js')) // eslint-disable-line import/no-dynamic-require
 
 describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefer-arrow-callback
@@ -156,14 +156,8 @@ describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefe
       it('parses valid YML', () => {
         expect(slsart.impl.parseScript(testYmlScriptStringified)).to.eql(testYmlScript)
       })
-      it('rejects non-JSON-or-YML', () => {
-        expect(() => slsart.impl.parseScript('NOT JSON OR YML')).to.throw(Error)
-      })
       it('rejects badly formatted YML', () => {
         expect(() => slsart.impl.parseScript(testBadYmlScriptStringified)).to.throw(yaml.YAMLException)
-      })
-      it('rejects invalid but well formed scripts', () => {
-        expect(() => slsart.impl.parseScript('{}')).to.throw(Error)
       })
     })
 
@@ -431,7 +425,7 @@ scenarios:
             enabled: true,
             input: {
               '>>': 'script.yml',
-              mode: task.def.modes.MONITORING,
+              mode: modes.MONITORING,
             },
           },
         },
@@ -530,12 +524,12 @@ scenarios:
         })
         it('rejects if script mode is "mon"', () => {
           expect(() =>
-            slsart.impl.validateServiceForInvocation({}, { mode: task.def.modes.MON }, defaultAssetsCwd)
+            slsart.impl.validateServiceForInvocation({}, { mode: modes.MON }, defaultAssetsCwd)
           ).to.throw(/does not support invocation with the monitoring flag/)
         })
         it('rejects if script mode is "monitoring"', () => {
           expect(() =>
-            slsart.impl.validateServiceForInvocation({}, { mode: task.def.modes.MONITORING }, defaultAssetsCwd)
+            slsart.impl.validateServiceForInvocation({}, { mode: modes.MONITORING }, defaultAssetsCwd)
           ).to.throw(/does not support invocation with the monitoring flag/)
         })
         it('does not reject default version otherwise', () => {
@@ -552,12 +546,12 @@ scenarios:
         })
         it('does not reject if script mode is "mon"', () => {
           expect(() =>
-            slsart.impl.validateServiceForInvocation({}, { mode: task.def.modes.MON }, v0_0_1_AssetsCwd)
+            slsart.impl.validateServiceForInvocation({}, { mode: modes.MON }, v0_0_1_AssetsCwd)
           ).not.to.throw(/does not support invocation with the monitoring flag/)
         })
         it('does not reject if script mode is "monitoring"', () => {
           expect(() =>
-            slsart.impl.validateServiceForInvocation({}, { mode: task.def.modes.MONITORING }, v0_0_1_AssetsCwd)
+            slsart.impl.validateServiceForInvocation({}, { mode: modes.MONITORING }, v0_0_1_AssetsCwd)
           ).not.to.throw(/does not support invocation with the monitoring flag/)
         })
         it('does not reject default version otherwise', () => {
@@ -644,14 +638,6 @@ scenarios:
           .then(() => { Payload = payload })
           .should.be.fulfilled
       })
-      it('handles rejections along the promise chain', () => {
-        const fakeInit = slsFakeInit
-        slsFakeInit = () => Promise.reject(new Error('rejected'))
-        return slsart.impl.serverlessRunner({})
-          .then(() => { slsFakeInit = fakeInit })
-          .catch((ex) => { slsFakeInit = fakeInit; throw ex })
-          .should.be.fulfilled
-      })
     })
   })
   describe(':exports', function slsartCommands() { // eslint-disable-line prefer-arrow-callback
@@ -688,7 +674,7 @@ scenarios:
 
       const replaceImpl = (scriptConstraintsResult, serverlessRunnerResult, testFunc) => (() => {
         const { scriptConstraints } = slsart.impl
-        scriptConstraints.task = { sampling: task.def.getSettings() }
+        scriptConstraints.task = { sampling: sampling.defaults }
         const { serverlessRunner } = slsart.impl
         const replaceInput = slsart.impl.replaceArgv
         slsart.impl.scriptConstraints = () => scriptConstraintsResult
@@ -730,24 +716,24 @@ scenarios:
           implParseInputStub.restore()
         })
         it('handles and reports validation errors from the function plugin, exiting the process', () => {
-          implParseInputStub.throws(new func.def.FunctionError('func.error'))
+          implParseInputStub.throws(new Error('func.error'))
           return slsart.invoke({ d: testJsonScriptStringified })
-            .should.be.rejectedWith(func.def.FunctionError, 'func.error')
+            .should.be.rejectedWith(Error, 'func.error')
         })
         it('handles and reports validation errors from the task plugin, exiting the process', () => {
-          implParseInputStub.throws(new task.def.TaskError('task.error'))
+          implParseInputStub.throws(new Error('task.error'))
           return slsart.invoke({ d: testJsonScriptStringified })
-            .should.be.rejectedWith(task.def.TaskError, 'task.error')
+            .should.be.rejectedWith(Error, 'task.error')
         })
         it('handles and reports assets version mismatch errors, exiting the process', () => {
           validateServiceForInvocationStub.throws(new Error('error'))
           return slsart.invoke({ d: testJsonScriptStringified })
-            .should.be.rejectedWith(task.def.Error, 'error')
+            .should.be.rejectedWith(Error, 'error')
         })
         it('handles and reports unexpected errors, exiting the process', () => {
           implParseInputStub.throws(new Error('error'))
           return slsart.invoke({ d: testJsonScriptStringified })
-            .should.be.rejectedWith(task.def.Error, 'error')
+            .should.be.rejectedWith(Error, 'error')
         })
       })
       describe('performance mode', () => {
@@ -810,7 +796,7 @@ scenarios:
               script.mode = 'acc'
               return slsart.invoke({ acceptance: true, d: testJsonScriptStringified })
                 .then(() => {
-                  expect(logs[3]).to.eql(JSON.stringify({ foo: 'bar' }, null, 2))
+                  expect(logs[2]).to.eql(JSON.stringify({ foo: 'bar' }, null, 2))
                 })
             } // eslint-disable-line comma-dangle
           ) // eslint-disable-line comma-dangle
@@ -818,7 +804,7 @@ scenarios:
         it('exits the process with a non-zero exit code when an error occurs during the acceptance test',
           replaceImpl(
             { allowance: 2, required: 1 },
-            { errors: 1, reports: [{ errors: 1 }] },
+            { errors: 1, reports: [{ errors: 1 }], errorMessage: 'An actual error occurred.' },
             () => {
               // save/replace process.exit
               const { exit } = process
@@ -876,7 +862,7 @@ scenarios:
             {},
             () => {
               const script = JSON.parse(testJsonScriptStringified)
-              script.mode = task.def.modes.MON
+              script.mode = modes.MON
               return slsart.invoke({ d: JSON.stringify(script) })
                 .then(() => expect(logs[1]).to.eql(completeMessage))
             } // eslint-disable-line comma-dangle
@@ -888,7 +874,7 @@ scenarios:
             {},
             () => {
               const script = JSON.parse(testJsonScriptStringified)
-              script.mode = task.def.modes.MONITORING
+              script.mode = modes.MONITORING
               return slsart.invoke({ d: JSON.stringify(script) })
                 .then(() => expect(logs[1]).to.eql(completeMessage))
             } // eslint-disable-line comma-dangle
@@ -903,7 +889,7 @@ scenarios:
               script.mode = 'mon'
               return slsart.invoke({ acceptance: true, d: testJsonScriptStringified })
                 .then(() => {
-                  expect(logs[3]).to.eql(JSON.stringify({ foo: 'bar' }, null, 2))
+                  expect(logs[2]).to.eql(JSON.stringify({ foo: 'bar' }, null, 2))
                 })
             } // eslint-disable-line comma-dangle
           ) // eslint-disable-line comma-dangle
@@ -911,7 +897,7 @@ scenarios:
         it('exits the process with a non-zero exit code when an error occurs during the monitoring test',
           replaceImpl(
             { allowance: 2, required: 1 },
-            { errors: 5, reports: [{ errors: 5 }] },
+            { errors: 5, reports: [{ errors: 5 }], errorMessage: 'an actual error' },
             () => {
               // save/replace process.exit
               const { exit } = process

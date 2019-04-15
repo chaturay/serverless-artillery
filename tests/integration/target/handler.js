@@ -45,4 +45,4 @@ const handler = (persist = persistence) => ({
 })
 
 module.exports = handler()
-module.exports.handler = handler
+module.exports.createHandler = handler

@@ -334,6 +334,74 @@ describe('versioning module', () => {
           })).to.throw('data should match pattern "^(?!foo).*", data property name \'foo\' is invalid')
         })
       })
+
+      describe('viable service meets all requirements', () => {
+        it('checks files, dependencies, requirements and conflicts', () => {
+          const versioningTest = versioning()('target-project')
+
+          versioningTest.checkForServiceFiles = sinon.spy()
+          versioningTest.checkForProjectDependencies = sinon.spy()
+          versioningTest.checkForMinimumRequirements = sinon.spy()
+          versioningTest.checkForConflicts = sinon.spy()
+
+          const serviceConfig = { service: 'test' }
+          const currentVersion = {
+            fileManifest: sinon.spy(),
+            projectDependencies: sinon.spy(),
+            serviceDefinitionSchema: sinon.spy(),
+          }
+          const nextVersion = {
+            serviceDefinitionConflictSchema: sinon.spy(),
+          }
+
+          versioningTest.validateServiceForUpgrade(serviceConfig, currentVersion, nextVersion)
+
+          expect(versioningTest.checkForServiceFiles).to.have.been.calledOnce
+          expect(versioningTest.checkForProjectDependencies).to.have.been.calledOnce
+          expect(versioningTest.checkForMinimumRequirements).to.have.been.calledOnce
+          expect(versioningTest.checkForConflicts).to.have.been.calledOnce
+        })
+      })
+    })
+
+    describe('loads and parses service definition', () => {
+      it('checks files, dependencies, requirements and conflicts', () => {
+        const fs = { readFileSync: sinon.spy() }
+        const path = { join: sinon.spy() }
+        const yaml = { safeLoad: sinon.spy() }
+
+        const versioningTest = versioning(fs, path, yaml)('target-project')
+
+        versioningTest.loadServiceDefinition()
+
+        expect(fs.readFileSync).to.have.been.calledOnce
+        expect(path.join).to.have.been.calledOnce
+        expect(yaml.safeLoad).to.have.been.calledOnce
+      })
+    })
+
+    describe('backs up the existing project files', () => {
+      it('creates a backup directory, cleans the project and copies all files', () => {
+        const fs = {
+          mkdirSync: sinon.spy(),
+          readdirSync: sinon.spy(() => ['one', 'two']),
+          readFileSync: sinon.spy(() => 'contents'),
+          writeFileSync: sinon.spy(() => 'contents'),
+          statSync: sinon.spy(() => ({ isDirectory: () => false })),
+        }
+        const path = { join: sinon.spy((dir, name) => `${dir}/${name}`) }
+        const yaml = { safeLoad: sinon.spy() }
+
+        const versioningTest = versioning(fs, path, yaml)('target-project')
+
+        versioningTest.backupProjectFiles()
+
+        expect(fs.mkdirSync).to.have.been.calledOnce
+        expect(fs.readdirSync).to.have.been.calledOnce
+        expect(fs.readFileSync).to.have.been.calledTwice
+        expect(fs.writeFileSync).to.have.been.calledTwice
+        expect(fs.statSync).to.have.been.calledTwice
+      })
     })
   })
 })

@@ -100,7 +100,9 @@ describe('upgrade plugin for version 0.0.0', () => {
     })
 
     const minimumServiceSchema = upgrade().serviceDefinitionSchema()
-    const verifyServiceIsValid = service => expect(ajv.validate(minimumServiceSchema, service)).to.be.true
+    const verifyServiceIsValid = (service) => {
+      expect(ajv.validate(minimumServiceSchema, service)).to.be.true
+    }
     const verifyServiceFailsValidation = (service, message) => {
       const valid = ajv.validate(minimumServiceSchema, service)
       expect(valid).to.be.false

@@ -16,7 +16,7 @@ script:
 expectations:
   - from: 0
     to: 30
-    min: 250
+    min: 240
     max: 310
   - from: 30
     to: 60

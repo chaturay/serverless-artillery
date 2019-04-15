@@ -20,7 +20,7 @@ describe('./tests/integration', () => {
   const deploying = () => {
     console.log('Deploying test serverless project. This will take a few minutes...')
     return deployNewTestResources()
-      .then(result => {
+      .then((result) => {
         const deployInfo = {
           urlsForName: urlsForScript(result),
           tempFolder: result.tempFolder,

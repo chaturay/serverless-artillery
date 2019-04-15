@@ -4,8 +4,8 @@
   "license": "All rights reserved for deployer.",
   "dependencies": {
     "uuid": "3.3.2",
-    "artillery": "git+https://github.com/Nordstrom/artillery.git#2d99b7ab1075e9df9f6eb2903102abc7849f1879",
-    "js-yaml": "^3.11.0",
+    "artillery": "git+https://github.com/Nordstrom/artillery.git#96552a4656ba7d1c32d8868754b1f1ab5299f8b8",
+    "js-yaml": "^3.13.0",
     "lodash.merge": "^4.6.1",
     "lodash.omit": "^4.5.0",
     "util-promisify": "^2.1.0"

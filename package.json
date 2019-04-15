@@ -9,10 +9,10 @@
   },
   "scripts": {
     "test": "./node_modules/.bin/nyc ./node_modules/.bin/_mocha -r aws-sdk \"./tests/**/*.spec.js\"",
-    "light": "./node_modules/.bin/nyc ./node_modules/.bin/_mocha -r aws-sdk \"./tests/**/!(serverless-artillery|npm).spec.js\"",
-    "integration": "./node_modules/.bin/_mocha --timeout=1200000 ./tests/integration/index",
-    "integration:upgrade": "./node_modules/.bin/_mocha --timeout 90000 ./tests/integration/versioning/upgrade.js",
-    "coverage": "./node_modules/.bin/nyc report --reporter=text-lcov | coveralls",
+    "test-light": "./node_modules/.bin/nyc ./node_modules/.bin/_mocha -r aws-sdk \"./tests/**/!(serverless-artillery|npm).spec.js\"",
+    "test-integration": "./node_modules/.bin/_mocha --timeout=1200000 ./tests/integration/index",
+    "test-upgrade": "./node_modules/.bin/_mocha --timeout 90000 ./tests/integration/versioning/upgrade.js",
+    "coverage-report": "./node_modules/.bin/nyc report --reporter=lcov",
     "lint": "./node_modules/.bin/eslint . bin/serverless-artillery",
     "fix": "./node_modules/.bin/eslint --fix . bin/serverless-artillery",
     "postinstall": "node ./postinstall.js",
@@ -44,7 +44,7 @@
     "bluebird": "^3.5.3",
     "diff": "^3.5.0",
     "get-stdin": "^6.0.0",
-    "js-yaml": "^3.12.1",
+    "js-yaml": "^3.13.0",
     "node-fetch": "^2.3.0",
     "rimraf": "^2.6.3",
     "semver": "^5.5.0",
@@ -68,9 +68,10 @@
     "ncp": "^2.0.0",
     "np": "^2.20.1",
     "nyc": "^11.7.1",
+    "proxyquire": "^2.1.0",
     "quibble": "^0.5.5",
     "recursive-readdir": "^2.2.2",
-    "serverless": "^1.36.1",
+    "serverless": "^1.40.0",
     "sinon": "^5.0.2",
     "sinon-chai": "^3.3.0",
     "tmp": "0.0.33"
@@ -84,7 +85,8 @@
       "**/lib/serverless-fx.js",
       "postinstall.js",
       "tests",
-      "test.js"
+      "test.js",
+      "**/assets"
     ],
     "reporter": [
       "lcov",

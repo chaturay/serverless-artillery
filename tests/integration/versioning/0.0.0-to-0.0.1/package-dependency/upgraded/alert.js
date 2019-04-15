@@ -2,7 +2,7 @@ const aws = require('aws-sdk') // eslint-disable-line import/no-extraneous-depen
 
 const sns = new aws.SNS()
 
-const impl = {
+const alert = {
   briefAnalysis: (analysis) => {
     const latencies = []
     analysis.reports.forEach((report, i) => {
@@ -35,7 +35,7 @@ const impl = {
 
 Logs:
 Full analysis:
-${impl.briefAnalysis(analysis)}
+${alert.briefAnalysis(analysis)}
 `
       const params = {
         Subject: subject,
@@ -47,4 +47,4 @@ ${impl.briefAnalysis(analysis)}
   },
 }
 
-module.exports = impl
+module.exports = alert

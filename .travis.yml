@@ -7,4 +7,4 @@ node_js:
 before_script:
   - 'npm --version'
   - 'npm i -g serverless'
-after_success: npm run coverage
+after_success: npm run coverage-report

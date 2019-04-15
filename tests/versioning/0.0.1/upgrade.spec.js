@@ -25,24 +25,23 @@ describe('upgrade plugin for version 0.0.1', () => {
 
   it('includes all asset files in the manifest', () => {
     expect(upgrade().fileManifest()).to.deep.equal([
+      '.slsart',
       'alert.js',
-      'func.js',
-      'funcDef.js',
-      'funcExec.js',
-      'funcHandle.js',
-      'funcValid.js',
+      'analysis.js',
+      'artillery-acceptance.js',
+      'artillery-monitoring.js',
+      'artillery-performance.js',
+      'artillery-task.js',
       'handler.js',
+      'modes.js',
       'node_modules',
       'package-lock.json',
       'package.json',
+      'planning.js',
+      'platform-settings.js',
+      'sampling.js',
       'script.yml',
       'serverless.yml',
-      'task.js',
-      'taskDef.js',
-      'taskExec.js',
-      'taskPlan.js',
-      'taskResult.js',
-      'taskValid.js',
     ])
   })
 
@@ -58,8 +57,8 @@ describe('upgrade plugin for version 0.0.1', () => {
 
   it('reads dependencies from package.json', () => {
     expect(upgrade().projectDependencies()).to.deep.equal({
-      artillery: 'git+https://github.com/Nordstrom/artillery.git#2d99b7ab1075e9df9f6eb2903102abc7849f1879',
-      'js-yaml': '^3.11.0',
+      artillery: 'git+https://github.com/Nordstrom/artillery.git#96552a4656ba7d1c32d8868754b1f1ab5299f8b8',
+      'js-yaml': '^3.13.0',
       'lodash.merge': '^4.6.1',
       'lodash.omit': '^4.5.0',
       'util-promisify': '^2.1.0',
@@ -129,7 +128,7 @@ describe('upgrade plugin for version 0.0.1', () => {
       },
       functions: {
         loadGenerator: {
-          handler: '',
+          createHandler: '',
           timeout: '',
         },
       },

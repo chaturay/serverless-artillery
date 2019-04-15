@@ -9,7 +9,7 @@ chai.use(chaiAsPromised)
 const { assert } = chai
 const { stub } = sinon
 
-const { handler } = require('./handler')
+const handler = require('./handler').createHandler
 
 describe('./tests/integration/target/handler.js', () => {
   describe('#handler', () => {
