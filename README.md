@@ -677,7 +677,7 @@ For more options see,
 ```
 slsart invoke --help
 ```
-=========ASHMI
+
 ### Reserved and unsupported flags
 `slsart` commands support most commandline flags of the corresponding `sls` (Serverless Framework) commands.
 #### Reserved flags
@@ -705,7 +705,7 @@ You would need to [create custom deployment assets](#tutorial-3-performance-test
 |[serverless-attach-managed-policy](https://www.npmjs.com/package/serverless-attach-managed-policy)|if you have automatic IAM role modification in your corporate/shared AWS account.|
 
 ### Performance testing VPC hosted services
-The default deployment assets of serverless-artillery are not deployed in a VPC and hence it can only successfully send requests to public endpoints. If your service is hosted in VPC (service is internal and does not have public endpoint), you would need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets).
+The default deployment assets (used in [Tutorial 1](#tutorial-1-run-a-quick-performance-test) and [Tutorial 2](#tutorial-2-performance-test-with-custom-script)) of serverless-artillery are not deployed in a VPC and hence it can only successfully send requests to public endpoints. If your service is hosted in VPC (i.e. service is internal and does not have public endpoint), you would need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets).
 
 Please refer to Serverless Frameworks's [doc](https://serverless.com/framework/docs/providers/aws/guide/functions/#vpc-configuration) to understand how to customize `serverless.yml` to deploy the customized assets to VPC.
 
@@ -735,18 +735,18 @@ provider:
 
 ### Advanced customization use cases
 #### Deployment assets and settings customization
-- Above we discussed how you need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets) and [`slsart configure` command] (#t35-create-custom-deployment-assets) when your testing needs are not met by the default deployment assets that are used in [Tutorial 1](#tutorial-1-run-a-quick-performance-test) and [Tutorial 2](#tutorial-2-performance-test-with-custom-script).
+- Above we discussed how you need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets) and [`slsart configure` command] (#5-create-custom-deployment-assets) when your testing needs are not met by the default deployment assets that are used in [Tutorial 1](#tutorial-1-run-a-quick-performance-test) and [Tutorial 2](#tutorial-2-performance-test-with-custom-script).
 - For example,
-  - when the endpoints you need to slam are in the VPC. See [here](#performance-testing-vpc-hosted-services) for details.
+  - when the endpoints you need to test are in the VPC. See [here](#performance-testing-vpc-hosted-services) for details.
   - when you need to view the results in your data store. See [here](#providing-a-data-store-to-view-the-results-of-your-performance-test) for details.
   - when you need to automatically attach an AWS Managed IAM Policy (or Policies) to all IAM Roles created by serverless-artillery due to company policy. See `serverless-attach-managed-policy` plugin [here](#related-tools-and-plugins) for details.
   - when you need to separate out various versions of the load testing function in order to maintain least privilege. **ASHMITODO ask Greg for clarification**
   - when you want to use payload/CSV files to feed data into the request being sent to the target. See [here](#using-payloadcsv-files-to-inject-data-in-scenarios-of-your-scriptyml) for details.
   - when you want to add custom IAM rights (see Serverless Framework [docs](https://serverless.com/framework/docs/providers/aws/guide/iam/)) to the service(?) (load generating Lambda?) to maintain least privilege. **ASHMITODO ask Greg for clarification**
-- For such cases you need to create a local copy of the deployment assets using [`slsart configure` command](#t35-create-custom-deployment-assets), customize them for your use case and deploy them using `slsart deploy` command as shown in [Tutorial 3](#tutorial-3-performance-test-with-custom-deployment-assets).
+- For such cases you need to create a local copy of the deployment assets using [`slsart configure` command](#5-create-custom-deployment-assets), customize them for your use case and deploy them using `slsart deploy` command as shown in [Tutorial 3](#tutorial-3-performance-test-with-custom-deployment-assets).
 - Full documentation of what is in the `serverless.yml` and the options you have available can be found at https://docs.serverless.com/framework/docs/.
-- You would need to use custom deployment assets when you want to make even more customizations to how serverless-artillery works. It generates a local copy of the serverless function code that can be edited and redeployed with your changed settings. For example, if you need to make any code change to load generator Lambda (example, alter hard-coded limits).
-- Please see [Serverless Framework docs](https://serverless.com/framework/docs/providers/aws/) for load generation function configuration related documentation.
+- You would need to use custom deployment assets when you want to make even more customizations to how serverless-artillery works. [`slsart configure` command](#5-create-custom-deployment-assets) generates a local copy of the serverless function code that can be edited and redeployed with your changed settings. For example, if you need to make any code change to load generating Lambda (example, alter hard-coded limits).
+- Please see [Serverless Framework docs](https://serverless.com/framework/docs/providers/aws/) for load generation Lambda function's configuration related documentation.
 - Please see [Artillery.io docs](https://artillery.io/docs/script-reference/) for script configuration related documentation.
 - **Note** that everytime you make changes to the local copy of deployment assets, you need to redeploy using `slsart deploy` command.
 
@@ -827,8 +827,9 @@ The result is a script chunk that can be executed within the duration limited pe
 
 Next, we take chunks from the script by maximum load. This is driven by the maximum requests per second that a single execution of the underlying function as a service (FaaS) provider is capable of pushing with high fidelity. For AWS Lambda (with the default 1024 MB configuration), we found 25 RPS to be a good level. This is lower than the absolute ceiling that Lambda is capable of pushing for a reason. First, each connection will be a separate opened and closed socket. Second, if we are producing too many connections, we can be in the middle of making a request when we receive the response of a separate request. Given that this is implemented in NodeJS, we have one thread and that means the timestamping of the receipt of that response is artificially and incorrectly delayed. We found that at RPS above 25 we observed an increase in the volatility of observed latencies. That written, if you do not intend to record your latencies, then you could bump this up to the limit of the FaaS service (i.e. `_split.maxChunkRequestsPerSecond = 300` or so). If you don't care about having separate sockets per request, you can alter that with artillery configuration as well **ASHMITODO greg this in past didnt work well for me. should we remove this statement?**.
 
-Anyway...  The result is a script chunk that is less than the limited period and also executable by a single function instance.  Therefore, we invoke a single function with the chunk to execute it.
+The result is a script chunk that is less than the limited period and also executable by a single function instance.  Therefore, we invoke a single function with the chunk to execute it.
 
+==== ASHMI
 # Acceptance mode
 **ASHMITODO acceptance test is broken in monitoring branch. Update the doc once it is fixed.**
 
