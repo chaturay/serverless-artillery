@@ -1292,118 +1292,451 @@ Performance testing framework forms the basis of monitoring mode of serverless-a
 ## Tutorial 6: Monitoring mode without serverless-artillery alert
 If you don't need serverless-artillery to send an alert when monitoring detects a problem then follow the tutorial here. You can [forward the test result to your data store](#providing-a-data-store-to-view-the-results-of-your-performance-test) and use alerting service there to noify you.
 
-### T6.1. Create custom deployment assets
+### 1. Create custom deployment assets
 Follow [Tutorial 3 to create custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets).
 
-### T6.2. Setup AWS account credentials
-This section is same as before. See [here](#t25-setup-aws-account-credentials) for details.
+### 2. Setup AWS account credentials
+This section is same as before. See [here](#before-running-serverless-artillery) for details.
 
-### T6.3. Tryout monitoring mode
-#### T6.3.1. Deploy assets to AWS
-This section is same as before. See [here](#t26-deploy-assets-to-aws) for details. **Note** that monitoring is turned off by default and hence the assets deployed in this step would not start monitoring.
+### 3. Tryout monitoring mode
+#### 3.1. Deploy assets to AWS
+This section is same as before. See [here](#3-deploy) for details. **Note** that monitoring is turned off by default in `serverless.yml` and hence the assets deployed in this step would not start monitoring.
 
-#### T6.3.2. Invoke monitoring once
-When `-m` option is used in `slsart invoke` command, serverless-artillery invokes the load generator Lambda in monitoring mode. This is useful also during script development to avoid having to redeploy everytime you edit `script.yml` as mentioned [below](#t65-deploy-assets-to-aws-to-start-monitoring).
+#### 3.2. Invoke monitoring once
+When `-m` option is used in `slsart invoke` command, serverless-artillery invokes the load generator Lambda in monitoring mode. This is useful also during script development to avoid having to redeploy everytime you edit `script.yml` as mentioned [below](#5-deploy-assets-to-aws-to-start-monitoring).
 ```
-slsart invoke -m
+slsart invoke -m --stage <your-unique-stage-name>
 ```
-Given default [moitoring behavior configuration](#to-configure-monitoring-behavior), each scenario/flow in your script will be executed five times **only once**.
+Given default [monitoring behavior configuration](#to-configure-monitoring-behavior), each scenario/flow in your script will be executed five times **only once**.
 
-### T6.4. Customize deployment assets to turn on monitoring
+### 4. Customize deployment assets to turn on monitoring
 Open `serverless.yml` in your favorite editor. Under `functions` > `loadGenerator` > `events` > `schedule` > find `enabled: false`. Set it to `true`.
 
 Notice instruction 0 and 1 under `BEFORE ENABLING` section if they are applicable for your use case.
 
-### T6.5. Deploy assets to AWS to start monitoring
-This section is same as before. See [here](#t26-deploy-assets-to-aws) for details. **Note** that in the previous step monitoring was turned on and hence just _deploying_ the assets would turn on monitoring. Separate _invoke_ is not needed.
+### 5. Deploy assets to AWS to start monitoring
+This section is same as before. See [here](#3-deploy) for details. **Note** that in the previous step monitoring was turned on and hence just _deploying_ the assets would turn on monitoring. Separate _invoke_ is not needed.
 
-**NOTE:** In performance test and acceptance test, the `script.yml` is passed with `invoke` command and hence redeployment is not needed when you edit `script.yml`. But monitoring mode uses the `script.yml` that is deployed in `slsart deploy` command. Also `invoke` command is not used in monitoring mode. Hence you need to redeploy everytime you edit `script.yml`. During script development you can take advantage of `slsart invoke -m` to [try monitoring](#t63-tryout-monitoring-mode) with your script and avoid having to redeploy each time it is changed.
+**NOTE:** In performance test and acceptance test, the `script.yml` is passed with `invoke` command and hence redeployment is not needed when you edit `script.yml`. But monitoring mode uses the `script.yml` that is deployed in `slsart deploy` command. Also `invoke` command is not used in monitoring mode. Hence you need to redeploy everytime you edit `script.yml`. During script development you can take advantage of `slsart invoke -m` to [try monitoring](#3-tryout-monitoring-mode) with your script and avoid having to redeploy each time it is changed.
 
 Given default [moitoring behavior configuration](#to-configure-monitoring-behavior), each scenario/flow in your script will be executed five times **every minute**.
 
-### T6.6. Pause monitoring
+### 6. Pause monitoring
 Monitoring mode will run 24x7 until turned off or paused. If you need to pause monitoring you can do the following.
-#### T6.6.1. Method 1: Using CloudWatch Rules
+#### 6.1. Method 1: Using CloudWatch Rules
 - Go to `AWS CloudWatch console` and find `Rules` (under `Events`) and search for the rule `${self:service}-${opt:stage, self:provider.stage}-monitoring` based on your `serverless.yml`.
 - Do required [steps](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/Delete-or-Disable-Rule.html) to `Disable` this rule. This will prevent further invocation of the load generating Lambda function for monitoring.
   - To enable monitoring again `Enable` this rule.
 - This will turn off monitoring and preserve the load generating Lambda logs.
-#### T6.6.2. Method 2: Turn monitoring off in `serverless.yml`
+#### 6.2. Method 2: Turn monitoring off in `serverless.yml`
 - Open `serverless.yml` in your favorite editor.
 - Under `functions` > `loadGenerator` > `events` > `schedule` > find `enabled: true`. Set it to `false`.
-- Redeploy assets using same instructions as before. See [here](#t26-deploy-assets-to-aws) for details.
+- Redeploy assets using same instructions as before. See [here](#3-deploy) for details.
 
-### T6.7. Remove assets from AWS
+### 7. Remove assets from AWS
 If you want to keep the 24x7 monitoring then you don't need to do this step.
 
-When you want to turn off monitoring then remove the assets from AWS. See [here](#t28-remove-assets-from-aws) for details.
+When you want to turn off monitoring then remove the assets from AWS. See [here](#8-remove-assets-from-aws) for details.
 
 ## Tutorial 7: Monitoring mode with serverless-artillery alert
 Here we will look into how to setup monitoring such that serverless-artillery sends alert when it detects a problem.
 
-### T7.1. Create custom deployment assets
+### 1. Create custom deployment assets
 Follow [Tutorial 3 to create custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets).
 
-### T7.2. Setup AWS account credentials
-This section is same as before. See [here](#t25-setup-aws-account-credentials) for details.
+### 2. Setup AWS account credentials
+This section is same as before. See [here](#before-running-serverless-artillery) for details.
 
-### T7.3. Customize script to have `match` clause
+### 3. Customize script to have `match` clause
 Ensure that you have `match` clauses defined for each request in your script's flows to validate the responses. See [here](#match- clause) to learn more about `match`.
 
-For the purpose of this tutorial you can copy paste the script from [here](#t51-customize-scriptyml).
+For the purpose of this tutorial you can copy paste the script from [here](#1-customize-scriptyml).
 
-### T7.4. Customize deployment assets to add at least one subscription
+### 4. Customize deployment assets to add at least one subscription
 Open `serverless.yml` in your favorite editor.
-- Uncomment the line of `Subscription` section.
+- _Uncomment_ the line of `Subscription` section.
 ```
 #        Subscription: # docs at https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-sns-subscription.html
 ```
 - Add at least one subscription. In this tutorial we will use email subscription.
-  - Uncomment following two lines.
+  - _Uncomment_ following two lines.
 ```
 #          - Endpoint: <target>@<host> # the endpoint is an email address
 #            Protocol: email
 ```
   - Replace `<target>@<host>` with your email address. Example, `mymail@myhost.com`.
 
-### T7.5. Tryout monitoring mode
-#### T7.5.1. Deploy assets to AWS
-This section is same as before. See [here](#t631-deploy-assets-to-aws) for details.
+### 5. Tryout monitoring mode
+#### 5.1. Deploy assets to AWS
+This section is same as before. See [here](#31-deploy-assets-to-aws) for details.
 
-#### T7.5.2. Invoke monitoring once
-This section is same as before. See [here](#t632-invoke-monitoring-once) for details.
+#### 5.2. Invoke monitoring once
+This section is same as before. See [here](#32-invoke-monitoring-once) for details.
 
-### T7.6. Test failure scenario
+### 6. Test failure scenario
 We will inject failure scenario so that the `match` fails and monitoring mode sends us an alert.
 
-#### T7.6.1. Edit `script.yml` to fail `match`
-Edit `script.yml` as mentioned [here](#t541-edit-scriptyml-to-fail-match) to cause `match` to fail.
+#### 6.1. Edit `script.yml` to fail `match`
+Edit `script.yml` as mentioned [here](#61-edit-scriptyml-to-fail-match) to cause `match` to fail.
 
-#### T7.6.2. Invoke monitoring once
-Follow instruction [here](#t632-invoke-monitoring-once) to use `-m` option of `slsart invoke` command to invoke monitoring once to try our modified `script.yml` without having to redeploy assets.
+#### 6.2. Invoke monitoring once
+Follow instruction [here](#32-invoke-monitoring-once) to use `-m` option of `slsart invoke` command to invoke monitoring once to try our modified `script.yml` without having to redeploy assets.
 
 Given default [moitoring behavior configuration](#to-configure-monitoring-behavior), each scenario/flow in your script will be executed five times **only once**. If all five of them fail (we try to avoid notifying you about blips) then you should receive a notification via the configured mechanism (email in the case of this tutorial).
 
 Below is sample email.
+<details><summary>Click to expand/collapse</summary>
+<p>
+
 ```
-ASHMITODO add sample email
+Alert:
+  monitoring failure: scenarios run: 5, total errors: 10, error budget: 4
+
+Logs:
+Full analysis:
+{
+  "errors": 10,
+  "reports": [
+    {
+      "timestamp": "2019-04-17T23:16:17.050Z",
+      "scenariosCreated": 5,
+      "scenariosCompleted": 0,
+      "requestsCompleted": 5,
+      "latency": {
+        "min": 12.4,
+        "max": 25.2,
+        "median": 24,
+        "p95": 25.2,
+        "p99": 25.2
+      },
+      "rps": {
+        "count": 5,
+        "mean": 0.93
+      },
+      "scenarioDuration": {
+        "min": null,
+        "max": null,
+        "median": null,
+        "p95": null,
+        "p99": null
+      },
+      "scenarioCounts": {
+        "0": 5
+      },
+      "errors": {
+        "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 5,
+        "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 5
+      },
+      "codes": {
+        "200": 5
+      },
+      "matches": 0,
+      "customStats": {},
+      "phases": [
+        {
+          "pause": 0.2255259122021872
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        },
+        {
+          "pause": 0.2968933399583734
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        },
+        {
+          "pause": 0.16654656047499483
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        },
+        {
+          "pause": 0.19488041671127268
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        },
+        {
+          "pause": 0.19656039636288947
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "scenariosCreated": 5,
+    "scenariosCompleted": 0,
+    "requestsCompleted": 5,
+    "codes": {
+      "200": 5
+    },
+    "errors": {
+      "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 5,
+      "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 5
+    }
+  },
+  "errorMessage": "monitoring failure: scenarios run: 5, total errors: 10, error budget: 4"
+}
+
+
+--
+If you wish to stop receiving notifications from this topic, please click or visit the link below to unsubscribe:
+https://sns.us-east-1.amazonaws.com/unsubscribe.html?SubscriptionArn=arn:aws:sns:us-east-1:515126931066:serverless-artillery-hPDAiDvuzL-ash-monitoringAlerts-3PPB71S63RM2:e11606d1-e70d-482c-82f9-eff26a760e68&Endpoint=ashmi.s.bhanushali@nordstrom.com
+
+Please do not reply directly to this email. If you have any questions or comments regarding this email, please contact us at https://aws.amazon.com/support
 ```
 
-### T7.7. Customize deployment assets to turn on monitoring
-This section is same as before. See [here](#t64-customize-deployment-assets-to-turn-on-monitoring) for details.
+</p>
+</details>
 
-### T7.8. Deploy assets to AWS to start monitoring
-This section is same as before. See [here](#t65-deploy-assets-to-aws-to-start-monitoring) for details.
+You will also see the following output at the command line.
+<details><summary>Click to expand/collapse</summary>
+<p>
+
+```
+
+	Invoking test Lambda
+
+{
+    "errors": 10,
+    "reports": [
+        {
+            "timestamp": "2019-04-17T23:06:29.570Z",
+            "scenariosCreated": 5,
+            "scenariosCompleted": 0,
+            "requestsCompleted": 5,
+            "latency": {
+                "min": 21.4,
+                "max": 52.1,
+                "median": 25.8,
+                "p95": 52.1,
+                "p99": 52.1
+            },
+            "rps": {
+                "count": 5,
+                "mean": 0.94
+            },
+            "scenarioDuration": {
+                "min": null,
+                "max": null,
+                "median": null,
+                "p95": null,
+                "p99": null
+            },
+            "scenarioCounts": {
+                "0": 5
+            },
+            "errors": {
+                "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 5,
+                "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 5
+            },
+            "codes": {
+                "200": 5
+            },
+            "matches": 0,
+            "customStats": {},
+            "phases": [
+                {
+                    "pause": 0.19110438826323195
+                },
+                {
+                    "duration": 1,
+                    "arrivalRate": 1
+                },
+                {
+                    "pause": 0.2695130316914205
+                },
+                {
+                    "duration": 1,
+                    "arrivalRate": 1
+                },
+                {
+                    "pause": 0.10236624757585773
+                },
+                {
+                    "duration": 1,
+                    "arrivalRate": 1
+                },
+                {
+                    "pause": 0.13588464289194607
+                },
+                {
+                    "duration": 1,
+                    "arrivalRate": 1
+                },
+                {
+                    "pause": 0.2951659631896233
+                },
+                {
+                    "duration": 1,
+                    "arrivalRate": 1
+                }
+            ]
+        }
+    ],
+    "totals": {
+        "scenariosCreated": 5,
+        "scenariosCompleted": 0,
+        "requestsCompleted": 5,
+        "codes": {
+            "200": 5
+        },
+        "errors": {
+            "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 5,
+            "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 5
+        }
+    },
+    "errorMessage": "monitoring failure: scenarios run: 5, total errors: 10, error budget: 4"
+}
+
+	Your function invocation has completed.
+
+{
+  "errors": 10,
+  "reports": [
+    {
+      "timestamp": "2019-04-17T23:06:29.570Z",
+      "scenariosCreated": 5,
+      "scenariosCompleted": 0,
+      "requestsCompleted": 5,
+      "latency": {
+        "min": 21.4,
+        "max": 52.1,
+        "median": 25.8,
+        "p95": 52.1,
+        "p99": 52.1
+      },
+      "rps": {
+        "count": 5,
+        "mean": 0.94
+      },
+      "scenarioDuration": {
+        "min": null,
+        "max": null,
+        "median": null,
+        "p95": null,
+        "p99": null
+      },
+      "scenarioCounts": {
+        "0": 5
+      },
+      "errors": {
+        "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 5,
+        "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 5
+      },
+      "codes": {
+        "200": 5
+      },
+      "matches": 0,
+      "customStats": {},
+      "phases": [
+        {
+          "pause": 0.19110438826323195
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        },
+        {
+          "pause": 0.2695130316914205
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        },
+        {
+          "pause": 0.10236624757585773
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        },
+        {
+          "pause": 0.13588464289194607
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        },
+        {
+          "pause": 0.2951659631896233
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "scenariosCreated": 5,
+    "scenariosCompleted": 0,
+    "requestsCompleted": 5,
+    "codes": {
+      "200": 5
+    },
+    "errors": {
+      "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 5,
+      "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 5
+    }
+  },
+  "errorMessage": "monitoring failure: scenarios run: 5, total errors: 10, error budget: 4"
+}
+Results:
+FAILED monitoring failure: scenarios run: 5, total errors: 10, error budget: 4
+
+```
+
+</p>
+</details>
+
+You can observe the following in the result.
+- Observe `"matches": 0,`. When any of the `match` statements fail it sets this to 0 (this could be confusing with scripts that don't have any `match` statements).
+- Observe the following section where we list the number of scenarios created, scenarios completed, requests completed and list of errors. You can see it has information about the `match` statements that failed so you can use this information to find where in script failure occured.
+```
+  "totals": {
+    "scenariosCreated": 5,
+    "scenariosCompleted": 0,
+    "requestsCompleted": 5,
+    "codes": {
+      "200": 5
+    },
+    "errors": {
+      "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 5,
+      "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 5
+    }
+  },
+```
+- Observe the following error message regarding acceptance testing. Notice that error budget (default 4) can be modified as per your need. Read [here](#to-configure-monitoring-behavior) for more info.
+```
+"errorMessage": "monitoring failure: scenarios run: 5, total errors: 10, error budget: 4"
+```
+
+Also, as this test failed, you will also observe that the process exit code is non-zero (number of `match` failures). On _Mac_ you can run command `echo $?` immediately after that to see the process exit code 10 in this case.
+
+### 7. Customize deployment assets to turn on monitoring
+This section is same as before. See [here](#4-customize-deployment-assets-to-turn-on-monitoring) for details.
+
+### 8. Deploy assets to AWS to start monitoring
+This section is same as before. See [here](#5-deploy-assets-to-aws-to-start-monitoring) for details.
 
 In this step, along with deployment asset we are also deploying the modified `script.yml` where `match` will fail. Hence once the assets are deployed, monitoring mode will turn on and send you an email to alert about these failures.
 
-**ASHMITODO how often will you get email**
+Given default [monitoring behavior configuration](#to-configure-monitoring-behavior), each scenario/flow in your script will be executed five times **every minute**. All five of the executions will cause the `match` statements to fail exceeding `errorBudget` (default 4) and hence would send the email alerting about the problem (once every minute).
 
-### T7.9. Pause monitoring
-This section is same as before. See [here](#t66-pause-monitoring) for details.
+### 9. Pause monitoring
+This section is same as before. See [here](#6-pause-monitoring) for details.
 
-### T7.10. Remove assets from AWS
-This section is same as before. See [here](#t67-remove-assets-from-aws) for details.
+### 10. Remove assets from AWS
+This section is same as before. See [here](#8-remove-assets-from-aws) for details.
 
 ## More about monitoring mode
 ### Run `script.yml` exclusively in monitoring mode
@@ -1609,19 +1942,6 @@ Options:
 ### Problems installing?
 #### Error: npm ERR! code EACCES
 If you are installing into a node_modules owned by root and getting error `npm ERR! code EACCES`, [read this](root-owns-node-modules.md).
-
-# Glossary
-- service/ end point/ target URL
-- load/ traffic/ requests
-- deploy to AWS
-- AWS stack
-- SA script
-- load testing
-- performance testing
-- acceptance testing
-- monitoring
-- deployment assets. default vs custom
-- local deployment assets and remote deployment assets
 
 # External References
 1. [artillery.io](https://artillery.io) for documentation about how to define your load shape, volume, targets, inputs, et cetera
