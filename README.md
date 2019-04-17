@@ -830,10 +830,7 @@ Next, we take chunks from the script by maximum load. This is driven by the maxi
 
 The result is a script chunk that is less than the limited period and also executable by a single function instance.  Therefore, we invoke a single function with the chunk to execute it.
 
-==== ASHMI
 # Acceptance mode
-**ASHMITODO acceptance test is broken in monitoring branch. Update the doc once it is fixed.**
-
 Find defects before performance testing! Acceptance mode runs each scenario/flow in your script exactly once and reports the results. For example, you can run your script in acceptance mode in your CI/CD to ensure that merges don't break the scenarios in your script.
 
 Performance testing framework forms the basis of acceptance mode of serverless-artillery. Hence please go through [performance mode](#performance-mode-performanceload-testing) section before proceeding.
@@ -846,10 +843,10 @@ When `-a` option is used in `slsart invoke` command, serverless-artillery invoke
 ```
 slsart invoke -a
 ```
-**ASHMITODO this is broken in MM branch.** Expect a non-zero exit code if a match clause fails.
+Expect a non-zero exit code if a match clause fails.
 
 ## Tutorial 5: Acceptance mode
-### T5.1. Customize `script.yml`
+### 1. Customize `script.yml`
 Follow [Tutorial 2 to create custom `script.yml`](#tutorial-2-performance-test-with-custom-script) and customize your `script.yml` by copy pasting the following content in it. Note the `match` clauses.
 
 ```
@@ -909,29 +906,174 @@ The JSON response will be as follows.
 
 The `match` clauses check if the return value is same as what is expected.
 
-### T5.2. Setup AWS account credentials
-This section is same as before. See [here](#t25-setup-aws-account-credentials) for details.
+### 2. Setup AWS account credentials
+This section is same as before. See [here](#before-running-serverless-artillery) for details.
 
-### T5.3. Deploy assets to AWS
-This section is same as before. See [here](#t26-deploy-assets-to-aws) for details.
+### 3. Deploy assets to AWS
+This section is same as before. See [here](#3-deploy) for details.
 
 **Note** that you don't need to _deploy_ the assets everytime `script.yml` changes.
 
-### T5.4. Invoke acceptance test
+### 4. Invoke acceptance test
 Run following command to run acceptance test.
 ```
-slsart invoke -a
+slsart invoke -a --stage <your-unique-stage-name>
 ```
-**ASHMITODO add what to observe where**
 
-### T5.4. Test failure scenario
-#### T5.4.1. Edit `script.yml` to fail `match`
-Edit `match` section in `script.yml` to look for wrong return value to simulate failure scenario.
+### 5. Observe the results
+You will see an output similar to the following.
+<details><summary>Click to expand/collapse</summary>
+<p>
+
+```
+
+	Invoking test Lambda
+
+{
+    "errors": 0,
+    "reports": [
+        {
+            "timestamp": "2019-04-17T21:40:59.127Z",
+            "scenariosCreated": 1,
+            "scenariosCompleted": 1,
+            "requestsCompleted": 1,
+            "latency": {
+                "min": 26.6,
+                "max": 26.6,
+                "median": 26.6,
+                "p95": 26.6,
+                "p99": 26.6
+            },
+            "rps": {
+                "count": 1,
+                "mean": 2.7
+            },
+            "scenarioDuration": {
+                "min": 177.8,
+                "max": 177.8,
+                "median": 177.8,
+                "p95": 177.8,
+                "p99": 177.8
+            },
+            "scenarioCounts": {
+                "0": 1
+            },
+            "errors": {},
+            "codes": {
+                "200": 1
+            },
+            "matches": 3,
+            "customStats": {},
+            "phases": [
+                {
+                    "pause": 0.2430741319294641
+                },
+                {
+                    "duration": 1,
+                    "arrivalRate": 1
+                }
+            ]
+        }
+    ],
+    "totals": {
+        "scenariosCreated": 1,
+        "scenariosCompleted": 1,
+        "requestsCompleted": 1,
+        "codes": {
+            "200": 1
+        },
+        "errors": {}
+    }
+}
+
+	Your function invocation has completed.
+
+{
+  "errors": 0,
+  "reports": [
+    {
+      "timestamp": "2019-04-17T21:40:59.127Z",
+      "scenariosCreated": 1,
+      "scenariosCompleted": 1,
+      "requestsCompleted": 1,
+      "latency": {
+        "min": 26.6,
+        "max": 26.6,
+        "median": 26.6,
+        "p95": 26.6,
+        "p99": 26.6
+      },
+      "rps": {
+        "count": 1,
+        "mean": 2.7
+      },
+      "scenarioDuration": {
+        "min": 177.8,
+        "max": 177.8,
+        "median": 177.8,
+        "p95": 177.8,
+        "p99": 177.8
+      },
+      "scenarioCounts": {
+        "0": 1
+      },
+      "errors": {},
+      "codes": {
+        "200": 1
+      },
+      "matches": 3,
+      "customStats": {},
+      "phases": [
+        {
+          "pause": 0.2430741319294641
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "scenariosCreated": 1,
+    "scenariosCompleted": 1,
+    "requestsCompleted": 1,
+    "codes": {
+      "200": 1
+    },
+    "errors": {}
+  }
+}
+Results:
+PASSED
+```
+
+</p>
+</details>
+
+You can observe the following in the result:
+- Observe the following section where we list the number of scenarios created, scenarios completed, requests completed and list of errors which in this case is 0.
+```
+  "totals": {
+    "scenariosCreated": 1,
+    "scenariosCompleted": 1,
+    "requestsCompleted": 1,
+    "codes": {
+      "200": 1
+    },
+    "errors": {}
+```
+
+Also, as this test passed, you will also observe that the process exit code is 0. On _Mac_ you can run command `echo $?` immediately after that to see the process exit code 0 in this case.
+
+### 6. Test failure scenario
+#### 6.1. Edit `script.yml` to fail `match`
+Edit `match` section in `script.yml` to look for wrong return value to simulate failure scenario. Note that we are causing failure for two matches out of three.
 ```
           match:
             - json: "$.headers.my-sample-header"
-              #value: "my-sample-header-value"
-              value: "failvalue"
+              value: "my-sample-header-value"
+              #value: "failvalue"
             - json: "$.headers.host"
               #value: "postman-echo.com"
               value: "failvalue"
@@ -939,12 +1081,180 @@ Edit `match` section in `script.yml` to look for wrong return value to simulate 
               #value: "https"
               value: "failvalue"
 ```
-#### T5.4.2. Invoke acceptance test
-Invoke acceptance test as mentioned [above](#t54-invoke-acceptance-test).
-**ASHMITODO where to observe failure**
+#### 6.2. Invoke acceptance test
+Invoke acceptance test as mentioned [above](#4-invoke-acceptance-test).
 
-### T5.5. Remove assets from AWS
-This section is same as before. See [here](#t28-remove-assets-from-aws) for details.
+#### 6.3. Observe the results
+You will see an output similar to the following.
+<details><summary>Click to expand/collapse</summary>
+<p>
+
+```
+
+	Invoking test Lambda
+
+{
+    "errors": 2,
+    "reports": [
+        {
+            "timestamp": "2019-04-17T21:56:59.527Z",
+            "scenariosCreated": 1,
+            "scenariosCompleted": 0,
+            "requestsCompleted": 1,
+            "latency": {
+                "min": 24.7,
+                "max": 24.7,
+                "median": 24.7,
+                "p95": 24.7,
+                "p99": 24.7
+            },
+            "rps": {
+                "count": 1,
+                "mean": 2
+            },
+            "scenarioDuration": {
+                "min": null,
+                "max": null,
+                "median": null,
+                "p95": null,
+                "p99": null
+            },
+            "scenarioCounts": {
+                "0": 1
+            },
+            "errors": {
+                "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 1,
+                "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 1
+            },
+            "codes": {
+                "200": 1
+            },
+            "matches": 0,
+            "customStats": {},
+            "phases": [
+                {
+                    "pause": 0.29122591362828076
+                },
+                {
+                    "duration": 1,
+                    "arrivalRate": 1
+                }
+            ]
+        }
+    ],
+    "totals": {
+        "scenariosCreated": 1,
+        "scenariosCompleted": 0,
+        "requestsCompleted": 1,
+        "codes": {
+            "200": 1
+        },
+        "errors": {
+            "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 1,
+            "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 1
+        }
+    },
+    "errorMessage": "acceptance failure: scenarios run: 1, total errors: 2, error budget: 0"
+}
+
+	Your function invocation has completed.
+
+{
+  "errors": 2,
+  "reports": [
+    {
+      "timestamp": "2019-04-17T21:56:59.527Z",
+      "scenariosCreated": 1,
+      "scenariosCompleted": 0,
+      "requestsCompleted": 1,
+      "latency": {
+        "min": 24.7,
+        "max": 24.7,
+        "median": 24.7,
+        "p95": 24.7,
+        "p99": 24.7
+      },
+      "rps": {
+        "count": 1,
+        "mean": 2
+      },
+      "scenarioDuration": {
+        "min": null,
+        "max": null,
+        "median": null,
+        "p95": null,
+        "p99": null
+      },
+      "scenarioCounts": {
+        "0": 1
+      },
+      "errors": {
+        "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 1,
+        "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 1
+      },
+      "codes": {
+        "200": 1
+      },
+      "matches": 0,
+      "customStats": {},
+      "phases": [
+        {
+          "pause": 0.29122591362828076
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "scenariosCreated": 1,
+    "scenariosCompleted": 0,
+    "requestsCompleted": 1,
+    "codes": {
+      "200": 1
+    },
+    "errors": {
+      "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 1,
+      "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 1
+    }
+  },
+  "errorMessage": "acceptance failure: scenarios run: 1, total errors: 2, error budget: 0"
+}
+Results:
+FAILED acceptance failure: scenarios run: 1, total errors: 2, error budget: 0
+
+```
+
+</p>
+</details>
+
+You can observe the following in the result.
+- Observe `"matches": 0,`. When any of the `match` statements fail it sets this to 0 (this could be confusing with scripts that don't have any `match` statements.
+- Observe the following section where we list the number of scenarios created, scenarios completed, requests completed and list of errors. You can see it has information about the `match` statements that failed so you can use this information to find where in script failure occured.
+```
+  "totals": {
+    "scenariosCreated": 1,
+    "scenariosCompleted": 0,
+    "requestsCompleted": 1,
+    "codes": {
+      "200": 1
+    },
+    "errors": {
+      "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 1,
+      "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 1
+    }
+```
+- Observe the following error message regarding acceptance testing. Notice that error budget (default 0) can be modified as per your need. Read [here](#to-configure-acceptance-behavior) for more info.
+```
+"errorMessage": "acceptance failure: scenarios run: 1, total errors: 2, error budget: 0"
+```
+
+Also, as this test failed, you will also observe that the process exit code is non-zero (number of `match` failures). On _Mac_ you can run command `echo $?` immediately after that to see the process exit code 2 in this case.
+
+### 7. Remove assets from AWS
+This section is same as before. See [here](#8-remove-assets-from-aws) for details.
 
 ## More about acceptance mode
 ### Acceptance testing in CI/CD
