@@ -695,7 +695,7 @@ The flag `--raw` is unsupported in `slsart invoke` command because, while arbitr
 - You are responsible for sending the results (usually via a plugin) to a data store for later review and/or analysis. See the [available plugins](#related-tools-and-plugins) that can be used.
 
 ### Related tools and plugins
-You would need to [create custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets) and customize `serverless.yml` to use a plugin as shown in the examples [here](#plugins).
+You would need to [create custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets) and customize `serverless.yml` to use a plugin as shown in the examples [here](#c-plugins).
 
 |Plugin|Description|
 |:----|:----------|
