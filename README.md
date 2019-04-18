@@ -54,11 +54,11 @@ Serverless-artillery makes it easy to test your services for performance and fun
     - [b. Load generator Lambda function name](#b-load-generator-lambda-function-name)
     - [c. Load generator Lambda function permissions](#c-load-generator-lambda-function-permissions)
   - [7. Customizing `serverless.yml`](#7-customizing-serverlessyml)
-    - [Customization for Nordstrom Engineers](#customization-for-nordstrom-engineers)
-    - [Service name](#service-name-1)
-    - [Plugins](#plugins)
-      - CloudWatch plugin
-      - Datadog plugin
+    - [a. Customization for Nordstrom Engineers](#a-customization-for-nordstrom-engineers)
+    - [b. Service name](#b-service-name)
+    - [c. Plugins](#c-plugins)
+      - [i. CloudWatch plugin](#i-cloudwatch-plugin)
+      - [ii. Datadog plugin](#ii-datadog-plugin)
   - [8. Setup AWS account credentials](#8-setup-aws-account-credentials)
   - [9. Deploy assets to AWS](#9-deploy-assets-to-aws)
   - [10. Invoke performance test](#10-invoke-performance-test)
