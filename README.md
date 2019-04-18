@@ -1856,6 +1856,8 @@ We have added `slsart upgrade` command in order to make it easier for you to upg
 slsart upgrade
 ```
 
+TODOGreg add example output of the command.
+
 # Detailed Usage
 ```
 $ slsart --help
