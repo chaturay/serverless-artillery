@@ -143,13 +143,13 @@ Serverless-artillery makes it easy to test your services for performance and fun
     - [To configure monitoring behavior](#to-configure-monitoring-behavior)
   - [Detailed Usage](#detailed-usage)
     - [Commands](#commands)
-      - [deploy](#deploy)
-      - [invoke](#invoke)
-      - [kill](#kill)
-      - [remove](#remove)
-      - [script](#script)
-      - [configure](#configure)
-      - [upgrade](#upgrade)
+      - [`deploy`](#deploy)
+      - [`invoke`](#invoke)
+      - [`kill`](#kill)
+      - [`remove`](#remove)
+      - [`script`](#script)
+      - [`configure`](#configure)
+      - [`upgrade`](#upgrade)
 - [Troubleshooting](#troubleshooting)
   - [Problems installing?](#problems-installing)
 - [External References](#external-references)
@@ -1888,7 +1888,7 @@ Options:
 ```
 
 ## Commands
-### deploy
+### `deploy`
 ```
 $ slsart deploy --help
 
@@ -1908,7 +1908,7 @@ Options:
                  what it is attempting to accomplish.
 ```
 
-### invoke
+### `invoke`
 ```
 $ slsart invoke --help
 
@@ -1941,7 +1941,7 @@ Options:
                     invocation result into a tool such as jq
 ```
 
-### kill
+### `kill`
 ```
 $ slsart kill --help
 
@@ -1958,7 +1958,7 @@ Options:
                  what it is attempting to accomplish.
 ```
 
-### remove
+### `remove`
 ```
 $ slsart remove --help
 
@@ -1977,7 +1977,7 @@ Options:
                  what it is attempting to accomplish.
 ```
 
-### script
+### `script`
 ```
 $ slsart script --help
 
@@ -2003,7 +2003,7 @@ Options:
   -o, --out       The file to output the generated script in to.        [string]
 ```
 
-### configure
+### `configure`
 ```
 $ slsart configure --help
 
@@ -2021,7 +2021,7 @@ Options:
                  what it is attempting to accomplish.
 ```
 
-### upgrade
+### `upgrade`
 ```
 $slsart upgrade --help
 
