@@ -1430,7 +1430,7 @@ Follow [Tutorial 3 to create custom deployment assets](#tutorial-3-performance-t
 This section is same as before. See [here](#before-running-serverless-artillery) for details.
 
 ### 3. Customize script to have `match` clause
-Ensure that you have `match` clauses defined for each request in your script's flows to validate the responses. See [here](#match- clause) to learn more about `match`.
+Ensure that you have `match` clauses defined for each request in your script's flows to validate the responses. See [here](#match-clause) to learn more about `match`.
 
 For the purpose of this tutorial you can copy paste the script from [here](#1-customize-scriptyml).
 
