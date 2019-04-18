@@ -745,7 +745,7 @@ provider:
   - when you want to use payload/CSV files to feed data into the request being sent to the target. See [here](#using-payloadcsv-files-to-inject-data-in-scenarios-of-your-scriptyml) for details.
   - when you want to add custom IAM rights (see Serverless Framework [docs](https://serverless.com/framework/docs/providers/aws/guide/iam/)) to the load generator Lambda to validate least privilege.
 - For such cases you need to create a local copy of the deployment assets using [`slsart configure` command](#5-create-custom-deployment-assets), customize them for your use case and deploy them using `slsart deploy` command as shown in [Tutorial 3](#tutorial-3-performance-test-with-custom-deployment-assets).
-- Full documentation of what is in the `serverless.yml` and the options you have available can be found at https://docs.serverless.com/framework/docs/.
+- Full documentation of what is in the `serverless.yml` and the options you have available can be found at https://serverless.com/framework/docs/.
 - You would need to use custom deployment assets when you want to make even more customizations to how serverless-artillery works. [`slsart configure` command](#5-create-custom-deployment-assets) generates a local copy of the serverless function code that can be edited and redeployed with your changed settings. For example, if you need to make any code change to load generator Lambda (example, alter hard-coded limits).
 - Please see [Serverless Framework docs](https://serverless.com/framework/docs/providers/aws/) for load generation Lambda function's configuration related documentation.
 - Please see [Artillery.io docs](https://artillery.io/docs/script-reference/) for script configuration related documentation.
