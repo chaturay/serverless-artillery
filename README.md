@@ -149,6 +149,7 @@ Serverless-artillery makes it easy to test your services for performance and fun
       - [remove](#remove)
       - [script](#script)
       - [configure](#configure)
+      - [upgrade](#upgrade)
 - [Troubleshooting](#troubleshooting)
   - [Problems installing?](#problems-installing)
 - [External References](#external-references)
@@ -2004,12 +2005,29 @@ Options:
 
 ### configure
 ```
-$ slsart configure
+$ slsart configure --help
 
 slsart configure
 
 Create a local copy of the deployment assets for modification and deployment.
 See https://docs.serverless.com for documentation.
+
+Options:
+  --help         Show help                                             [boolean]
+  --version      Show version number                                   [boolean]
+  -D, --debug    Execute the command in debug mode.  It will be chatty about
+                 what it is happening in the code.
+  -V, --verbose  Execute the command in verbose mode.  It will be chatty about
+                 what it is attempting to accomplish.
+```
+
+### upgrade
+```
+$slsart upgrade --help
+
+slsart upgrade
+
+Upgrade local assets to latest version.
 
 Options:
   --help         Show help                                             [boolean]
