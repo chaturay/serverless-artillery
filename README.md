@@ -1848,6 +1848,13 @@ sampling:
 ```
 
 # Upgrading customized projects built with older versions of serverless-artillery
+If you had built a custom test project (in order to customize the deployment assets) with an older version of serverless-artillery, then you might need to upgrade the project in order to use features of newer version of serverless-artillery. For example, serverless-artillery's monitoring mode requires certain deployment assets (configured in `serverless.yml`), that are not part of the configuration defined in `serverless.yml` created by `slsart configure` command of the older versions of serverless-artillery. Hence if you were to try monitoring on such test project then it would not work.
+
+We have added `slsart upgrade` command in order to make it easier for you to upgrade such custom test projects. Please note that you might have to manually add your customizations in the upgraded test project.
+
+```
+slsart upgrade
+```
 
 # Detailed Usage
 ```
