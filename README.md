@@ -13,8 +13,6 @@ Serverless-artillery makes it easy to test your services for performance and fun
 1. You want to constantly monitor your services over time to make sure the latency of your services is under control (i.e. monitoring mode).
 
 # Table of Contents
-- []()
-- []()
 - [Installation](#installation)
   - [Installing on local machine](#installing-on-local-machine)
     - [Prerequisite](#prerequisite)
@@ -63,8 +61,56 @@ Serverless-artillery makes it easy to test your services for performance and fun
   - [9. Deploy assets to AWS](#9-deploy-assets-to-aws)
   - [10. Invoke performance test](#10-invoke-performance-test)
   - [11. Remove assets from AWS](#11-remove-assets-from-aws)
+- [Tutorial 4: Killing in-progress performance test](#tutorial-4-killing-in-progress-performance-test)
+  - [1. Increase `duration`](#1-increase-duration)
+  - [2. Setup AWS account credentials](#2-setup-aws-account-credentials)
+  - [3. Deploy assets to AWS](#3-deploy-assets-to-aws)
+  - [4. Invoke performance test](#4-invoke-performance-test)
+  - [5. Kill the in-progress performance test](#5-kill-the-in-progress-performance-test)
+  - [6. Wait before re-deploying](#6-wait-before-re-deploying)
 - [Performance test workshop](#performance-test-workshop)
-- [Create customized `script.yml`](#create-customized-scriptyml)
+- [Other commands and use cases](#other-commands-and-use-cases)
+  - [Killing in-progress performance test](#killing-in-progress-performance-test)
+  - [Create customized `script.yml`](#create-customized-scriptyml)
+  - [Performance test using script file with different name/path](#performance-test-using-script-file-with-different-namepath)
+  - [Reserved and unsupported flags](#reserved-and-unsupported-flags)
+    - [Reserved flags](#reserved-flags)
+    - [Unsupported flags](#unsupported-flags)
+  - [Providing a data store to view the results of your performance test](#providing-a-data-store-to-view-the-results-of-your-performance-test)
+  - [Related tools and plugins](#related-tools-and-plugins)
+  - [Performance testing VPC hosted services](#performance-testing-vpc-hosted-services)
+  - [Using Payload/CSV files to inject data in scenarios of your `script.yml`](#using-payloadcsv-files-to-inject-data-in-scenarios-of-your-scriptyml)
+  - [Advanced customization use cases](#advanced-customization-use-cases)
+    - [Deployment assets and settings customization](#deployment-assets-and-settings-customization)
+    - [Test script and execution customization using Artillery.io](#test-script-and-execution-customization-using-artilleryio)
+    - [Script splitting customization](#script-splitting-customization)
+    - [Debugging and Tracing Behavior Customization](#debugging-and-tracing-behavior-customization)
+      - [`_trace`](#_trace)
+      - [`_simulation`](#_simulation)
+    - [Splitting and Distribution Logic Customization](#splitting-and-distribution-logic-customization)
+      - [Scripts](#scripts)
+      - [Splitting](#splitting)
+- [Acceptance mode](#acceptance-mode)
+  - [`match` clause](#match-clause)
+  - [Acceptance test command](#acceptance-test-command)
+  - [Tutorial 5: Acceptance mode](#tutorial-5-acceptance-mode)
+    - [1. Customize `script.yml`](#1-customize-scriptyml)
+    - [2. Setup AWS account credentials](#2-setup-aws-account-credentials-1)
+    - [3. Deploy assets to AWS](#3-deploy-assets-to-aws-1)
+    - [4. Invoke acceptance test](#4-invoke-acceptance-test)
+    - [5. Observe the results](#5-observe-the-results)
+    - [6. Test failure scenario](#6-test-failure-scenario)
+      - [6.1. Edit `script.yml` to fail `match`](#61-edit-scriptyml-to-fail-match)
+      - [6.2. Invoke acceptance test](#62-invoke-acceptance-test)
+      - [6.3. Observe the results](#63-observe-the-results)
+    - [7. Remove assets from AWS](#7-remove-assets-from-aws)
+  - [More about acceptance mode](#more-about-acceptance-mode)
+    - [Acceptance testing in CI/CD](#acceptance-testing-in-cicd)
+    - [Run `script.yml` exclusively in acceptance mode](#run-scriptyml-exclusively-in-acceptance-mode)
+    - [Use same script.yml for performance and acceptance testing and monitoring](#use-same-scriptyml-for-performance-and-acceptance-testing-and-monitoring)
+    - [To configure acceptance behavior](#to-configure-acceptance-behavior)
+    - []()
+    - []()
 - [Troubleshooting](#troubleshooting)
   - [Problems installing?](#problems-installing)
   - [Error: npm ERR! code EACCES](#error-npm-err-code-eacces)
@@ -1263,7 +1309,7 @@ This section is same as before. See [here](#8-remove-assets-from-aws) for detail
 ### Acceptance testing in CI/CD
 For the purposes of facilitating the use of this tool in a CI/CD pipeline, if any of the acceptance tests fail to successfully complete, the process will exit with a non-zero exit code.
 
-### Run `script.yml` exclusively in acceptance mode:
+### Run `script.yml` exclusively in acceptance mode
 To hard code acceptance mode into your script add the following in your `script.yml`:
 ```
 mode: acceptance
@@ -1276,7 +1322,7 @@ You can use the same `script.yml` for performance, acceptance testing and monito
 
 Since acceptance mode will run all scenarios only once (by default), the scripts that only are run in acceptance mode are not required to have a `phases` array in the `config` section of the script.
 
-### To configure acceptance behavior:
+### To configure acceptance behavior
 You may configure [sampling](glossary.md#sampling) behavior.  To control the number of samples taken, the time before taking a sample, or the number of errors constituting a failure, you may supply the following (default values listed):
 
 ```
