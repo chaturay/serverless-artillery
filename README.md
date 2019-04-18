@@ -558,7 +558,7 @@ provider:
 ```
 
 ### 8. Setup AWS account credentials
-This section is same as before. See [here]((#before-running-serverless-artillery)) for details.
+This section is same as before. See [here](#before-running-serverless-artillery) for details.
 
 ### 9. Deploy assets to AWS
 This section is same as before. See [here](#3-deploy) for details.
