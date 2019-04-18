@@ -141,7 +141,7 @@ Serverless-artillery makes it easy to test your services for performance and fun
     - [Run `script.yml` exclusively in monitoring mode](#run-scriptyml-exclusively-in-monitoring-mode)
     - [Use same `script.yml` for performance and acceptance testing and monitoring](#use-same-scriptyml-for-performance-and-acceptance-testing-and-monitoring-1)
     - [To configure monitoring behavior](#to-configure-monitoring-behavior)
-- [Upgrading customized projects built with older versions of serverless-artillery]()
+- [Upgrading customized projects built with older versions of serverless-artillery](#upgrading-customized-projects-built-with-older-versions-of-serverless-artillery)
 - [Detailed Usage](#detailed-usage)
   - [Commands](#commands)
     - [`deploy`](#deploy)
