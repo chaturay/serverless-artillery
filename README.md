@@ -109,17 +109,10 @@ Serverless-artillery makes it easy to test your services for performance and fun
     - [Run `script.yml` exclusively in acceptance mode](#run-scriptyml-exclusively-in-acceptance-mode)
     - [Use same script.yml for performance and acceptance testing and monitoring](#use-same-scriptyml-for-performance-and-acceptance-testing-and-monitoring)
     - [To configure acceptance behavior](#to-configure-acceptance-behavior)
-    - []()
-    - []()
+- [Monitoring mode](#monitoring-mode)
+  - []()
 - [Troubleshooting](#troubleshooting)
   - [Problems installing?](#problems-installing)
-  - [Error: npm ERR! code EACCES](#error-npm-err-code-eacces)
-- [Glossary](#glossary)
-  - []()
-  - []()
-  - []()
-  - []()
-  - []()
 
 # Installation
 
