@@ -638,7 +638,7 @@ Result:
 The default maximum duration of a [script chunk](#splitting) is 2 minutes (`maxChunkDurationInSeconds`). As a result of this, on average, load will not be produced after 1 minute but it could continue for up to the full 2 minutes. To lower the wait times after killing, this value can be overridden in your `script.yml` within the \_split attribute, as shown [here](#script-splitting-customization). This value can be as low as 15 seconds and using this value causes each script chunk to run for a maximum duration of 15 seconds. Theoretically, this means that you’d only have to wait 7.5 seconds on average for tests to stop running after killing your test (in practice we have observed roughly 20 seconds lag between killing a function and termination of invocations).
 
 ### Create customized `script.yml`
-Above you used how to use `slsart script` to create the default `script.yml` (see [here](#t22-create-scriptyml)) and how to customize it by manually editing it (see [here](#t24-customizing-scriptyml)).
+Above you used how to use `slsart script` to create the default `script.yml` (see [here](#2-create-scriptyml)) and how to customize it by manually editing it (see [here](#4-customizing-scriptyml)).
 
 `slsart script` command has options to quickly do the above in one command. Run the following command to create custom `script.yml` with **one** load `phase`.
 ```
