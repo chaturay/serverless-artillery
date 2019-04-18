@@ -577,7 +577,7 @@ This section is same as before. See [here](#8-remove-assets-from-aws) for detail
 While running performance/load test it is sometimes necessary to kill the test before it is complete. Read more about the [kill command](#killing-in-progress-performance-test).
 
 ### 1. Increase `duration`
-If you are a **_Nordstrom_** engineer, please follow [Tutorial 3](#tutorial-3-performance-test-with-custom-deployment-assets) to create custom script and custom deployment assets. Make sure you do [customization for Nordstrom Engineers](#customization-for-nordstrom-engineers). Other optional customizations are not necessary for this tutorial.
+If you are a **_Nordstrom_** engineer, please follow [Tutorial 3](#tutorial-3-performance-test-with-custom-deployment-assets) to create custom script and custom deployment assets. Make sure you do [customization for Nordstrom Engineers](#a-customization-for-nordstrom-engineers). Other optional customizations are not necessary for this tutorial.
 
 Others can follow [Tutorial 2](#tutorial-2-performance-test-with-custom-script) to create custom `script.yml`.
 
