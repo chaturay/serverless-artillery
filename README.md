@@ -13,6 +13,8 @@ Serverless-artillery makes it easy to test your services for performance and fun
 1. You want to constantly monitor your services over time to make sure the latency of your services is under control (i.e. monitoring mode).
 
 # Table of Contents
+- []()
+- []()
 - [Installation](#installation)
   - [Installing on local machine](#installing-on-local-machine)
     - [Prerequisite](#prerequisite)
@@ -22,7 +24,7 @@ Serverless-artillery makes it easy to test your services for performance and fun
   - [Installing in Docker](#installing-in-docker)
 - [Uninstallation](#uninstallation)
 - [How it works?](#how-it-works)
-  - [Load generating Lambda function on AWS](#load-generating-lambda-function-on-aws)
+  - [Load generator Lambda function on AWS](#load-generator-lambda-function-on-aws)
 - [Before running serverless-artillery](#before-running-serverless-artillery)
   - [Setup for Nordstrom Technology](#setup-for-nordstrom-technology)
   - [Setup for everyone else](#setup-for-everyone-else)
