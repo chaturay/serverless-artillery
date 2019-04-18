@@ -1890,8 +1890,9 @@ Options:
 ## Commands
 ### `deploy`
 ```
-$ slsart deploy --help
-
+slsart deploy --help
+```
+```
 slsart deploy
 
 Deploy a default version of the function that will execute your Artillery
@@ -1910,8 +1911,9 @@ Options:
 
 ### `invoke`
 ```
-$ slsart invoke --help
-
+slsart invoke --help
+```
+```
 slsart invoke
 
 Invoke your function with your Artillery script.  Will prefer a script given by
@@ -1943,8 +1945,9 @@ Options:
 
 ### `kill`
 ```
-$ slsart kill --help
-
+slsart kill --help
+```
+```
 slsart kill
 
 Stop a currently running load test and remove the function.
@@ -1960,8 +1963,9 @@ Options:
 
 ### `remove`
 ```
-$ slsart remove --help
-
+slsart remove --help
+```
+```
 slsart remove
 
 Remove the function and the associated resources created for or by it.  See
@@ -1979,8 +1983,9 @@ Options:
 
 ### `script`
 ```
-$ slsart script --help
-
+slsart script --help
+```
+```
 slsart script
 
 Create a local Artillery script so that you can customize it for your specific
@@ -2005,8 +2010,9 @@ Options:
 
 ### `configure`
 ```
-$ slsart configure --help
-
+slsart configure --help
+```
+```
 slsart configure
 
 Create a local copy of the deployment assets for modification and deployment.
@@ -2023,8 +2029,9 @@ Options:
 
 ### `upgrade`
 ```
-$slsart upgrade --help
-
+slsart upgrade --help
+```
+```
 slsart upgrade
 
 Upgrade local assets to latest version.
