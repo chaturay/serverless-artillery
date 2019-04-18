@@ -117,12 +117,12 @@ npm uninstall -g serverless-artillery
   * test target/URL/endpoint/service
   * load progression
   * and the scenarios that are important for your service to test.
-* When you run `slsart deploy` command, serverless-artillery deploys a **load generating Lambda function**, on your AWS account along with other assets.
+* When you run `slsart deploy` command, serverless-artillery deploys a **load generator Lambda function**, on your AWS account along with other assets.
 * Running the tests
-  * **Performance test:** When you run `slsart invoke` command, serverless-artillery would invoke the load generating Lambda function.
+  * **Performance test:** When you run `slsart invoke` command, serverless-artillery would invoke the load generator Lambda function.
     * It would generate the number of requests as specified in `script.yml` to specified test target in order to run the specified scenarios.
-  * **Acceptance test:** When you run `slsart invoke -a` command, serverless-artillery would invoke the load generating Lambda function in acceptance test mode where it runs each scenario in your script exactly once and reports the results.
-  * **Monitoring:** When you customize the deployment assets to turn on monitoring and deploy those assets using `slsart deploy` command, the load generating Lambda function is invoked in monitoring mode once a minute 24x7 where it runs each scenario in your script 5 times and sends an alert if it detects a problem. 
+  * **Acceptance test:** When you run `slsart invoke -a` command, serverless-artillery would invoke the load generator Lambda function in acceptance test mode where it runs each scenario in your script exactly once and reports the results.
+  * **Monitoring:** When you customize the deployment assets to turn on monitoring and deploy those assets using `slsart deploy` command, the load generator Lambda function is invoked in monitoring mode once a minute 24x7 where it runs each scenario in your script 5 times and sends an alert if it detects a problem. 
 * When you run `slsart remove` command, serverless-artillery would remove these assets from your AWS account.
 * When you run `slsart kill` command, serverless-artillery would kill the in-progress test and remove these assets from your AWS account.
 
@@ -147,19 +147,19 @@ npm uninstall -g serverless-artillery
 
 ### Serverless-artillery
 - Serverless-artillery allows your script to specify an amount of load far exceeding the capacity of a single server to execute.
-- It breaks that script into smaller chunks (sized for a single instance of load generating Lambda function) and distribute the chunks for execution across multiple instances of load generating Lambda function.
+- It breaks that script into smaller chunks (sized for a single instance of load generator Lambda function) and distribute the chunks for execution across multiple instances of load generator Lambda function.
 - Since this is done using a FaaS provider, the ephemeral infrastructure used to execute your load disappears as soon as your load tests are complete.
 
 </p>
 </details>
 
-## Load generating Lambda function on AWS
+## Load generator Lambda function on AWS
 <details><summary>Click to expand/collapse</summary>
 <p>
 
 <img src="docs/Architecture.gif">
 
-- Serverless-artillery generates the requests to run the specified tests using load generating Lambda function, which is deployed and invoked on AWS along with other assets.
+- Serverless-artillery generates the requests to run the specified tests using load generator Lambda function, which is deployed and invoked on AWS along with other assets.
   -  Naming format is `<customized-service-name default:serverless-artillery>-<optional-unique-string-><stage default:dev>-loadGenerator`. For example, `serverless-artillery-dev-loadGenerator` or `serverless-artillery-XnBa473psJ-dev-loadGenerator`.
 - It has an ephimeral architecture. It only exists as long as you need it.
 - It runs Artillery.io node package in AWS Lambda function.
@@ -175,7 +175,7 @@ npm uninstall -g serverless-artillery
 </details>
 
 # Before running serverless-artillery
-Serverless-artillery needs to _deploy_ assets like [load generating Lambda function](#load-generating-lambda-function-on-aws) to AWS, _invoke_ the function to run the tests and _remove_ these assets from AWS when not needed. Hence you need an AWS account and setup credentials with which to deploy, invoke and remove the assets from AWS.
+Serverless-artillery needs to _deploy_ assets like [load generator Lambda function](#load-generator-lambda-function-on-aws) to AWS, _invoke_ the function to run the tests and _remove_ these assets from AWS when not needed. Hence you need an AWS account and setup credentials with which to deploy, invoke and remove the assets from AWS.
 
 ## Setup for Nordstrom Technology
 If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Setup`_** in **Confluence** and follow the instructions there.
@@ -195,7 +195,7 @@ Make sure you have [setup your AWS account credentials](#before-running-serverle
 Go to command line for all the following steps in this tutorial. You can run the steps of this tutorial from anywhere in command line since the commands you run in this tutorial will not create any files on your local machine.
 
 ### 3. Deploy
-The `slsart deploy` command deploys required assets (like [load generating Lambda function](#load-generating-lambda-function-on-aws)) to the AWS account you selected in the previous step. 
+The `slsart deploy` command deploys required assets (like [load generator Lambda function](#load-generator-lambda-function-on-aws)) to the AWS account you selected in the previous step. 
 
 By _default_ it uses `service` name `serverless-artillery` and `stage` name `dev`. And hence the _default_ AWS CloudFormation Stack name becomes `serverless-artillery-dev` (format: `<service-name default:serverless-artillery>-<stage-name default:dev>`). You will see that if you go to your AWS account console > CloudFormation after running the command.
 
@@ -212,7 +212,7 @@ slsart deploy --stage test1
 The AWS CloudFormation Stack name in this case would be `serverless-artillery-test1`. 
 
 ### 4. Invoke
-The following command will invoke [load generating Lambda function](#load-generating-lambda-function-on-aws) using the default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script. Note that this default load script is part of the global install of serverless-artillery and not in the local folder from where you are running the command.
+The following command will invoke [load generator Lambda function](#load-generator-lambda-function-on-aws) using the default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script. Note that this default load script is part of the global install of serverless-artillery and not in the local folder from where you are running the command.
 ```
 slsart invoke --stage <your-unique-stage-name>
 ```
@@ -465,7 +465,7 @@ Please refer to [`serverless.yml` documentation](https://serverless.com/framewor
 - You can change `service` name to some other unique string as per your need. For example, `serverless-artillery-myperftestservice` or `myloadtestservice`.
 - The rest of the `serverless.yml` refers to the service name by using `${self:service}`.
 
-#### b. [Load generating Lambda function](#load-generating-lambda-function-on-aws) name
+#### b. [Load generator Lambda function](#load-generator-lambda-function-on-aws) name
 The Serverless Framework automatically names the Lambda function based on the service, stage and function name as follows.
 - The function `loadGenerator` when deployed is named as `${self:service}-${opt:stage, self:provider.stage}-loadGenerator`.
   - `${self:service}` is name of the service. In this `serverless.yml` it is `serverless-artillery-XnBa473psJ`.
@@ -473,9 +473,9 @@ The Serverless Framework automatically names the Lambda function based on the se
     - `${opt:stage}` refers to the (optional) stage name passed in `slsart deploy [--stage <stage-name>]` command. For example, if you run `slsart deploy --stage prod` then `prod` would be used for `${opt:stage}`.
     - If no stage name is passed in the deploy command then `${self:provider.stage}` would be used. It is the `stage` name set under `provider` block in the `serverless.yml`. If one is not provided (like in above example) it is set to `dev`. See [here](https://serverless.com/framework/docs/providers/aws/guide/serverless.yml/).
 - In this example function name will be set to `serverless-artillery-XnBa473psJ-dev-loadGenerator` while running `slsart deploy` command (note no stage name specified).
-#### c. [Load generating Lambda function](#load-generating-lambda-function-on-aws) permissions
-- In order to generate load the load generating Lambda needs to invoke itself.
-- The `iamRoleStatements` block in the `serverless.yml` gives the load generating Lambda function to invoke itself (`lambda:InvokeFunction`).
+#### c. [Load generator Lambda function](#load-generator-lambda-function-on-aws) permissions
+- In order to generate load the load generator Lambda needs to invoke itself.
+- The `iamRoleStatements` block in the `serverless.yml` gives the load generator Lambda function to invoke itself (`lambda:InvokeFunction`).
 
 ### 7. Customizing `serverless.yml`
 Except for [one step for **_Nordstrom_** Engineers](#customization-for-nordstrom-engineers), all customizations are **optional** in the tutorial. If you like you can customize `serverless.yml` as follows.
@@ -623,13 +623,13 @@ You must specify a `region` when running this command:
 Serverless will use the `us-east-1` region by default.
 
 The command will do the followings:
-- It will set the load generating Lambda function's [concurrency level](https://docs.aws.amazon.com/lambda/latest/dg/concurrent-executions.html#per-function-concurrency) to 0.
-- and then _remove_ the deployed assets. It will remove load generating Lambda function, CloudWatch logs, and IAM role. CloudWatch metrics will remain.
+- It will set the load generator Lambda function's [concurrency level](https://docs.aws.amazon.com/lambda/latest/dg/concurrent-executions.html#per-function-concurrency) to 0.
+- and then _remove_ the deployed assets. It will remove load generator Lambda function, CloudWatch logs, and IAM role. CloudWatch metrics will remain.
 
 Result:
-- Any further invocations of load generating Lambda will be supressed. 
-- The already executing instances of load generating Lambda will continue and complete the assigned load generation workload.
-- The load generating Lambda function by default runs for up to 2 minutes. So that would be the default maximum time before the load generation stops.
+- Any further invocations of load generator Lambda will be supressed. 
+- The already executing instances of load generator Lambda will continue and complete the assigned load generation workload.
+- The load generator Lambda function by default runs for up to 2 minutes. So that would be the default maximum time before the load generation stops.
 
 **You will want to wait approximately 5 minutes before redeploying to avoid the killed performance test from resuming.** Behind the scenes, AWS creates a queue for Lambda invocations. While processing the invocation requests from the queue, if a function is not available then that message will be placed back onto the queue for further attempts. As a result, redeploying your function can allow those re-queued messages to be used to invoke your re-deployed function. In our observation based on a limited set of tests, messages will be permanently failed out of the queues after 5 minutes. That is the basis of our recommendation.
 
@@ -688,7 +688,7 @@ Following flags are reserved in `slsart invoke` command.
 The flag `--raw` is unsupported in `slsart invoke` command because, while arbitrary functions can accept strings, a string does not comprise a valid artillery script.
 
 ### Providing a data store to view the results of your performance test
-- If your script specifies a small load that can be generated by single invocation of [load generating lambda function](#load-generating-lambda-function-on-aws) then the results are reported back at the end of `slsart invoke` command.
+- If your script specifies a small load that can be generated by single invocation of [load generator Lambda function](#load-generator-lambda-function-on-aws) then the results are reported back at the end of `slsart invoke` command.
 - Otherwise, the volume of load results can be such that it cannot pass back to the original requestor. 
 - You are responsible for sending the results (usually via a plugin) to a data store for later review and/or analysis. See the [available plugins](#related-tools-and-plugins) that can be used.
 
@@ -741,10 +741,10 @@ provider:
   - when you need to automatically attach an AWS Managed IAM Policy (or Policies) to all IAM Roles created by serverless-artillery due to company policy. See `serverless-attach-managed-policy` plugin [here](#related-tools-and-plugins) for details.
   - when you need to separate out various versions of the load testing function in order to maintain least privilege. 
   - when you want to use payload/CSV files to feed data into the request being sent to the target. See [here](#using-payloadcsv-files-to-inject-data-in-scenarios-of-your-scriptyml) for details.
-  - when you want to add custom IAM rights (see Serverless Framework [docs](https://serverless.com/framework/docs/providers/aws/guide/iam/)) to the load generating Lambda to validate least privilege.
+  - when you want to add custom IAM rights (see Serverless Framework [docs](https://serverless.com/framework/docs/providers/aws/guide/iam/)) to the load generator Lambda to validate least privilege.
 - For such cases you need to create a local copy of the deployment assets using [`slsart configure` command](#5-create-custom-deployment-assets), customize them for your use case and deploy them using `slsart deploy` command as shown in [Tutorial 3](#tutorial-3-performance-test-with-custom-deployment-assets).
 - Full documentation of what is in the `serverless.yml` and the options you have available can be found at https://docs.serverless.com/framework/docs/.
-- You would need to use custom deployment assets when you want to make even more customizations to how serverless-artillery works. [`slsart configure` command](#5-create-custom-deployment-assets) generates a local copy of the serverless function code that can be edited and redeployed with your changed settings. For example, if you need to make any code change to load generating Lambda (example, alter hard-coded limits).
+- You would need to use custom deployment assets when you want to make even more customizations to how serverless-artillery works. [`slsart configure` command](#5-create-custom-deployment-assets) generates a local copy of the serverless function code that can be edited and redeployed with your changed settings. For example, if you need to make any code change to load generator Lambda (example, alter hard-coded limits).
 - Please see [Serverless Framework docs](https://serverless.com/framework/docs/providers/aws/) for load generation Lambda function's configuration related documentation.
 - Please see [Artillery.io docs](https://artillery.io/docs/script-reference/) for script configuration related documentation.
 - **Note** that everytime you make changes to the local copy of deployment assets, you need to redeploy using `slsart deploy` command.
@@ -758,7 +758,7 @@ provider:
 - The HTTP engine has support for "hooks", which allow for custom JS functions to be called at certain points during the execution of a scenario. See [here](https://artillery.io/docs/http-reference/#advanced-writing-custom-logic-in-javascript) for details.
 
 #### Script splitting customization
-As mentioned [here](#load-generating-lambda-function-on-aws), the controller mode load generating Lambda function splits the work to generate the required load between multiple worker mode load generating Lambdas. The following controls are available to control how splitting is done. That said, the defaults are good and you generally won't need them until you have gotten deeper into implementation.  
+As mentioned [here](#load-generator-lambda-function-on-aws), the controller mode load generator Lambda function splits the work to generate the required load between multiple worker mode load generator Lambdas. The following controls are available to control how splitting is done. That said, the defaults are good and you generally won't need them until you have gotten deeper into implementation.  
 To use these, define a `_split` attribute within your `script.yml`. The values of that object will be used to alter the splitting of your script.
 ```
 {
@@ -775,7 +775,7 @@ To use these, define a `_split` attribute within your `script.yml`. The values o
 See the [Splitting and Distribution Logic Customization](#splitting-and-distribution-logic-customization) section for an in depth discussion of how splitting is implemented and what you control with these parameters as well as the concerns involved in making decisions about them.  See the comments in [`~/lambda/handler.js`](lib/lambda/handler.js) for detailed documentation of the semantics the code has with regard to them (search for '`const constants`').  By the way, you now have the source code to change those hard-coded limits and can change them at will if you so desire - we wanted to provide a margin of safety and guardrails but not restrictions.
 
 #### Debugging and Tracing Behavior Customization
-There are two primary tools for debugging and tracing the load generating Lambda function and how it splits and executes the task it has been given.  Define the following in your `script.yml`:
+There are two primary tools for debugging and tracing the load generator Lambda function and how it splits and executes the task it has been given.  Define the following in your `script.yml`:
 ```
 {
   _trace: true,
@@ -785,7 +785,7 @@ There are two primary tools for debugging and tracing the load generating Lambda
 ```
 
 ##### `_trace`
-`_trace` causes the load generating Lambda function to report the actions it is taking with your script and the chunks that it breaks your script into. Expect statements such as this:
+`_trace` causes the load generator Lambda function to report the actions it is taking with your script and the chunks that it breaks your script into. Expect statements such as this:
 ```
 scheduling self invocation for 1234567890123 in 2345678901234 with a 3456789012345 ms delay
 ```
@@ -796,7 +796,7 @@ console.log(`scheduling self invocation for ${event._genesis} in ${event._start}
 ```
 
 Here are definitions that will help you understand these statements. In the code you will see `_genesis`, `_start`, `now`, and `timeDelay`:
-- `_genesis`: the datetime stamp immediately taken by the first instance of load generating Lambda function that received the original script. `_genesis` is added to the original script so that all child function executions of the original handler have a datetime stamp of when the original "load execution request" was received. If you are not running many load tests simultaneously then this can serve as a unique ID for the current load execution. This can be useful for correlation. An improvement could include adding a unique factor to avoid collisions in such usage.  
+- `_genesis`: the datetime stamp immediately taken by the first instance of load generator Lambda function that received the original script. `_genesis` is added to the original script so that all child function executions of the original handler have a datetime stamp of when the original "load execution request" was received. If you are not running many load tests simultaneously then this can serve as a unique ID for the current load execution. This can be useful for correlation. An improvement could include adding a unique factor to avoid collisions in such usage.  
 - `_start`: the datetime stamp immediately taken by the current function that is executing on either the original script or a chunk of that original script. This allows relative time reporting and evaluation with a function execution.  
 - `now`: the datetime stamp taken when the log entry was produced.  
 - `timeDelay`: a time delta (in milliseconds) between the current time of the current function and when it has scheduled to take the action reported in the current log entry.  
@@ -804,7 +804,7 @@ Here are definitions that will help you understand these statements. In the code
 `_trace` is very useful in identifying what the system is doing or where something is going wrong.  #bugs-happen
 
 ##### `_simulation`
-Setting the `_simulation` attribute to a truthy value will cause the load generating Lambda function to split the script without taking action on the script. Functionally, this comprises splitting the given script into pieces without invoking functions to handle the split chunks and/or execute the load described by those chunks. Concretely, when it comes time to invoke new function instances for distributing the load, it simply invokes (or schedules an invokation of) itself. Likewise, when it comes time to invoke the `artillery` entry point for generating load from the chunk, it instead invokes the simulation shim that reports what would have been executed and immediately completes.
+Setting the `_simulation` attribute to a truthy value will cause the load generator Lambda function to split the script without taking action on the script. Functionally, this comprises splitting the given script into pieces without invoking functions to handle the split chunks and/or execute the load described by those chunks. Concretely, when it comes time to invoke new function instances for distributing the load, it simply invokes (or schedules an invokation of) itself. Likewise, when it comes time to invoke the `artillery` entry point for generator load from the chunk, it instead invokes the simulation shim that reports what would have been executed and immediately completes.
 
 This mode, in combination with `_trace` related behavior is very helpful in debugging script splitting behavior and identifying what the logic declares should occur.
 
@@ -1323,9 +1323,9 @@ Given default [moitoring behavior configuration](#to-configure-monitoring-behavi
 Monitoring mode will run 24x7 until turned off or paused. If you need to pause monitoring you can do the following.
 #### 6.1. Method 1: Using CloudWatch Rules
 - Go to `AWS CloudWatch console` and find `Rules` (under `Events`) and search for the rule `${self:service}-${opt:stage, self:provider.stage}-monitoring` based on your `serverless.yml`.
-- Do required [steps](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/Delete-or-Disable-Rule.html) to `Disable` this rule. This will prevent further invocation of the load generating Lambda function for monitoring.
+- Do required [steps](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/Delete-or-Disable-Rule.html) to `Disable` this rule. This will prevent further invocation of the load generator Lambda function for monitoring.
   - To enable monitoring again `Enable` this rule.
-- This will turn off monitoring and preserve the load generating Lambda logs.
+- This will turn off monitoring and preserve the load generator Lambda logs.
 #### 6.2. Method 2: Turn monitoring off in `serverless.yml`
 - Open `serverless.yml` in your favorite editor.
 - Under `functions` > `loadGenerator` > `events` > `schedule` > find `enabled: true`. Set it to `false`.
