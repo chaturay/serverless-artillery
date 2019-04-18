@@ -478,7 +478,9 @@ The Serverless Framework automatically names the Lambda function based on the se
 - The `iamRoleStatements` block in the `serverless.yml` gives the load generator Lambda function to invoke itself (`lambda:InvokeFunction`).
 
 ### 7. Customizing `serverless.yml`
-Except for [one step for **_Nordstrom_** Engineers](#a-customization-for-nordstrom-engineers), all customizations are **optional** in the tutorial. If you like you can customize `serverless.yml` as follows.
+**NOTE:** Except for [one step for **_Nordstrom_** Engineers](#a-customization-for-nordstrom-engineers), all customizations are **optional** in the tutorial.
+
+If you like you can customize `serverless.yml` as follows.
 
 #### a. Customization for Nordstrom Engineers
 If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Policies`_** in **Confluence** and follow the instructions there.
