@@ -1854,9 +1854,33 @@ We have added `slsart upgrade` command in order to make it easier for you to upg
 
 ```
 slsart upgrade
+
+Upgrading project...
+Cleaning project by deleting node_modules and package-lock.json ...done.
+
+Backing up existing project files to `backup` directory ...
+handler.js -> backup/handler.js ✔
+package.json -> backup/package.json ✔
+serverless.yml -> backup/serverless.yml ✔
+Backup complete.
+
+upgrading to version 0.0.1 ...done.
+Executing `npm install` to provide dependencies to the upgraded project ...
+[ NPM install output here ]
+
+Upgrade complete.
+
+Existing project files were copied to `backup`.
+
+It's possible that the upgraded project contained additional customizations:
+Diff `backup` with `original-assets-0.0.0` to understand how the project was originally customized.
+Diff `serverless.yml` with `backup/serverless.yml` to compare the previous cloud resources with the upgraded service.
+Diff `project.json` with `backup/project.json` to compare the changes in project dependencies.
+
+Please merge any missing customizations into the project to complete the upgrade.
+
 ```
 
-TODOGreg add example output of the command.
 
 # Detailed Usage
 ```
@@ -1887,7 +1911,7 @@ Commands:
                     https://artillery.io for documentation.
   slsart configure  Create a local copy of the deployment assets for
                     modification and deployment.  See
-                    https://docs.serverless.com for documentation. (ASHMITODO greg this link needs to change to https://serverless.com/framework/docs/)
+                    https://serverless.com/framework/docs/ for documentation.
   slsart upgrade    Upgrade local assets to latest version.
 
 Options:
@@ -2014,8 +2038,8 @@ Options:
   -d, --duration  The duration, in seconds, to load the given endpoint. [number]
   -r, --rate      The rate, in requests per second, at which to load the given
                   endpoint.                                             [number]
-  -t, --rampTo    The rate to adjust towards away from the given rate, in
-                  requests per second at which to load the given endpoint. ASHMITODO greg should we specify ramp up here?
+  -t, --rampTo    The rate to ramp up to from the given (starting) rate, in
+                  requests per second at which to load the given endpoint.
                                                                         [number]
   -o, --out       The file to output the generated script in to.        [string]
 ```

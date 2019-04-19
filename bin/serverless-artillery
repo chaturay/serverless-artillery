@@ -173,7 +173,7 @@ const yargs = require('yargs')
       },
       t: {
         alias: 'rampTo',
-        description: 'The rate to adjust towards away from the given rate, in requests per second at which to load ' +
+        description: 'The rate to ramp up to from the given (starting) rate, in requests per second at which to load ' +
           'the given endpoint.',
         requiresArg: true,
         type: 'number',
@@ -187,7 +187,7 @@ const yargs = require('yargs')
     } // eslint-disable-line comma-dangle
   )
   .command('configure', 'Create a local copy of the deployment assets for modification and deployment.  See ' +
-    'https://docs.serverless.com for documentation.', {})
+    'https://serverless.com/framework/docs/ for documentation.', {})
   .command('upgrade', 'Upgrade local assets to latest version.', {})
   .demand(1)
 
