@@ -1881,6 +1881,26 @@ Please merge any missing customizations into the project to complete the upgrade
 
 ```
 
+It's possible that the upgrade fails with this error:
+```
+UpdatePreconditionError: Invalid package.json dependency package version found:
+        csv-parse expected ^1.1.7 found ^1.3.3
+```
+
+Do the following to work-around this error:
+
+1) Delete the backup directory which we created by the failed upgrade:
+```
+rm -rf ./backup
+```
+2) Modify the existing `package.json` dependency for `csv-parse` to version `^1.1.7`:
+```
+"csv-parse": "^1.1.7"
+```
+3) Run the upgrade again:
+```
+slsart upgrade
+```
 
 # Detailed Usage
 ```
