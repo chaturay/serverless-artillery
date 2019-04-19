@@ -8,14 +8,15 @@ const path = require('path')
 BbPromise.longStackTraces()
 chai.use(chaiAsPromised)
 
-const expect = chai.expect
+const { expect } = chai
 
 const packageJson = require(path.join(__dirname, '..', '..', 'lib', 'lambda', 'package.json')) // eslint-disable-line import/no-dynamic-require
 const slsart = require('../../lib/index')
+const npm = require('../../lib/npm')
 
-describe('./lib/npm.js:exports', () => {
+describe('./lib/npm.js:exports', function npmExports() { // eslint-disable-line prefer-arrow-callback
   describe('#install', function exportsConfigure() { // eslint-disable-line prefer-arrow-callback
-    const cwd = process.cwd
+    const { cwd } = process
     const replaceCwd = (dirToReplace) => {
       process.cwd = () => dirToReplace
     }
@@ -41,6 +42,10 @@ describe('./lib/npm.js:exports', () => {
           .then(() => {
             replaceCwd(tmpdir)
             return slsart.configure({ debug: true, trace: true })
+          })
+          .then(() => {
+            npm.install(tmpdir, 'aws-sdk') // given that it is skipped as "already present in lambda"
+            require(path.join(tmpdir, 'handler.js')) // eslint-disable-line global-require, import/no-dynamic-require
           })
           .then(() => {
             let dependencyChecks = []

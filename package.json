@@ -1,6 +1,6 @@
 {
   "name": "serverless-artillery",
-  "version": "0.3.5",
+  "version": "0.3.2",
   "description": "A serverless performance testing tool. `serverless` + `artillery` = crush.  a.k.a. Orbital Laziers [sic]",
   "main": "index.js",
   "bin": {
@@ -8,11 +8,13 @@
     "slsart": "./bin/serverless-artillery"
   },
   "scripts": {
-    "audit": "npm audit; pushd lib/lambda && npm audit && popd",
-    "test": "./node_modules/.bin/nyc ./node_modules/.bin/_mocha -r aws-sdk -r ./lib/lambda/node_modules/artillery-core \"./tests/**/*.spec.js\"",
-    "light": "./node_modules/.bin/nyc ./node_modules/.bin/_mocha -r aws-sdk -r ./lib/lambda/node_modules/artillery-core \"./tests/**/!(serverless-artillery|npm).spec.js\"",
-    "coverage": "./node_modules/.bin/nyc report --reporter=text-lcov | coveralls",
+    "test": "./node_modules/.bin/nyc ./node_modules/.bin/_mocha -r aws-sdk \"./tests/**/*.spec.js\"",
+    "test-light": "./node_modules/.bin/nyc ./node_modules/.bin/_mocha -r aws-sdk \"./tests/**/!(serverless-artillery|npm).spec.js\"",
+    "test-integration": "./node_modules/.bin/_mocha --timeout=1200000 ./tests/integration/index",
+    "test-upgrade": "./node_modules/.bin/_mocha --timeout 90000 ./tests/integration/versioning/upgrade.js",
+    "coverage-report": "./node_modules/.bin/nyc report --reporter=lcov",
     "lint": "./node_modules/.bin/eslint . bin/serverless-artillery",
+    "fix": "./node_modules/.bin/eslint --fix . bin/serverless-artillery",
     "postinstall": "node ./postinstall.js",
     "publish": "./node_modules/.bin/np"
   },
@@ -30,37 +32,49 @@
     "scale",
     "lambda"
   ],
-  "author": "Erik Erikson, Jane Savina, Jason Olmstead, Greg Smith, Rob Gruhl, Andy Day",
+  "author": "Erik Erikson, Greg Smith, Rob Gruhl, Danno Mayer, Andy Day, Grace Lee, Sayna Parsi",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/Nordstrom/serverless-artillery/issues"
   },
   "homepage": "https://github.com/Nordstrom/serverless-artillery#readme",
   "dependencies": {
-    "aws-sdk": "^2.411.0",
-    "bluebird": "^3.4.6",
-    "get-stdin": "^5.0.1",
-    "js-yaml": "^3.6.1",
-    "semver": "^5.3.0",
-    "shortid": "^2.2.6",
-    "yargs": "^6.2.0"
+    "ajv": "^6.7.0",
+    "aws-sdk": "^2.388.0",
+    "bluebird": "^3.5.3",
+    "diff": "^3.5.0",
+    "get-stdin": "^6.0.0",
+    "js-yaml": "^3.13.0",
+    "node-fetch": "^2.3.0",
+    "rimraf": "^2.6.3",
+    "semver": "^5.5.0",
+    "shortid": "^2.2.14",
+    "yargs": "^11.1.0"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
+    "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
-    "coveralls": "^3.0.0",
-    "eslint": "^4.5.0",
-    "eslint-config-airbnb": "^15.1.0",
-    "eslint-plugin-import": "^2.7.0",
-    "eslint-plugin-jsx-a11y": "^5.1.1",
-    "eslint-plugin-react": "^7.4.0",
-    "mocha": "^6.0.2",
-    "np": "^2.16.0",
-    "nyc": "^13.3.0",
-    "quibble": "^0.5.3",
-    "serverless": "^1.38.0",
-    "sinon": "^4.1.3",
-    "sinon-chai": "^2.14.0"
+    "chai-spies": "^1.0.0",
+    "coveralls": "^3.0.1",
+    "cross-spawn": "^6.0.5",
+    "es6-promisify": "^6.0.1",
+    "eslint": "^5.12.0",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.11.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.12.3",
+    "lodash.merge": "^4.6.1",
+    "mocha": "^5.1.1",
+    "ncp": "^2.0.0",
+    "np": "^2.20.1",
+    "nyc": "^11.7.1",
+    "proxyquire": "^2.1.0",
+    "quibble": "^0.5.5",
+    "recursive-readdir": "^2.2.2",
+    "serverless": "^1.40.0",
+    "sinon": "^5.0.2",
+    "sinon-chai": "^3.3.0",
+    "tmp": "0.0.33"
   },
   "nyc": {
     "include": [
@@ -71,7 +85,8 @@
       "**/lib/serverless-fx.js",
       "postinstall.js",
       "tests",
-      "test.js"
+      "test.js",
+      "**/assets"
     ],
     "reporter": [
       "lcov",

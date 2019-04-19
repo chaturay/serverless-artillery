@@ -1,0 +1,22 @@
+script:
+  config:
+    target: 'https://example.com'
+    phases:
+      - duration: 10
+        arrivalRate: 1
+        rampTo: 10
+      - duration: 10
+        arrivalRate: 10
+  scenarios:
+    - flow:
+      - get:
+          url: '/'
+expectations:
+  - from: 0
+    to: 10
+    min: 45
+    max: 80
+  - from: 10
+    to: 20
+    min: 90
+    max: 110

@@ -1,0 +1,48 @@
+{
+  "type": "object",
+  "properties": {
+    "functions": {
+      "type": "object",
+      "properties": {
+        "loadGenerator": {
+          "type": "object",
+          "properties": {
+            "environment": {
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^(?!TOPIC_ARN|TOPIC_NAME).*"
+              }
+            },
+            "events": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "schedule": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "pattern": "^(?!\\${self:service}-\\${opt:stage, self:provider\\.stage}-monitoring).*"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "properties": {
+        "Resources": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^(?!monitoringAlerts).*"
+          }
+        }
+      }
+    }
+  }
+}

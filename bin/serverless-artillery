@@ -32,7 +32,7 @@ const yargs = require('yargs')
       requiresArg: false,
     },
   })
-  .global('D', 'V')
+  .global(['D', 'V'])
   .command('deploy', 'Deploy a default version of the function that will execute your Artillery scripts.  See ' +
     'https://serverless.com/framework/docs/providers/aws/cli-reference/deploy/ for reference.', {})
   .command(
@@ -45,6 +45,12 @@ const yargs = require('yargs')
       a: {
         alias: 'acceptance',
         description: 'Execute the script in acceptance mode.  It will execute each flow once, reporting failures.',
+        requiresArg: false,
+      },
+      m: {
+        alias: 'monitoring',
+        description: 'Execute the script in monitoring mode.  It will execute each flow a multiple of times, alerting ' +
+          'if the number of errors exceeds the configured threshold.',
         requiresArg: false,
       },
       d: {
@@ -89,6 +95,7 @@ const yargs = require('yargs')
       // TODO artillery script.  This conflicts with the -s and --stage flags of the serverless framework.  As such,
       // TODO while we transition our users away from providing the script via -s/--script, we reject those flags and
       // TODO redirect them.
+      // TODO Transition start date:
       if (hasFlag(breakingFlags, argv)) {
         console.error([
           os.EOL,
@@ -138,6 +145,7 @@ const yargs = require('yargs')
       }
     } // eslint-disable-line comma-dangle
   )
+  .command('kill', 'Stop a currently running load test and remove the function.', {})
   .command('remove', 'Remove the function and the associated resources created for or by it.  See ' +
     'https://serverless.com/framework/docs/providers/aws/cli-reference/remove/ for reference.', {})
   .command(
@@ -165,7 +173,7 @@ const yargs = require('yargs')
       },
       t: {
         alias: 'rampTo',
-        description: 'The rate to adjust towards away from the given rate, in requests per second at which to load ' +
+        description: 'The rate to ramp up to from the given (starting) rate, in requests per second at which to load ' +
           'the given endpoint.',
         requiresArg: true,
         type: 'number',
@@ -179,22 +187,26 @@ const yargs = require('yargs')
     } // eslint-disable-line comma-dangle
   )
   .command('configure', 'Create a local copy of the deployment assets for modification and deployment.  See ' +
-    'https://docs.serverless.com for documentation.', {})
+    'https://serverless.com/framework/docs/ for documentation.', {})
+  .command('upgrade', 'Upgrade local assets to latest version.', {})
   .demand(1)
-  .strict()
-  .argv
 
-const command = yargs._[0]
+const command = yargs.argv._[0]
 
-if (yargs.debug) {
-  console.log(`options were:${os.EOL}${JSON.stringify(yargs, null, 2)}`)
-  console.log(`command that will be executed: slsArt[${command}](${yargs})`)
+if (yargs.argv.debug) {
+  console.log(`options were:${os.EOL}${JSON.stringify(yargs.argv, null, 2)}`)
+  console.log(`command that will be executed: slsArt[${command}](${yargs.argv})`)
 }
 
-slsArt[command](yargs)
+if (!(command in slsArt)) {
+  yargs.showHelp()
+  process.exit(1)
+}
+
+slsArt[command](yargs.argv)
   .catch((ex) => {
     console.error(ex.message)
-    if (yargs.verbose) {
+    if (yargs.argv.verbose) {
       console.error(ex.stack)
     }
     process.exit(1)

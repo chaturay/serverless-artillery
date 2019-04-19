@@ -1,0 +1,43 @@
+service: slsart-integration-target
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  endpointType: regional
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - logs:FilterLogEvents
+      Resource: arn:aws:logs:*:*:log-group:/aws/lambda/slsart-integration-target-${self:provider.stage}-test:*
+
+functions:
+  test:
+    handler: handler.test
+    events:
+      - http:
+          path: test/{id}
+          method: get
+
+  list:
+    handler: handler.list
+    events:
+      - http:
+          path: list/{id}
+          method: get
+    environment:
+      TEST_LOG_GROUP: /aws/lambda/slsart-integration-target-${self:provider.stage}-test
+
+resources:
+  Outputs:
+     TestApi:
+       Description: The URL of the ApiGateway at which to invoke the get function
+       Value:
+        Ref: ApiGatewayRestApi
+       Export:
+        Name: ${self:service}-test-api
+     ListApi:
+       Description: The URL of the ApiGateway at which to invoke the get function
+       Value:
+        Ref: ApiGatewayRestApi
+       Export:
+        Name: ${self:service}-list-api
