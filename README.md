@@ -142,6 +142,7 @@ Serverless-artillery makes it easy to test your services for performance and fun
     - [Use same `script.yml` for performance and acceptance testing and monitoring](#use-same-scriptyml-for-performance-and-acceptance-testing-and-monitoring-1)
     - [To configure monitoring behavior](#to-configure-monitoring-behavior)
 - [Upgrading customized projects built with older versions of serverless-artillery](#upgrading-customized-projects-built-with-older-versions-of-serverless-artillery)
+  - [Known Upgrade Issues](#known-upgrade-issues)
 - [Detailed Usage](#detailed-usage)
   - [Commands](#commands)
     - [`deploy`](#deploy)
@@ -1881,6 +1882,8 @@ Please merge any missing customizations into the project to complete the upgrade
 
 ```
 
+## Known Upgrade Issues
+
 It's possible that the upgrade fails with this error:
 ```
 UpdatePreconditionError: Invalid package.json dependency package version found:
@@ -1889,10 +1892,7 @@ UpdatePreconditionError: Invalid package.json dependency package version found:
 
 Do the following to work-around this error:
 
-1) Delete the backup directory which we created by the failed upgrade:
-```
-rm -rf ./backup
-```
+1) Delete the backup directory which we created by the failed upgrade.
 2) Modify the existing `package.json` dependency for `csv-parse` to version `^1.1.7`:
 ```
 "csv-parse": "^1.1.7"
