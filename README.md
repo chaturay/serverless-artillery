@@ -2,7 +2,6 @@
 
 [//]: # (Thanks to https://www.divio.com/en/blog/documentation/)
 
-
 # Introduction
 Combine [`serverless`](https://serverless.com) with [`artillery`](https://artillery.io) and you get `serverless-artillery` (a.k.a. `slsart`). 
 
@@ -23,55 +22,139 @@ Serverless-artillery makes it easy to test your services for performance and fun
   - [Installing in Docker](#installing-in-docker)
 - [Uninstallation](#uninstallation)
 - [How it works?](#how-it-works)
-  - [Load generating Lambda function on AWS](#load-generating-lambda-function-on-aws)
+  - [Load generator Lambda function on AWS](#load-generator-lambda-function-on-aws)
 - [Before running serverless-artillery](#before-running-serverless-artillery)
   - [Setup for Nordstrom Technology](#setup-for-nordstrom-technology)
   - [Setup for everyone else](#setup-for-everyone-else)
 - [Tutorial 1: Run a quick performance test](#tutorial-1-run-a-quick-performance-test)
-  - [T1.1. Setup AWS account credentials](#t11-setup-aws-account-credentials)
-  - [T1.2. Deploy](#t12-deploy)
-  - [T1.3. Invoke](#t13-invoke)
-  - [T1.4. Remove](#t14-remove)
+  - [1. Setup AWS account credentials](#1-setup-aws-account-credentials)
+  - [2. Command line](#2-command-line)
+  - [3. Deploy](#3-deploy)
+  - [4. Invoke](#4-invoke)
+  - [5. Remove](#5-remove)
 - [Tutorial 2: Performance test with custom script](#tutorial-2-performance-test-with-custom-script)
-  - [T2.1. Create new directory](#t21-create-new-directory)
-  - [T2.2. Create `script.yml`](#t22-create-scriptyml)
-  - [T2.3. Understanding `script.yml`](#t23-understanding-scriptyml)
-  - [T2.4. Customizing `script.yml`](#t24-customizing-scriptyml)
-  - [T2.5. Setup AWS account credentials](#t25-setup-aws-account-credentials)
-  - [T2.6. Deploy assets to AWS](#t26-deploy-assets-to-aws)
-  - [T2.7. Invoke performance test](#t27-invoke-performance-test)
-  - [T2.8. Remove assets from AWS](#t28-remove-assets-from-aws)
+  - [1. Create new directory](#1-create-new-directory)
+  - [2. Create `script.yml`](#2-create-scriptyml)
+  - [3. Understanding `script.yml`](#3-understanding-scriptyml)
+  - [4. Customizing `script.yml`](#4-customizing-scriptyml)
+  - [5. Setup AWS account credentials](#5-setup-aws-account-credentials)
+  - [6. Deploy assets to AWS](#6-deploy-assets-to-aws)
+  - [7. Invoke performance test](#7-invoke-performance-test)
+  - [8. Remove assets from AWS](#8-remove-assets-from-aws)
 - [Tutorial 3: Performance test with custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets)
-  - [T3.1. Create new directory](#t31-create-new-directory)
-  - [T3.2. Create `script.yml`](#t32-create-scriptyml)
-  - [T3.3. Understanding `script.yml`](#t33-understanding-scriptyml)
-  - [T3.4. Customizing `script.yml`](#t34-customizing-scriptyml)
-  - [T3.5. Create custom deployment assets](#t35-create-custom-deployment-assets)
-  - [T3.6. Understanding `serverless.yml`](#t36-understanding-serverlessyml)
-    - [Service name](#service-name)
-    - [Load generating Lambda function name](#load-generating-lambda-function-name)
-    - [Load generating Lambda function permissions](#load-generating-lambda-function-permissions)
-  - [T3.7. Customizing `serverless.yml`](#t37-customizing-serverlessyml)
-    - [Customization for Nordstrom Engineers](#customization-for-nordstrom-engineers)
-    - [Service name](#service-name-1)
-    - [Plugins](#plugins)
-      - CloudWatch plugin
-      - Datadog plugin
-  - [T3.8. Setup AWS account credentials](#t38-setup-aws-account-credentials)
-  - [T3.9. Deploy assets to AWS](#t39-deploy-assets-to-aws)
-  - [T3.10. Invoke performance test](#t310-invoke-performance-test)
-  - [T3.11. Remove assets from AWS](#t311-remove-assets-from-aws)
+  - [1. Create new directory](#1-create-new-directory-1)
+  - [2. Create `script.yml`](#2-create-scriptyml)
+  - [3. Understanding `script.yml`](#3-understanding-scriptyml)
+  - [4. Customizing `script.yml`](#4-customizing-scriptyml)
+  - [5. Create custom deployment assets](#5-create-custom-deployment-assets)
+  - [6. Understanding `serverless.yml`](#6-understanding-serverlessyml)
+    - [a. Service name](#a-service-name)
+    - [b. Load generator Lambda function name](#b-load-generator-lambda-function-name)
+    - [c. Load generator Lambda function permissions](#c-load-generator-lambda-function-permissions)
+  - [7. Customizing `serverless.yml`](#7-customizing-serverlessyml)
+    - [a. Customization for Nordstrom Engineers](#a-customization-for-nordstrom-engineers)
+    - [b. Service name](#b-service-name)
+    - [c. Plugins](#c-plugins)
+      - [i. CloudWatch plugin](#i-cloudwatch-plugin)
+      - [ii. Datadog plugin](#ii-datadog-plugin)
+  - [8. Setup AWS account credentials](#8-setup-aws-account-credentials)
+  - [9. Deploy assets to AWS](#9-deploy-assets-to-aws)
+  - [10. Invoke performance test](#10-invoke-performance-test)
+  - [11. Remove assets from AWS](#11-remove-assets-from-aws)
+- [Tutorial 4: Killing in-progress performance test](#tutorial-4-killing-in-progress-performance-test)
+  - [1. Increase `duration`](#1-increase-duration)
+  - [2. Setup AWS account credentials](#2-setup-aws-account-credentials)
+  - [3. Deploy assets to AWS](#3-deploy-assets-to-aws)
+  - [4. Invoke performance test](#4-invoke-performance-test)
+  - [5. Kill the in-progress performance test](#5-kill-the-in-progress-performance-test)
+  - [6. Wait before re-deploying](#6-wait-before-re-deploying)
 - [Performance test workshop](#performance-test-workshop)
-- [Create customized `script.yml`](#create-customized-scriptyml)
+- [Other commands and use cases](#other-commands-and-use-cases)
+  - [Killing in-progress performance test](#killing-in-progress-performance-test)
+  - [Create customized `script.yml`](#create-customized-scriptyml)
+  - [Performance test using script file with different name/path](#performance-test-using-script-file-with-different-namepath)
+  - [Reserved and unsupported flags](#reserved-and-unsupported-flags)
+    - [Reserved flags](#reserved-flags)
+    - [Unsupported flags](#unsupported-flags)
+  - [Providing a data store to view the results of your performance test](#providing-a-data-store-to-view-the-results-of-your-performance-test)
+  - [Related tools and plugins](#related-tools-and-plugins)
+  - [Performance testing VPC hosted services](#performance-testing-vpc-hosted-services)
+  - [Using Payload/CSV files to inject data in scenarios of your `script.yml`](#using-payloadcsv-files-to-inject-data-in-scenarios-of-your-scriptyml)
+  - [Advanced customization use cases](#advanced-customization-use-cases)
+    - [Deployment assets and settings customization](#deployment-assets-and-settings-customization)
+    - [Test script and execution customization using Artillery.io](#test-script-and-execution-customization-using-artilleryio)
+    - [Script splitting customization](#script-splitting-customization)
+    - [Debugging and Tracing Behavior Customization](#debugging-and-tracing-behavior-customization)
+      - [`_trace`](#_trace)
+      - [`_simulation`](#_simulation)
+    - [Splitting and Distribution Logic Customization](#splitting-and-distribution-logic-customization)
+      - [Scripts](#scripts)
+      - [Splitting](#splitting)
+- [Acceptance mode](#acceptance-mode)
+  - [`match` clause](#match-clause)
+  - [Acceptance test command](#acceptance-test-command)
+  - [Tutorial 5: Acceptance mode](#tutorial-5-acceptance-mode)
+    - [1. Customize `script.yml`](#1-customize-scriptyml)
+    - [2. Setup AWS account credentials](#2-setup-aws-account-credentials-1)
+    - [3. Deploy assets to AWS](#3-deploy-assets-to-aws-1)
+    - [4. Invoke acceptance test](#4-invoke-acceptance-test)
+    - [5. Observe the results](#5-observe-the-results)
+    - [6. Test failure scenario](#6-test-failure-scenario)
+      - [6.1. Edit `script.yml` to fail `match`](#61-edit-scriptyml-to-fail-match)
+      - [6.2. Invoke acceptance test](#62-invoke-acceptance-test)
+      - [6.3. Observe the results](#63-observe-the-results)
+    - [7. Remove assets from AWS](#7-remove-assets-from-aws)
+  - [More about acceptance mode](#more-about-acceptance-mode)
+    - [Acceptance testing in CI/CD](#acceptance-testing-in-cicd)
+    - [Run `script.yml` exclusively in acceptance mode](#run-scriptyml-exclusively-in-acceptance-mode)
+    - [Use same `script.yml` for performance and acceptance testing and monitoring](#use-same-scriptyml-for-performance-and-acceptance-testing-and-monitoring)
+    - [To configure acceptance behavior](#to-configure-acceptance-behavior)
+- [Monitoring mode](#monitoring-mode)
+  - [Tutorial 6: Monitoring mode without serverless-artillery alert](#tutorial-6-monitoring-mode-without-serverless-artillery-alert)
+    - [1. Create custom deployment assets](#1-create-custom-deployment-assets)
+    - [2. Setup AWS account credentials](#2-setup-aws-account-credentials-2)
+    - [3. Tryout monitoring mode](#3-tryout-monitoring-mode)
+      - [3.1. Deploy assets to AWS](#31-deploy-assets-to-aws)
+      - [3.2. Invoke monitoring once](#32-invoke-monitoring-once)
+    - [4. Customize deployment assets to turn on monitoring](#4-customize-deployment-assets-to-turn-on-monitoring)
+    - [5. Deploy assets to AWS to start monitoring](#5-deploy-assets-to-aws-to-start-monitoring)
+    - [6. Pause monitoring](#6-pause-monitoring)
+      - [6.1. Method 1: Using CloudWatch Rules](#61-method-1-using-cloudwatch-rules)
+      - [6.2. Method 2: Turn monitoring off in `serverless.yml`](#62-method-2-turn-monitoring-off-in-serverlessyml)
+    - [7. Remove assets from AWS](#7-remove-assets-from-aws-1)
+  - [Tutorial 7: Monitoring mode with serverless-artillery alert](#tutorial-7-monitoring-mode-with-serverless-artillery-alert)
+    - [1. Create custom deployment assets](#1-create-custom-deployment-assets-1)
+    - [2. Setup AWS account credentials](#2-setup-aws-account-credentials-3)
+    - [3. Customize script to have `match` clause](#3-customize-script-to-have-match-clause)
+    - [4. Customize deployment assets to add at least one subscription](#4-customize-deployment-assets-to-add-at-least-one-subscription)
+    - [5. Tryout monitoring mode](#5-tryout-monitoring-mode)
+      - [5.1. Deploy assets to AWS](#51-deploy-assets-to-aws)
+      - [5.2. Invoke monitoring once](#52-invoke-monitoring-once)
+    - [6. Test failure scenario](#6-test-failure-scenario-1)
+      - [6.1. Edit `script.yml` to fail `match`](#61-edit-scriptyml-to-fail-match-1)
+      - [6.2. Invoke monitoring once](#62-invoke-monitoring-once)
+    - [7. Customize deployment assets to turn on monitoring](#7-customize-deployment-assets-to-turn-on-monitoring)
+    - [8. Deploy assets to AWS to start monitoring](#8-deploy-assets-to-aws-to-start-monitoring)
+    - [9. Pause monitoring](#9-pause-monitoring)
+    - [10. Remove assets from AWS](#10-remove-assets-from-aws)
+  - [More about monitoring mode](#more-about-monitoring-mode)
+    - [Run `script.yml` exclusively in monitoring mode](#run-scriptyml-exclusively-in-monitoring-mode)
+    - [Use same `script.yml` for performance and acceptance testing and monitoring](#use-same-scriptyml-for-performance-and-acceptance-testing-and-monitoring-1)
+    - [To configure monitoring behavior](#to-configure-monitoring-behavior)
+- [Upgrading customized projects built with older versions of serverless-artillery](#upgrading-customized-projects-built-with-older-versions-of-serverless-artillery)
+- [Detailed Usage](#detailed-usage)
+  - [Commands](#commands)
+    - [`deploy`](#deploy)
+    - [`invoke`](#invoke)
+    - [`kill`](#kill)
+    - [`remove`](#remove)
+    - [`script`](#script)
+    - [`configure`](#configure)
+    - [`upgrade`](#upgrade)
 - [Troubleshooting](#troubleshooting)
   - [Problems installing?](#problems-installing)
-  - [Error: npm ERR! code EACCES](#error-npm-err-code-eacces)
-- [Glossary](#glossary)
-  - []()
-  - []()
-  - []()
-  - []()
-  - []()
+- [External References](#external-references)
+- [If you've read this far](#if-youve-read-this-far)
 
 # Installation
 
@@ -118,12 +201,12 @@ npm uninstall -g serverless-artillery
   * test target/URL/endpoint/service
   * load progression
   * and the scenarios that are important for your service to test.
-* When you run `slsart deploy` command, serverless-artillery deploys a **load generating Lambda function**, on your AWS account along with other assets.
+* When you run `slsart deploy` command, serverless-artillery deploys a **load generator Lambda function**, on your AWS account along with other assets.
 * Running the tests
-  * **Performance test:** When you run `slsart invoke` command, serverless-artillery would invoke the load generating Lambda function.
+  * **Performance test:** When you run `slsart invoke` command, serverless-artillery would invoke the load generator Lambda function.
     * It would generate the number of requests as specified in `script.yml` to specified test target in order to run the specified scenarios.
-  * **Acceptance test:** When you run `slsart invoke -a` command, serverless-artillery would invoke the load generating Lambda function in acceptance test mode where it runs each scenario in your script exactly once and reports the results.
-  * **Monitoring:** When you customize the deployment assets to turn on monitoring and deploy those assets using `slsart deploy` command, the load generating Lambda function is invoked in monitoring mode once a minute 24x7 where it runs each scenario in your script 5 times and sends an alert if it detects a problem. 
+  * **Acceptance test:** When you run `slsart invoke -a` command, serverless-artillery would invoke the load generator Lambda function in acceptance test mode where it runs each scenario in your script exactly once and reports the results.
+  * **Monitoring:** When you customize the deployment assets to turn on monitoring and deploy those assets using `slsart deploy` command, the load generator Lambda function is invoked in monitoring mode once a minute 24x7 where it runs each scenario in your script 5 times and sends an alert if it detects a problem. 
 * When you run `slsart remove` command, serverless-artillery would remove these assets from your AWS account.
 * When you run `slsart kill` command, serverless-artillery would kill the in-progress test and remove these assets from your AWS account.
 
@@ -148,19 +231,19 @@ npm uninstall -g serverless-artillery
 
 ### Serverless-artillery
 - Serverless-artillery allows your script to specify an amount of load far exceeding the capacity of a single server to execute.
-- It breaks that script into smaller chunks (sized for a single instance of load generating Lambda function) and distribute the chunks for execution across multiple instances of load generating Lambda function.
+- It breaks that script into smaller chunks (sized for a single instance of load generator Lambda function) and distribute the chunks for execution across multiple instances of load generator Lambda function.
 - Since this is done using a FaaS provider, the ephemeral infrastructure used to execute your load disappears as soon as your load tests are complete.
 
 </p>
 </details>
 
-## Load generating Lambda function on AWS
+## Load generator Lambda function on AWS
 <details><summary>Click to expand/collapse</summary>
 <p>
 
 <img src="docs/Architecture.gif">
 
-- Serverless-artillery generates the requests to run the specified tests using load generating Lambda function, which is deployed and invoked on AWS along with other assets.
+- Serverless-artillery generates the requests to run the specified tests using load generator Lambda function, which is deployed and invoked on AWS along with other assets.
   -  Naming format is `<customized-service-name default:serverless-artillery>-<optional-unique-string-><stage default:dev>-loadGenerator`. For example, `serverless-artillery-dev-loadGenerator` or `serverless-artillery-XnBa473psJ-dev-loadGenerator`.
 - It has an ephimeral architecture. It only exists as long as you need it.
 - It runs Artillery.io node package in AWS Lambda function.
@@ -176,7 +259,7 @@ npm uninstall -g serverless-artillery
 </details>
 
 # Before running serverless-artillery
-Serverless-artillery needs to _deploy_ assets like [load generating Lambda function](#load-generating-lambda-function-on-aws) to AWS, _invoke_ the function to run the tests and _remove_ these assets from AWS when not needed. Hence you need an AWS account and setup credentials with which to deploy, invoke and remove the assets from AWS.
+Serverless-artillery needs to _deploy_ assets like [load generator Lambda function](#load-generator-lambda-function-on-aws) to AWS, _invoke_ the function to run the tests and _remove_ these assets from AWS when not needed. Hence you need an AWS account and setup credentials with which to deploy, invoke and remove the assets from AWS.
 
 ## Setup for Nordstrom Technology
 If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Setup`_** in **Confluence** and follow the instructions there.
@@ -196,7 +279,7 @@ Make sure you have [setup your AWS account credentials](#before-running-serverle
 Go to command line for all the following steps in this tutorial. You can run the steps of this tutorial from anywhere in command line since the commands you run in this tutorial will not create any files on your local machine.
 
 ### 3. Deploy
-The `slsart deploy` command deploys required assets (like [load generating Lambda function](#load-generating-lambda-function-on-aws)) to the AWS account you selected in the previous step. 
+The `slsart deploy` command deploys required assets (like [load generator Lambda function](#load-generator-lambda-function-on-aws)) to the AWS account you selected in the previous step. 
 
 By _default_ it uses `service` name `serverless-artillery` and `stage` name `dev`. And hence the _default_ AWS CloudFormation Stack name becomes `serverless-artillery-dev` (format: `<service-name default:serverless-artillery>-<stage-name default:dev>`). You will see that if you go to your AWS account console > CloudFormation after running the command.
 
@@ -213,7 +296,7 @@ slsart deploy --stage test1
 The AWS CloudFormation Stack name in this case would be `serverless-artillery-test1`. 
 
 ### 4. Invoke
-The following command will invoke [load generating Lambda function](#load-generating-lambda-function-on-aws) using the default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script. Note that this default load script is part of the global install of serverless-artillery and not in the local folder from where you are running the command.
+The following command will invoke [load generator Lambda function](#load-generator-lambda-function-on-aws) using the default load script (`script.yml`), creating small traffic against the sample endpoint specified in the default script. Note that this default load script is part of the global install of serverless-artillery and not in the local folder from where you are running the command.
 ```
 slsart invoke --stage <your-unique-stage-name>
 ```
@@ -466,7 +549,7 @@ Please refer to [`serverless.yml` documentation](https://serverless.com/framewor
 - You can change `service` name to some other unique string as per your need. For example, `serverless-artillery-myperftestservice` or `myloadtestservice`.
 - The rest of the `serverless.yml` refers to the service name by using `${self:service}`.
 
-#### b. [Load generating Lambda function](#load-generating-lambda-function-on-aws) name
+#### b. [Load generator Lambda function](#load-generator-lambda-function-on-aws) name
 The Serverless Framework automatically names the Lambda function based on the service, stage and function name as follows.
 - The function `loadGenerator` when deployed is named as `${self:service}-${opt:stage, self:provider.stage}-loadGenerator`.
   - `${self:service}` is name of the service. In this `serverless.yml` it is `serverless-artillery-XnBa473psJ`.
@@ -474,12 +557,14 @@ The Serverless Framework automatically names the Lambda function based on the se
     - `${opt:stage}` refers to the (optional) stage name passed in `slsart deploy [--stage <stage-name>]` command. For example, if you run `slsart deploy --stage prod` then `prod` would be used for `${opt:stage}`.
     - If no stage name is passed in the deploy command then `${self:provider.stage}` would be used. It is the `stage` name set under `provider` block in the `serverless.yml`. If one is not provided (like in above example) it is set to `dev`. See [here](https://serverless.com/framework/docs/providers/aws/guide/serverless.yml/).
 - In this example function name will be set to `serverless-artillery-XnBa473psJ-dev-loadGenerator` while running `slsart deploy` command (note no stage name specified).
-#### c. [Load generating Lambda function](#load-generating-lambda-function-on-aws) permissions
-- In order to generate load the load generating Lambda needs to invoke itself.
-- The `iamRoleStatements` block in the `serverless.yml` gives the load generating Lambda function to invoke itself (`lambda:InvokeFunction`).
+#### c. [Load generator Lambda function](#load-generator-lambda-function-on-aws) permissions
+- In order to generate load the load generator Lambda needs to invoke itself.
+- The `iamRoleStatements` block in the `serverless.yml` gives the load generator Lambda function to invoke itself (`lambda:InvokeFunction`).
 
 ### 7. Customizing `serverless.yml`
-Except for [one step for **_Nordstrom_** Engineers](#customization-for-nordstrom-engineers), all customizations are **optional** in the tutorial. If you like you can customize `serverless.yml` as follows.
+**NOTE:** Except for [one step for **_Nordstrom_** Engineers](#a-customization-for-nordstrom-engineers), all customizations are **optional** in the tutorial.
+
+If you like you can customize `serverless.yml` as follows.
 
 #### a. Customization for Nordstrom Engineers
 If you are a **_Nordstrom_** engineer, please see the page titled **_`Serverless Artillery - Nordstrom Technology Policies`_** in **Confluence** and follow the instructions there.
@@ -557,7 +642,7 @@ provider:
 ```
 
 ### 8. Setup AWS account credentials
-This section is same as before. See [here]((#before-running-serverless-artillery)) for details.
+This section is same as before. See [here](#before-running-serverless-artillery) for details.
 
 ### 9. Deploy assets to AWS
 This section is same as before. See [here](#3-deploy) for details.
@@ -576,7 +661,7 @@ This section is same as before. See [here](#8-remove-assets-from-aws) for detail
 While running performance/load test it is sometimes necessary to kill the test before it is complete. Read more about the [kill command](#killing-in-progress-performance-test).
 
 ### 1. Increase `duration`
-If you are a **_Nordstrom_** engineer, please follow [Tutorial 3](#tutorial-3-performance-test-with-custom-deployment-assets) to create custom script and custom deployment assets. Make sure you do [customization for Nordstrom Engineers](#customization-for-nordstrom-engineers). Other optional customizations are not necessary for this tutorial.
+If you are a **_Nordstrom_** engineer, please follow [Tutorial 3](#tutorial-3-performance-test-with-custom-deployment-assets) to create custom script and custom deployment assets. Make sure you do [customization for Nordstrom Engineers](#a-customization-for-nordstrom-engineers). Other optional customizations are not necessary for this tutorial.
 
 Others can follow [Tutorial 2](#tutorial-2-performance-test-with-custom-script) to create custom `script.yml`.
 
@@ -624,20 +709,20 @@ You must specify a `region` when running this command:
 Serverless will use the `us-east-1` region by default.
 
 The command will do the followings:
-- It will set the load generating Lambda function's [concurrency level](https://docs.aws.amazon.com/lambda/latest/dg/concurrent-executions.html#per-function-concurrency) to 0.
-- and then _remove_ the deployed assets. It will remove load generating Lambda function, CloudWatch logs, and IAM role. CloudWatch metrics will remain.
+- It will set the load generator Lambda function's [concurrency level](https://docs.aws.amazon.com/lambda/latest/dg/concurrent-executions.html#per-function-concurrency) to 0.
+- and then _remove_ the deployed assets. It will remove load generator Lambda function, CloudWatch logs, and IAM role. CloudWatch metrics will remain.
 
 Result:
-- Any further invocations of load generating Lambda will be supressed. 
-- The already executing instances of load generating Lambda will continue and complete the assigned load generation workload.
-- The load generating Lambda function by default runs for up to 2 minutes. So that would be the default maximum time before the load generation stops.
+- Any further invocations of load generator Lambda will be supressed. 
+- The already executing instances of load generator Lambda will continue and complete the assigned load generation workload.
+- The load generator Lambda function by default runs for up to 2 minutes. So that would be the default maximum time before the load generation stops.
 
 **You will want to wait approximately 5 minutes before redeploying to avoid the killed performance test from resuming.** Behind the scenes, AWS creates a queue for Lambda invocations. While processing the invocation requests from the queue, if a function is not available then that message will be placed back onto the queue for further attempts. As a result, redeploying your function can allow those re-queued messages to be used to invoke your re-deployed function. In our observation based on a limited set of tests, messages will be permanently failed out of the queues after 5 minutes. That is the basis of our recommendation.
 
 The default maximum duration of a [script chunk](#splitting) is 2 minutes (`maxChunkDurationInSeconds`). As a result of this, on average, load will not be produced after 1 minute but it could continue for up to the full 2 minutes. To lower the wait times after killing, this value can be overridden in your `script.yml` within the \_split attribute, as shown [here](#script-splitting-customization). This value can be as low as 15 seconds and using this value causes each script chunk to run for a maximum duration of 15 seconds. Theoretically, this means that you’d only have to wait 7.5 seconds on average for tests to stop running after killing your test (in practice we have observed roughly 20 seconds lag between killing a function and termination of invocations).
 
 ### Create customized `script.yml`
-Above you used how to use `slsart script` to create the default `script.yml` (see [here](#t22-create-scriptyml)) and how to customize it by manually editing it (see [here](#t24-customizing-scriptyml)).
+Above you used how to use `slsart script` to create the default `script.yml` (see [here](#2-create-scriptyml)) and how to customize it by manually editing it (see [here](#4-customizing-scriptyml)).
 
 `slsart script` command has options to quickly do the above in one command. Run the following command to create custom `script.yml` with **one** load `phase`.
 ```
@@ -677,7 +762,7 @@ For more options see,
 ```
 slsart invoke --help
 ```
-=========ASHMI
+
 ### Reserved and unsupported flags
 `slsart` commands support most commandline flags of the corresponding `sls` (Serverless Framework) commands.
 #### Reserved flags
@@ -689,12 +774,12 @@ Following flags are reserved in `slsart invoke` command.
 The flag `--raw` is unsupported in `slsart invoke` command because, while arbitrary functions can accept strings, a string does not comprise a valid artillery script.
 
 ### Providing a data store to view the results of your performance test
-- If your script specifies a small load that can be generated by single invocation of [load generating lambda function](#load-generating-lambda-function-on-aws) then the results are reported back at the end of `slsart invoke` command.
+- If your script specifies a small load that can be generated by single invocation of [load generator Lambda function](#load-generator-lambda-function-on-aws) then the results are reported back at the end of `slsart invoke` command.
 - Otherwise, the volume of load results can be such that it cannot pass back to the original requestor. 
 - You are responsible for sending the results (usually via a plugin) to a data store for later review and/or analysis. See the [available plugins](#related-tools-and-plugins) that can be used.
 
 ### Related tools and plugins
-You would need to [create custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets) and customize `serverless.yml` to use a plugin as shown in the examples [here](#plugins).
+You would need to [create custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets) and customize `serverless.yml` to use a plugin as shown in the examples [here](#c-plugins).
 
 |Plugin|Description|
 |:----|:----------|
@@ -705,7 +790,7 @@ You would need to [create custom deployment assets](#tutorial-3-performance-test
 |[serverless-attach-managed-policy](https://www.npmjs.com/package/serverless-attach-managed-policy)|if you have automatic IAM role modification in your corporate/shared AWS account.|
 
 ### Performance testing VPC hosted services
-The default deployment assets of serverless-artillery are not deployed in a VPC and hence it can only successfully send requests to public endpoints. If your service is hosted in VPC (service is internal and does not have public endpoint), you would need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets).
+The default deployment assets (used in [Tutorial 1](#tutorial-1-run-a-quick-performance-test) and [Tutorial 2](#tutorial-2-performance-test-with-custom-script)) of serverless-artillery are not deployed in a VPC and hence it can only successfully send requests to public endpoints. If your service is hosted in VPC (i.e. service is internal and does not have public endpoint), you would need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets).
 
 Please refer to Serverless Frameworks's [doc](https://serverless.com/framework/docs/providers/aws/guide/functions/#vpc-configuration) to understand how to customize `serverless.yml` to deploy the customized assets to VPC.
 
@@ -735,18 +820,18 @@ provider:
 
 ### Advanced customization use cases
 #### Deployment assets and settings customization
-- Above we discussed how you need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets) and [`slsart configure` command] (#t35-create-custom-deployment-assets) when your testing needs are not met by the default deployment assets that are used in [Tutorial 1](#tutorial-1-run-a-quick-performance-test) and [Tutorial 2](#tutorial-2-performance-test-with-custom-script).
+- Above we discussed how you need to use [custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets) and [`slsart configure` command] (#5-create-custom-deployment-assets) when your testing needs are not met by the default deployment assets that are used in [Tutorial 1](#tutorial-1-run-a-quick-performance-test) and [Tutorial 2](#tutorial-2-performance-test-with-custom-script).
 - For example,
-  - when the endpoints you need to slam are in the VPC. See [here](#performance-testing-vpc-hosted-services) for details.
+  - when the endpoints you need to test are in the VPC. See [here](#performance-testing-vpc-hosted-services) for details.
   - when you need to view the results in your data store. See [here](#providing-a-data-store-to-view-the-results-of-your-performance-test) for details.
   - when you need to automatically attach an AWS Managed IAM Policy (or Policies) to all IAM Roles created by serverless-artillery due to company policy. See `serverless-attach-managed-policy` plugin [here](#related-tools-and-plugins) for details.
-  - when you need to separate out various versions of the load testing function in order to maintain least privilege. **ASHMITODO ask Greg for clarification**
+  - when you need to separate out various versions of the load testing function in order to maintain least privilege. 
   - when you want to use payload/CSV files to feed data into the request being sent to the target. See [here](#using-payloadcsv-files-to-inject-data-in-scenarios-of-your-scriptyml) for details.
-  - when you want to add custom IAM rights (see Serverless Framework [docs](https://serverless.com/framework/docs/providers/aws/guide/iam/)) to the service(?) (load generating Lambda?) to maintain least privilege. **ASHMITODO ask Greg for clarification**
-- For such cases you need to create a local copy of the deployment assets using [`slsart configure` command](#t35-create-custom-deployment-assets), customize them for your use case and deploy them using `slsart deploy` command as shown in [Tutorial 3](#tutorial-3-performance-test-with-custom-deployment-assets).
-- Full documentation of what is in the `serverless.yml` and the options you have available can be found at https://docs.serverless.com/framework/docs/.
-- You would need to use custom deployment assets when you want to make even more customizations to how serverless-artillery works. It generates a local copy of the serverless function code that can be edited and redeployed with your changed settings. For example, if you need to make any code change to load generator Lambda (example, alter hard-coded limits).
-- Please see [Serverless Framework docs](https://serverless.com/framework/docs/providers/aws/) for load generation function configuration related documentation.
+  - when you want to add custom IAM rights (see Serverless Framework [docs](https://serverless.com/framework/docs/providers/aws/guide/iam/)) to the load generator Lambda to validate least privilege.
+- For such cases you need to create a local copy of the deployment assets using [`slsart configure` command](#5-create-custom-deployment-assets), customize them for your use case and deploy them using `slsart deploy` command as shown in [Tutorial 3](#tutorial-3-performance-test-with-custom-deployment-assets).
+- Full documentation of what is in the `serverless.yml` and the options you have available can be found at https://serverless.com/framework/docs/.
+- You would need to use custom deployment assets when you want to make even more customizations to how serverless-artillery works. [`slsart configure` command](#5-create-custom-deployment-assets) generates a local copy of the serverless function code that can be edited and redeployed with your changed settings. For example, if you need to make any code change to load generator Lambda (example, alter hard-coded limits).
+- Please see [Serverless Framework docs](https://serverless.com/framework/docs/providers/aws/) for load generation Lambda function's configuration related documentation.
 - Please see [Artillery.io docs](https://artillery.io/docs/script-reference/) for script configuration related documentation.
 - **Note** that everytime you make changes to the local copy of deployment assets, you need to redeploy using `slsart deploy` command.
 
@@ -759,7 +844,7 @@ provider:
 - The HTTP engine has support for "hooks", which allow for custom JS functions to be called at certain points during the execution of a scenario. See [here](https://artillery.io/docs/http-reference/#advanced-writing-custom-logic-in-javascript) for details.
 
 #### Script splitting customization
-As mentioned [here](#load-generating-lambda-function-on-aws), the controller mode load generating Lambda function splits the work to generate the required load between multiple worker mode load generating Lambdas. The following controls are available to control how splitting is done. That said, the defaults are good and you generally won't need them until you have gotten deeper into implementation.  
+As mentioned [here](#load-generator-lambda-function-on-aws), the controller mode load generator Lambda function splits the work to generate the required load between multiple worker mode load generator Lambdas. The following controls are available to control how splitting is done. That said, the defaults are good and you generally won't need them until you have gotten deeper into implementation.  
 To use these, define a `_split` attribute within your `script.yml`. The values of that object will be used to alter the splitting of your script.
 ```
 {
@@ -776,7 +861,7 @@ To use these, define a `_split` attribute within your `script.yml`. The values o
 See the [Splitting and Distribution Logic Customization](#splitting-and-distribution-logic-customization) section for an in depth discussion of how splitting is implemented and what you control with these parameters as well as the concerns involved in making decisions about them.  See the comments in [`~/lambda/handler.js`](lib/lambda/handler.js) for detailed documentation of the semantics the code has with regard to them (search for '`const constants`').  By the way, you now have the source code to change those hard-coded limits and can change them at will if you so desire - we wanted to provide a margin of safety and guardrails but not restrictions.
 
 #### Debugging and Tracing Behavior Customization
-There are two primary tools for debugging and tracing the load generating Lambda function and how it splits and executes the task it has been given.  Define the following in your `script.yml`:
+There are two primary tools for debugging and tracing the load generator Lambda function and how it splits and executes the task it has been given.  Define the following in your `script.yml`:
 ```
 {
   _trace: true,
@@ -786,7 +871,7 @@ There are two primary tools for debugging and tracing the load generating Lambda
 ```
 
 ##### `_trace`
-`_trace` causes the load generating Lambda function to report the actions it is taking with your script and the chunks that it breaks your script into. Expect statements such as this:
+`_trace` causes the load generator Lambda function to report the actions it is taking with your script and the chunks that it breaks your script into. Expect statements such as this:
 ```
 scheduling self invocation for 1234567890123 in 2345678901234 with a 3456789012345 ms delay
 ```
@@ -797,7 +882,7 @@ console.log(`scheduling self invocation for ${event._genesis} in ${event._start}
 ```
 
 Here are definitions that will help you understand these statements. In the code you will see `_genesis`, `_start`, `now`, and `timeDelay`:
-- `_genesis`: the datetime stamp immediately taken by the first instance of load generating Lambda function that received the original script. `_genesis` is added to the original script so that all child function executions of the original handler have a datetime stamp of when the original "load execution request" was received. If you are not running many load tests simultaneously then this can serve as a unique ID for the current load execution. This can be useful for correlation. An improvement could include adding a unique factor to avoid collisions in such usage.  
+- `_genesis`: the datetime stamp immediately taken by the first instance of load generator Lambda function that received the original script. `_genesis` is added to the original script so that all child function executions of the original handler have a datetime stamp of when the original "load execution request" was received. If you are not running many load tests simultaneously then this can serve as a unique ID for the current load execution. This can be useful for correlation. An improvement could include adding a unique factor to avoid collisions in such usage.  
 - `_start`: the datetime stamp immediately taken by the current function that is executing on either the original script or a chunk of that original script. This allows relative time reporting and evaluation with a function execution.  
 - `now`: the datetime stamp taken when the log entry was produced.  
 - `timeDelay`: a time delta (in milliseconds) between the current time of the current function and when it has scheduled to take the action reported in the current log entry.  
@@ -805,7 +890,7 @@ Here are definitions that will help you understand these statements. In the code
 `_trace` is very useful in identifying what the system is doing or where something is going wrong.  #bugs-happen
 
 ##### `_simulation`
-Setting the `_simulation` attribute to a truthy value will cause the load generating Lambda function to split the script without taking action on the script. Functionally, this comprises splitting the given script into pieces without invoking functions to handle the split chunks and/or execute the load described by those chunks. Concretely, when it comes time to invoke new function instances for distributing the load, it simply invokes (or schedules an invokation of) itself. Likewise, when it comes time to invoke the `artillery-core` (**ASHMITODO talk to greg what needs to change here as it mentions artillery core**) entry point for generating load from the chunk, it instead invokes the simulation shim that reports what would have been executed and immediately completes.
+Setting the `_simulation` attribute to a truthy value will cause the load generator Lambda function to split the script without taking action on the script. Functionally, this comprises splitting the given script into pieces without invoking functions to handle the split chunks and/or execute the load described by those chunks. Concretely, when it comes time to invoke new function instances for distributing the load, it simply invokes (or schedules an invokation of) itself. Likewise, when it comes time to invoke the `artillery` entry point for generator load from the chunk, it instead invokes the simulation shim that reports what would have been executed and immediately completes.
 
 This mode, in combination with `_trace` related behavior is very helpful in debugging script splitting behavior and identifying what the logic declares should occur.
 
@@ -814,24 +899,22 @@ You've got the code.  Have at!  Have fun and consider contributing improvements 
 
 Some helpful notions used in the code and discussion of them follows.
 ##### Scripts
-An artillery script is composed of a number of phases which occur one after the other. Each of these phases has its own duration and maximum load. The duration is straightforwardly how long the phase lasts. The maximum load of the phase is the maximum Requests Per Second (RPS) that are declared for the entirety of that phase (e.g. a phase declaring a ramp from 0 to 500 RPS {or 500 to 0 **ASHMITODO greg does this sound like ramp down?**} has a maximum load of 500 RPS). Phases are declared in serial in order to provide warming or not as appropriate for the load testing scenario that interests you.
+An artillery script is composed of a number of phases which occur one after the other. Each of these phases has its own duration and maximum load. The duration is straightforwardly how long the phase lasts. The maximum load of the phase is the maximum Requests Per Second (RPS) that are declared for the entirety of that phase (e.g. a phase declaring a ramp up from 0 to 500 RPS has a maximum load of 500 RPS). Phases are declared in serial in order to provide warming or not as appropriate for the load testing scenario that interests you.
 
 The duration of the script is the sum of the durations of its phases. The maximum load of the script is the maximum RPS that any of its phases declares.
 
 ##### Splitting
 The splitting of a script comprises taking "chunks" off of the script.
 
-First, we take chunks from the script by duration. This is driven by the maximum duration of the underlying function as a service (FaaS) provider that we are using. For AWS Lambda, this at the time of original implementation was 5 minutes (now 15 minutes). However, we need to allow for cold starts and as such must provide a buffer of time before we begin the execution of any specific load job. Following the execution of a load job, the artillery-core (**ASHMITODO greg ask him to verify the statement as it contains artillery core**) framework calculates a summary and invokes custom analyzers (via the plugin capabilities it offers). As a result, a tailing buffer is also needed to ensure execution can properly complete.
+First, we take chunks from the script by duration. This is driven by the maximum duration of the underlying function as a service (FaaS) provider that we are using. For AWS Lambda, this at the time of original implementation was 5 minutes (now 15 minutes). However, we need to allow for cold starts and as such must provide a buffer of time before we begin the execution of any specific load job. Following the execution of a load job, the artillery framework calculates a summary and invokes custom analyzers (via the plugin capabilities it offers). As a result, a tailing buffer is also needed to ensure execution can properly complete.
 
 The result is a script chunk that can be executed within the duration limited period the FaaS provider allows (no guarantees yet exist on whether a single function can execute the demanded load). This chunk will be called the script for referential simplicity. We also may have a remainder script that must be executed by a new function instance as the current splitting function nears its timeout.
 
-Next, we take chunks from the script by maximum load. This is driven by the maximum requests per second that a single execution of the underlying function as a service (FaaS) provider is capable of pushing with high fidelity. For AWS Lambda (with the default 1024 MB configuration), we found 25 RPS to be a good level. This is lower than the absolute ceiling that Lambda is capable of pushing for a reason. First, each connection will be a separate opened and closed socket. Second, if we are producing too many connections, we can be in the middle of making a request when we receive the response of a separate request. Given that this is implemented in NodeJS, we have one thread and that means the timestamping of the receipt of that response is artificially and incorrectly delayed. We found that at RPS above 25 we observed an increase in the volatility of observed latencies. That written, if you do not intend to record your latencies, then you could bump this up to the limit of the FaaS service (i.e. `_split.maxChunkRequestsPerSecond = 300` or so). If you don't care about having separate sockets per request, you can alter that with artillery configuration as well **ASHMITODO greg this in past didnt work well for me. should we remove this statement?**.
+Next, we take chunks from the script by maximum load. This is driven by the maximum requests per second that a single execution of the underlying function as a service (FaaS) provider is capable of pushing with high fidelity. For AWS Lambda (with the default 1024 MB configuration), we found 25 RPS to be a good level. This is lower than the absolute ceiling that Lambda is capable of pushing for a reason. First, each connection will be a separate opened and closed socket. Second, if we are producing too many connections, we can be in the middle of making a request when we receive the response of a separate request. Given that this is implemented in NodeJS, we have one thread and that means the timestamping of the receipt of that response is artificially and incorrectly delayed. We found that at RPS above 25 we observed an increase in the volatility of observed latencies. That written, if you do not intend to record your latencies, then you could bump this up to the limit of the FaaS service (i.e. `_split.maxChunkRequestsPerSecond = 300` or so).
 
-Anyway...  The result is a script chunk that is less than the limited period and also executable by a single function instance.  Therefore, we invoke a single function with the chunk to execute it.
+The result is a script chunk that is less than the limited period and also executable by a single function instance.  Therefore, we invoke a single function with the chunk to execute it.
 
 # Acceptance mode
-**ASHMITODO acceptance test is broken in monitoring branch. Update the doc once it is fixed.**
-
 Find defects before performance testing! Acceptance mode runs each scenario/flow in your script exactly once and reports the results. For example, you can run your script in acceptance mode in your CI/CD to ensure that merges don't break the scenarios in your script.
 
 Performance testing framework forms the basis of acceptance mode of serverless-artillery. Hence please go through [performance mode](#performance-mode-performanceload-testing) section before proceeding.
@@ -844,10 +927,10 @@ When `-a` option is used in `slsart invoke` command, serverless-artillery invoke
 ```
 slsart invoke -a
 ```
-**ASHMITODO this is broken in MM branch.** Expect a non-zero exit code if a match clause fails.
+Expect a non-zero exit code if a match clause fails.
 
 ## Tutorial 5: Acceptance mode
-### T5.1. Customize `script.yml`
+### 1. Customize `script.yml`
 Follow [Tutorial 2 to create custom `script.yml`](#tutorial-2-performance-test-with-custom-script) and customize your `script.yml` by copy pasting the following content in it. Note the `match` clauses.
 
 ```
@@ -907,29 +990,174 @@ The JSON response will be as follows.
 
 The `match` clauses check if the return value is same as what is expected.
 
-### T5.2. Setup AWS account credentials
-This section is same as before. See [here](#t25-setup-aws-account-credentials) for details.
+### 2. Setup AWS account credentials
+This section is same as before. See [here](#before-running-serverless-artillery) for details.
 
-### T5.3. Deploy assets to AWS
-This section is same as before. See [here](#t26-deploy-assets-to-aws) for details.
+### 3. Deploy assets to AWS
+This section is same as before. See [here](#3-deploy) for details.
 
 **Note** that you don't need to _deploy_ the assets everytime `script.yml` changes.
 
-### T5.4. Invoke acceptance test
+### 4. Invoke acceptance test
 Run following command to run acceptance test.
 ```
-slsart invoke -a
+slsart invoke -a --stage <your-unique-stage-name>
 ```
-**ASHMITODO add what to observe where**
 
-### T5.4. Test failure scenario
-#### T5.4.1. Edit `script.yml` to fail `match`
-Edit `match` section in `script.yml` to look for wrong return value to simulate failure scenario.
+### 5. Observe the results
+You will see an output similar to the following.
+<details><summary>Click to expand/collapse</summary>
+<p>
+
+```
+
+	Invoking test Lambda
+
+{
+    "errors": 0,
+    "reports": [
+        {
+            "timestamp": "2019-04-17T21:40:59.127Z",
+            "scenariosCreated": 1,
+            "scenariosCompleted": 1,
+            "requestsCompleted": 1,
+            "latency": {
+                "min": 26.6,
+                "max": 26.6,
+                "median": 26.6,
+                "p95": 26.6,
+                "p99": 26.6
+            },
+            "rps": {
+                "count": 1,
+                "mean": 2.7
+            },
+            "scenarioDuration": {
+                "min": 177.8,
+                "max": 177.8,
+                "median": 177.8,
+                "p95": 177.8,
+                "p99": 177.8
+            },
+            "scenarioCounts": {
+                "0": 1
+            },
+            "errors": {},
+            "codes": {
+                "200": 1
+            },
+            "matches": 3,
+            "customStats": {},
+            "phases": [
+                {
+                    "pause": 0.2430741319294641
+                },
+                {
+                    "duration": 1,
+                    "arrivalRate": 1
+                }
+            ]
+        }
+    ],
+    "totals": {
+        "scenariosCreated": 1,
+        "scenariosCompleted": 1,
+        "requestsCompleted": 1,
+        "codes": {
+            "200": 1
+        },
+        "errors": {}
+    }
+}
+
+	Your function invocation has completed.
+
+{
+  "errors": 0,
+  "reports": [
+    {
+      "timestamp": "2019-04-17T21:40:59.127Z",
+      "scenariosCreated": 1,
+      "scenariosCompleted": 1,
+      "requestsCompleted": 1,
+      "latency": {
+        "min": 26.6,
+        "max": 26.6,
+        "median": 26.6,
+        "p95": 26.6,
+        "p99": 26.6
+      },
+      "rps": {
+        "count": 1,
+        "mean": 2.7
+      },
+      "scenarioDuration": {
+        "min": 177.8,
+        "max": 177.8,
+        "median": 177.8,
+        "p95": 177.8,
+        "p99": 177.8
+      },
+      "scenarioCounts": {
+        "0": 1
+      },
+      "errors": {},
+      "codes": {
+        "200": 1
+      },
+      "matches": 3,
+      "customStats": {},
+      "phases": [
+        {
+          "pause": 0.2430741319294641
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "scenariosCreated": 1,
+    "scenariosCompleted": 1,
+    "requestsCompleted": 1,
+    "codes": {
+      "200": 1
+    },
+    "errors": {}
+  }
+}
+Results:
+PASSED
+```
+
+</p>
+</details>
+
+You can observe the following in the result:
+- Observe the following section where we list the number of scenarios created, scenarios completed, requests completed and list of errors which in this case is 0.
+```
+  "totals": {
+    "scenariosCreated": 1,
+    "scenariosCompleted": 1,
+    "requestsCompleted": 1,
+    "codes": {
+      "200": 1
+    },
+    "errors": {}
+```
+
+Also, as this test passed, you will also observe that the process exit code is 0. On _Mac_ you can run command `echo $?` immediately after that to see the process exit code 0 in this case.
+
+### 6. Test failure scenario
+#### 6.1. Edit `script.yml` to fail `match`
+Edit `match` section in `script.yml` to look for wrong return value to simulate failure scenario. Note that we are causing failure for two matches out of three.
 ```
           match:
             - json: "$.headers.my-sample-header"
-              #value: "my-sample-header-value"
-              value: "failvalue"
+              value: "my-sample-header-value"
+              #value: "failvalue"
             - json: "$.headers.host"
               #value: "postman-echo.com"
               value: "failvalue"
@@ -937,18 +1165,186 @@ Edit `match` section in `script.yml` to look for wrong return value to simulate 
               #value: "https"
               value: "failvalue"
 ```
-#### T5.4.2. Invoke acceptance test
-Invoke acceptance test as mentioned [above](#t54-invoke-acceptance-test).
-**ASHMITODO where to observe failure**
+#### 6.2. Invoke acceptance test
+Invoke acceptance test as mentioned [above](#4-invoke-acceptance-test).
 
-### T5.5. Remove assets from AWS
-This section is same as before. See [here](#t28-remove-assets-from-aws) for details.
+#### 6.3. Observe the results
+You will see an output similar to the following.
+<details><summary>Click to expand/collapse</summary>
+<p>
+
+```
+
+	Invoking test Lambda
+
+{
+    "errors": 2,
+    "reports": [
+        {
+            "timestamp": "2019-04-17T21:56:59.527Z",
+            "scenariosCreated": 1,
+            "scenariosCompleted": 0,
+            "requestsCompleted": 1,
+            "latency": {
+                "min": 24.7,
+                "max": 24.7,
+                "median": 24.7,
+                "p95": 24.7,
+                "p99": 24.7
+            },
+            "rps": {
+                "count": 1,
+                "mean": 2
+            },
+            "scenarioDuration": {
+                "min": null,
+                "max": null,
+                "median": null,
+                "p95": null,
+                "p99": null
+            },
+            "scenarioCounts": {
+                "0": 1
+            },
+            "errors": {
+                "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 1,
+                "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 1
+            },
+            "codes": {
+                "200": 1
+            },
+            "matches": 0,
+            "customStats": {},
+            "phases": [
+                {
+                    "pause": 0.29122591362828076
+                },
+                {
+                    "duration": 1,
+                    "arrivalRate": 1
+                }
+            ]
+        }
+    ],
+    "totals": {
+        "scenariosCreated": 1,
+        "scenariosCompleted": 0,
+        "requestsCompleted": 1,
+        "codes": {
+            "200": 1
+        },
+        "errors": {
+            "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 1,
+            "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 1
+        }
+    },
+    "errorMessage": "acceptance failure: scenarios run: 1, total errors: 2, error budget: 0"
+}
+
+	Your function invocation has completed.
+
+{
+  "errors": 2,
+  "reports": [
+    {
+      "timestamp": "2019-04-17T21:56:59.527Z",
+      "scenariosCreated": 1,
+      "scenariosCompleted": 0,
+      "requestsCompleted": 1,
+      "latency": {
+        "min": 24.7,
+        "max": 24.7,
+        "median": 24.7,
+        "p95": 24.7,
+        "p99": 24.7
+      },
+      "rps": {
+        "count": 1,
+        "mean": 2
+      },
+      "scenarioDuration": {
+        "min": null,
+        "max": null,
+        "median": null,
+        "p95": null,
+        "p99": null
+      },
+      "scenarioCounts": {
+        "0": 1
+      },
+      "errors": {
+        "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 1,
+        "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 1
+      },
+      "codes": {
+        "200": 1
+      },
+      "matches": 0,
+      "customStats": {},
+      "phases": [
+        {
+          "pause": 0.29122591362828076
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "scenariosCreated": 1,
+    "scenariosCompleted": 0,
+    "requestsCompleted": 1,
+    "codes": {
+      "200": 1
+    },
+    "errors": {
+      "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 1,
+      "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 1
+    }
+  },
+  "errorMessage": "acceptance failure: scenarios run: 1, total errors: 2, error budget: 0"
+}
+Results:
+FAILED acceptance failure: scenarios run: 1, total errors: 2, error budget: 0
+
+```
+
+</p>
+</details>
+
+You can observe the following in the result.
+- Observe `"matches": 0,`. When any of the `match` statements fail it sets this to 0 (this could be confusing with scripts that don't have any `match` statements.
+- Observe the following section where we list the number of scenarios created, scenarios completed, requests completed and list of errors. You can see it has information about the `match` statements that failed so you can use this information to find where in script failure occured.
+```
+  "totals": {
+    "scenariosCreated": 1,
+    "scenariosCompleted": 0,
+    "requestsCompleted": 1,
+    "codes": {
+      "200": 1
+    },
+    "errors": {
+      "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 1,
+      "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 1
+    }
+```
+- Observe the following error message regarding acceptance testing. Notice that error budget (default 0) can be modified as per your need. Read [here](#to-configure-acceptance-behavior) for more info.
+```
+"errorMessage": "acceptance failure: scenarios run: 1, total errors: 2, error budget: 0"
+```
+
+Also, as this test failed, you will also observe that the process exit code is non-zero (number of `match` failures). On _Mac_ you can run command `echo $?` immediately after that to see the process exit code 2 in this case.
+
+### 7. Remove assets from AWS
+This section is same as before. See [here](#8-remove-assets-from-aws) for details.
 
 ## More about acceptance mode
 ### Acceptance testing in CI/CD
 For the purposes of facilitating the use of this tool in a CI/CD pipeline, if any of the acceptance tests fail to successfully complete, the process will exit with a non-zero exit code.
 
-### Run `script.yml` exclusively in acceptance mode:
+### Run `script.yml` exclusively in acceptance mode
 To hard code acceptance mode into your script add the following in your `script.yml`:
 ```
 mode: acceptance
@@ -959,9 +1355,9 @@ mode: acceptance
 ### Use same `script.yml` for performance and acceptance testing and monitoring
 You can use the same `script.yml` for performance, acceptance testing and monitoring so you don't have to maintain multiple files. The scenarios that are important for performance test would be used for acceptance testing and monitoring as well.
 
-Scripts running in acceptance mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via the `-a` flag) and have them anyway. **ASHMITODO ask greg. I am confused. why does it say it is expected that performance tests will be run in this mode? does it mean acceptance test is like running perf test but only once?**
+Since acceptance mode will run all scenarios only once (by default), the scripts that only are run in acceptance mode are not required to have a `phases` array in the `config` section of the script.
 
-### To configure acceptance behavior:
+### To configure acceptance behavior
 You may configure [sampling](glossary.md#sampling) behavior.  To control the number of samples taken, the time before taking a sample, or the number of errors constituting a failure, you may supply the following (default values listed):
 
 ```
@@ -980,118 +1376,451 @@ Performance testing framework forms the basis of monitoring mode of serverless-a
 ## Tutorial 6: Monitoring mode without serverless-artillery alert
 If you don't need serverless-artillery to send an alert when monitoring detects a problem then follow the tutorial here. You can [forward the test result to your data store](#providing-a-data-store-to-view-the-results-of-your-performance-test) and use alerting service there to noify you.
 
-### T6.1. Create custom deployment assets
+### 1. Create custom deployment assets
 Follow [Tutorial 3 to create custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets).
 
-### T6.2. Setup AWS account credentials
-This section is same as before. See [here](#t25-setup-aws-account-credentials) for details.
+### 2. Setup AWS account credentials
+This section is same as before. See [here](#before-running-serverless-artillery) for details.
 
-### T6.3. Tryout monitoring mode
-#### T6.3.1. Deploy assets to AWS
-This section is same as before. See [here](#t26-deploy-assets-to-aws) for details. **Note** that monitoring is turned off by default and hence the assets deployed in this step would not start monitoring.
+### 3. Tryout monitoring mode
+#### 3.1. Deploy assets to AWS
+This section is same as before. See [here](#3-deploy) for details. **Note** that monitoring is turned off by default in `serverless.yml` and hence the assets deployed in this step would not start monitoring.
 
-#### T6.3.2. Invoke monitoring once
-When `-m` option is used in `slsart invoke` command, serverless-artillery invokes the load generator Lambda in monitoring mode. This is useful also during script development to avoid having to redeploy everytime you edit `script.yml` as mentioned [below](#t65-deploy-assets-to-aws-to-start-monitoring).
+#### 3.2. Invoke monitoring once
+When `-m` option is used in `slsart invoke` command, serverless-artillery invokes the load generator Lambda in monitoring mode. This is useful also during script development to avoid having to redeploy everytime you edit `script.yml` as mentioned [below](#5-deploy-assets-to-aws-to-start-monitoring).
 ```
-slsart invoke -m
+slsart invoke -m --stage <your-unique-stage-name>
 ```
-Given default [moitoring behavior configuration](#to-configure-monitoring-behavior), each scenario/flow in your script will be executed five times **only once**.
+Given default [monitoring behavior configuration](#to-configure-monitoring-behavior), each scenario/flow in your script will be executed five times **only once**.
 
-### T6.4. Customize deployment assets to turn on monitoring
+### 4. Customize deployment assets to turn on monitoring
 Open `serverless.yml` in your favorite editor. Under `functions` > `loadGenerator` > `events` > `schedule` > find `enabled: false`. Set it to `true`.
 
 Notice instruction 0 and 1 under `BEFORE ENABLING` section if they are applicable for your use case.
 
-### T6.5. Deploy assets to AWS to start monitoring
-This section is same as before. See [here](#t26-deploy-assets-to-aws) for details. **Note** that in the previous step monitoring was turned on and hence just _deploying_ the assets would turn on monitoring. Separate _invoke_ is not needed.
+### 5. Deploy assets to AWS to start monitoring
+This section is same as before. See [here](#3-deploy) for details. **Note** that in the previous step monitoring was turned on and hence just _deploying_ the assets would turn on monitoring. Separate _invoke_ is not needed.
 
-**NOTE:** In performance test and acceptance test, the `script.yml` is passed with `invoke` command and hence redeployment is not needed when you edit `script.yml`. But monitoring mode uses the `script.yml` that is deployed in `slsart deploy` command. Also `invoke` command is not used in monitoring mode. Hence you need to redeploy everytime you edit `script.yml`. During script development you can take advantage of `slsart invoke -m` to [try monitoring](#t63-tryout-monitoring-mode) with your script and avoid having to redeploy each time it is changed.
+**NOTE:** In performance test and acceptance test, the `script.yml` is passed with `invoke` command and hence redeployment is not needed when you edit `script.yml`. But monitoring mode uses the `script.yml` that is deployed in `slsart deploy` command. Also `invoke` command is not used in monitoring mode. Hence you need to redeploy everytime you edit `script.yml`. During script development you can take advantage of `slsart invoke -m` to [try monitoring](#3-tryout-monitoring-mode) with your script and avoid having to redeploy each time it is changed.
 
 Given default [moitoring behavior configuration](#to-configure-monitoring-behavior), each scenario/flow in your script will be executed five times **every minute**.
 
-### T6.6. Pause monitoring
+### 6. Pause monitoring
 Monitoring mode will run 24x7 until turned off or paused. If you need to pause monitoring you can do the following.
-#### T6.6.1. Method 1: Using CloudWatch Rules
+#### 6.1. Method 1: Using CloudWatch Rules
 - Go to `AWS CloudWatch console` and find `Rules` (under `Events`) and search for the rule `${self:service}-${opt:stage, self:provider.stage}-monitoring` based on your `serverless.yml`.
-- Do required [steps](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/Delete-or-Disable-Rule.html) to `Disable` this rule. This will prevent further invocation of the load generating Lambda function for monitoring.
+- Do required [steps](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/Delete-or-Disable-Rule.html) to `Disable` this rule. This will prevent further invocation of the load generator Lambda function for monitoring.
   - To enable monitoring again `Enable` this rule.
-- This will turn off monitoring and preserve the load generating Lambda logs.
-#### T6.6.2. Method 2: Turn monitoring off in `serverless.yml`
+- This will turn off monitoring and preserve the load generator Lambda logs.
+#### 6.2. Method 2: Turn monitoring off in `serverless.yml`
 - Open `serverless.yml` in your favorite editor.
 - Under `functions` > `loadGenerator` > `events` > `schedule` > find `enabled: true`. Set it to `false`.
-- Redeploy assets using same instructions as before. See [here](#t26-deploy-assets-to-aws) for details.
+- Redeploy assets using same instructions as before. See [here](#3-deploy) for details.
 
-### T6.7. Remove assets from AWS
+### 7. Remove assets from AWS
 If you want to keep the 24x7 monitoring then you don't need to do this step.
 
-When you want to turn off monitoring then remove the assets from AWS. See [here](#t28-remove-assets-from-aws) for details.
+When you want to turn off monitoring then remove the assets from AWS. See [here](#8-remove-assets-from-aws) for details.
 
 ## Tutorial 7: Monitoring mode with serverless-artillery alert
 Here we will look into how to setup monitoring such that serverless-artillery sends alert when it detects a problem.
 
-### T7.1. Create custom deployment assets
+### 1. Create custom deployment assets
 Follow [Tutorial 3 to create custom deployment assets](#tutorial-3-performance-test-with-custom-deployment-assets).
 
-### T7.2. Setup AWS account credentials
-This section is same as before. See [here](#t25-setup-aws-account-credentials) for details.
+### 2. Setup AWS account credentials
+This section is same as before. See [here](#before-running-serverless-artillery) for details.
 
-### T7.3. Customize script to have `match` clause
-Ensure that you have `match` clauses defined for each request in your script's flows to validate the responses. See [here](#match- clause) to learn more about `match`.
+### 3. Customize script to have `match` clause
+Ensure that you have `match` clauses defined for each request in your script's flows to validate the responses. See [here](#match-clause) to learn more about `match`.
 
-For the purpose of this tutorial you can copy paste the script from [here](#t51-customize-scriptyml).
+For the purpose of this tutorial you can copy paste the script from [here](#1-customize-scriptyml).
 
-### T7.4. Customize deployment assets to add at least one subscription
+### 4. Customize deployment assets to add at least one subscription
 Open `serverless.yml` in your favorite editor.
-- Uncomment the line of `Subscription` section.
+- _Uncomment_ the line of `Subscription` section.
 ```
 #        Subscription: # docs at https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-sns-subscription.html
 ```
 - Add at least one subscription. In this tutorial we will use email subscription.
-  - Uncomment following two lines.
+  - _Uncomment_ following two lines.
 ```
 #          - Endpoint: <target>@<host> # the endpoint is an email address
 #            Protocol: email
 ```
   - Replace `<target>@<host>` with your email address. Example, `mymail@myhost.com`.
 
-### T7.5. Tryout monitoring mode
-#### T7.5.1. Deploy assets to AWS
-This section is same as before. See [here](#t631-deploy-assets-to-aws) for details.
+### 5. Tryout monitoring mode
+#### 5.1. Deploy assets to AWS
+This section is same as before. See [here](#31-deploy-assets-to-aws) for details.
 
-#### T7.5.2. Invoke monitoring once
-This section is same as before. See [here](#t632-invoke-monitoring-once) for details.
+#### 5.2. Invoke monitoring once
+This section is same as before. See [here](#32-invoke-monitoring-once) for details.
 
-### T7.6. Test failure scenario
+### 6. Test failure scenario
 We will inject failure scenario so that the `match` fails and monitoring mode sends us an alert.
 
-#### T7.6.1. Edit `script.yml` to fail `match`
-Edit `script.yml` as mentioned [here](#t541-edit-scriptyml-to-fail-match) to cause `match` to fail.
+#### 6.1. Edit `script.yml` to fail `match`
+Edit `script.yml` as mentioned [here](#61-edit-scriptyml-to-fail-match) to cause `match` to fail.
 
-#### T7.6.2. Invoke monitoring once
-Follow instruction [here](#t632-invoke-monitoring-once) to use `-m` option of `slsart invoke` command to invoke monitoring once to try our modified `script.yml` without having to redeploy assets.
+#### 6.2. Invoke monitoring once
+Follow instruction [here](#32-invoke-monitoring-once) to use `-m` option of `slsart invoke` command to invoke monitoring once to try our modified `script.yml` without having to redeploy assets.
 
 Given default [moitoring behavior configuration](#to-configure-monitoring-behavior), each scenario/flow in your script will be executed five times **only once**. If all five of them fail (we try to avoid notifying you about blips) then you should receive a notification via the configured mechanism (email in the case of this tutorial).
 
 Below is sample email.
+<details><summary>Click to expand/collapse</summary>
+<p>
+
 ```
-ASHMITODO add sample email
+Alert:
+  monitoring failure: scenarios run: 5, total errors: 10, error budget: 4
+
+Logs:
+Full analysis:
+{
+  "errors": 10,
+  "reports": [
+    {
+      "timestamp": "2019-04-17T23:16:17.050Z",
+      "scenariosCreated": 5,
+      "scenariosCompleted": 0,
+      "requestsCompleted": 5,
+      "latency": {
+        "min": 12.4,
+        "max": 25.2,
+        "median": 24,
+        "p95": 25.2,
+        "p99": 25.2
+      },
+      "rps": {
+        "count": 5,
+        "mean": 0.93
+      },
+      "scenarioDuration": {
+        "min": null,
+        "max": null,
+        "median": null,
+        "p95": null,
+        "p99": null
+      },
+      "scenarioCounts": {
+        "0": 5
+      },
+      "errors": {
+        "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 5,
+        "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 5
+      },
+      "codes": {
+        "200": 5
+      },
+      "matches": 0,
+      "customStats": {},
+      "phases": [
+        {
+          "pause": 0.2255259122021872
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        },
+        {
+          "pause": 0.2968933399583734
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        },
+        {
+          "pause": 0.16654656047499483
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        },
+        {
+          "pause": 0.19488041671127268
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        },
+        {
+          "pause": 0.19656039636288947
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "scenariosCreated": 5,
+    "scenariosCompleted": 0,
+    "requestsCompleted": 5,
+    "codes": {
+      "200": 5
+    },
+    "errors": {
+      "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 5,
+      "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 5
+    }
+  },
+  "errorMessage": "monitoring failure: scenarios run: 5, total errors: 10, error budget: 4"
+}
+
+
+--
+If you wish to stop receiving notifications from this topic, please click or visit the link below to unsubscribe:
+https://sns.us-east-1.amazonaws.com/unsubscribe.html?SubscriptionArn=arn:aws:sns:us-east-1:515126931066:serverless-artillery-hPDAiDvuzL-ash-monitoringAlerts-3PPB71S63RM2:e11606d1-e70d-482c-82f9-eff26a760e68&Endpoint=ashmi.s.bhanushali@nordstrom.com
+
+Please do not reply directly to this email. If you have any questions or comments regarding this email, please contact us at https://aws.amazon.com/support
 ```
 
-### T7.7. Customize deployment assets to turn on monitoring
-This section is same as before. See [here](#t64-customize-deployment-assets-to-turn-on-monitoring) for details.
+</p>
+</details>
 
-### T7.8. Deploy assets to AWS to start monitoring
-This section is same as before. See [here](#t65-deploy-assets-to-aws-to-start-monitoring) for details.
+You will also see the following output at the command line.
+<details><summary>Click to expand/collapse</summary>
+<p>
+
+```
+
+	Invoking test Lambda
+
+{
+    "errors": 10,
+    "reports": [
+        {
+            "timestamp": "2019-04-17T23:06:29.570Z",
+            "scenariosCreated": 5,
+            "scenariosCompleted": 0,
+            "requestsCompleted": 5,
+            "latency": {
+                "min": 21.4,
+                "max": 52.1,
+                "median": 25.8,
+                "p95": 52.1,
+                "p99": 52.1
+            },
+            "rps": {
+                "count": 5,
+                "mean": 0.94
+            },
+            "scenarioDuration": {
+                "min": null,
+                "max": null,
+                "median": null,
+                "p95": null,
+                "p99": null
+            },
+            "scenarioCounts": {
+                "0": 5
+            },
+            "errors": {
+                "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 5,
+                "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 5
+            },
+            "codes": {
+                "200": 5
+            },
+            "matches": 0,
+            "customStats": {},
+            "phases": [
+                {
+                    "pause": 0.19110438826323195
+                },
+                {
+                    "duration": 1,
+                    "arrivalRate": 1
+                },
+                {
+                    "pause": 0.2695130316914205
+                },
+                {
+                    "duration": 1,
+                    "arrivalRate": 1
+                },
+                {
+                    "pause": 0.10236624757585773
+                },
+                {
+                    "duration": 1,
+                    "arrivalRate": 1
+                },
+                {
+                    "pause": 0.13588464289194607
+                },
+                {
+                    "duration": 1,
+                    "arrivalRate": 1
+                },
+                {
+                    "pause": 0.2951659631896233
+                },
+                {
+                    "duration": 1,
+                    "arrivalRate": 1
+                }
+            ]
+        }
+    ],
+    "totals": {
+        "scenariosCreated": 5,
+        "scenariosCompleted": 0,
+        "requestsCompleted": 5,
+        "codes": {
+            "200": 5
+        },
+        "errors": {
+            "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 5,
+            "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 5
+        }
+    },
+    "errorMessage": "monitoring failure: scenarios run: 5, total errors: 10, error budget: 4"
+}
+
+	Your function invocation has completed.
+
+{
+  "errors": 10,
+  "reports": [
+    {
+      "timestamp": "2019-04-17T23:06:29.570Z",
+      "scenariosCreated": 5,
+      "scenariosCompleted": 0,
+      "requestsCompleted": 5,
+      "latency": {
+        "min": 21.4,
+        "max": 52.1,
+        "median": 25.8,
+        "p95": 52.1,
+        "p99": 52.1
+      },
+      "rps": {
+        "count": 5,
+        "mean": 0.94
+      },
+      "scenarioDuration": {
+        "min": null,
+        "max": null,
+        "median": null,
+        "p95": null,
+        "p99": null
+      },
+      "scenarioCounts": {
+        "0": 5
+      },
+      "errors": {
+        "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 5,
+        "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 5
+      },
+      "codes": {
+        "200": 5
+      },
+      "matches": 0,
+      "customStats": {},
+      "phases": [
+        {
+          "pause": 0.19110438826323195
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        },
+        {
+          "pause": 0.2695130316914205
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        },
+        {
+          "pause": 0.10236624757585773
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        },
+        {
+          "pause": 0.13588464289194607
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        },
+        {
+          "pause": 0.2951659631896233
+        },
+        {
+          "duration": 1,
+          "arrivalRate": 1
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "scenariosCreated": 5,
+    "scenariosCompleted": 0,
+    "requestsCompleted": 5,
+    "codes": {
+      "200": 5
+    },
+    "errors": {
+      "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 5,
+      "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 5
+    }
+  },
+  "errorMessage": "monitoring failure: scenarios run: 5, total errors: 10, error budget: 4"
+}
+Results:
+FAILED monitoring failure: scenarios run: 5, total errors: 10, error budget: 4
+
+```
+
+</p>
+</details>
+
+You can observe the following in the result.
+- Observe `"matches": 0,`. When any of the `match` statements fail it sets this to 0 (this could be confusing with scripts that don't have any `match` statements).
+- Observe the following section where we list the number of scenarios created, scenarios completed, requests completed and list of errors. You can see it has information about the `match` statements that failed so you can use this information to find where in script failure occured.
+```
+  "totals": {
+    "scenariosCreated": 5,
+    "scenariosCompleted": 0,
+    "requestsCompleted": 5,
+    "codes": {
+      "200": 5
+    },
+    "errors": {
+      "Failed match: expected=failvalue got=postman-echo.com expression=$.headers.host": 5,
+      "Failed match: expected=failvalue got=https expression=$.headers.x-forwarded-proto": 5
+    }
+  },
+```
+- Observe the following error message regarding acceptance testing. Notice that error budget (default 4) can be modified as per your need. Read [here](#to-configure-monitoring-behavior) for more info.
+```
+"errorMessage": "monitoring failure: scenarios run: 5, total errors: 10, error budget: 4"
+```
+
+Also, as this test failed, you will also observe that the process exit code is non-zero (number of `match` failures). On _Mac_ you can run command `echo $?` immediately after that to see the process exit code 10 in this case.
+
+### 7. Customize deployment assets to turn on monitoring
+This section is same as before. See [here](#4-customize-deployment-assets-to-turn-on-monitoring) for details.
+
+### 8. Deploy assets to AWS to start monitoring
+This section is same as before. See [here](#5-deploy-assets-to-aws-to-start-monitoring) for details.
 
 In this step, along with deployment asset we are also deploying the modified `script.yml` where `match` will fail. Hence once the assets are deployed, monitoring mode will turn on and send you an email to alert about these failures.
 
-**ASHMITODO how often will you get email**
+Given default [monitoring behavior configuration](#to-configure-monitoring-behavior), each scenario/flow in your script will be executed five times **every minute**. All five of the executions will cause the `match` statements to fail exceeding `errorBudget` (default 4) and hence would send the email alerting about the problem (once every minute).
 
-### T7.9. Pause monitoring
-This section is same as before. See [here](#t66-pause-monitoring) for details.
+### 9. Pause monitoring
+This section is same as before. See [here](#6-pause-monitoring) for details.
 
-### T7.10. Remove assets from AWS
-This section is same as before. See [here](#t67-remove-assets-from-aws) for details.
+### 10. Remove assets from AWS
+This section is same as before. See [here](#8-remove-assets-from-aws) for details.
 
 ## More about monitoring mode
 ### Run `script.yml` exclusively in monitoring mode
@@ -1105,7 +1834,7 @@ mode: monitoring
 ### Use same `script.yml` for performance and acceptance testing and monitoring
 You can use the same `script.yml` for performance, acceptance testing and monitoring so you don't have to maintain multiple files. The scenarios that are important for performance test would be used for acceptance testing and monitoring as well.
 
-Scripts running in monitoring mode do not require a `phases` array in the `config` section of the script but it is expected that performance tests will be run in this mode (via a schedule event or with the `-m` flag) and have them anyway. **ASHMITODO ask greg. I am confused. why does it say it is expected that performance tests will be run in this mode? does it mean monitoring test is like running perf test but 5 times every minute?**
+Since monitoring mode will run all scenarios five times (by default), the scripts that only are run in monitoring mode are not required to have a `phases` array in the `config` section of the script.
 
 ### To configure monitoring behavior
 You may configure [sampling](glossary.md#sampling) behavior.  To control the number of samples taken, the time before taking a sample, or the number of errors constituting a failure, you may supply the following (default values listed):
@@ -1117,6 +1846,17 @@ sampling:
   pauseVariance: 0.1 # The maximum difference of the actual pause from the average pause (in either direction)
   errorBudget: 4     # The number of observed errors to accept before alerting
 ```
+
+# Upgrading customized projects built with older versions of serverless-artillery
+If you had built a custom test project (in order to customize the deployment assets) with an older version of serverless-artillery, then you might need to upgrade the project in order to use features of newer version of serverless-artillery. For example, serverless-artillery's monitoring mode requires certain deployment assets (configured in `serverless.yml`), that are not part of the configuration defined in `serverless.yml` created by `slsart configure` command of the older versions of serverless-artillery. Hence if you were to try monitoring on such test project then it would not work.
+
+We have added `slsart upgrade` command in order to make it easier for you to upgrade such custom test projects. Please note that you might have to manually add your customizations in the upgraded test project.
+
+```
+slsart upgrade
+```
+
+TODOGreg add example output of the command.
 
 # Detailed Usage
 ```
@@ -1160,10 +1900,11 @@ Options:
 ```
 
 ## Commands
-### deploy
+### `deploy`
 ```
-$ slsart deploy --help
-
+slsart deploy --help
+```
+```
 slsart deploy
 
 Deploy a default version of the function that will execute your Artillery
@@ -1180,10 +1921,11 @@ Options:
                  what it is attempting to accomplish.
 ```
 
-### invoke
+### `invoke`
 ```
-$ slsart invoke --help
-
+slsart invoke --help
+```
+```
 slsart invoke
 
 Invoke your function with your Artillery script.  Will prefer a script given by
@@ -1213,10 +1955,11 @@ Options:
                     invocation result into a tool such as jq
 ```
 
-### kill
+### `kill`
 ```
-$ slsart kill --help
-
+slsart kill --help
+```
+```
 slsart kill
 
 Stop a currently running load test and remove the function.
@@ -1230,10 +1973,11 @@ Options:
                  what it is attempting to accomplish.
 ```
 
-### remove
+### `remove`
 ```
-$ slsart remove --help
-
+slsart remove --help
+```
+```
 slsart remove
 
 Remove the function and the associated resources created for or by it.  See
@@ -1249,10 +1993,11 @@ Options:
                  what it is attempting to accomplish.
 ```
 
-### script
+### `script`
 ```
-$ slsart script --help
-
+slsart script --help
+```
+```
 slsart script
 
 Create a local Artillery script so that you can customize it for your specific
@@ -1275,14 +2020,33 @@ Options:
   -o, --out       The file to output the generated script in to.        [string]
 ```
 
-### configure
+### `configure`
 ```
-$ slsart configure
-
+slsart configure --help
+```
+```
 slsart configure
 
 Create a local copy of the deployment assets for modification and deployment.
 See https://docs.serverless.com for documentation.
+
+Options:
+  --help         Show help                                             [boolean]
+  --version      Show version number                                   [boolean]
+  -D, --debug    Execute the command in debug mode.  It will be chatty about
+                 what it is happening in the code.
+  -V, --verbose  Execute the command in verbose mode.  It will be chatty about
+                 what it is attempting to accomplish.
+```
+
+### `upgrade`
+```
+slsart upgrade --help
+```
+```
+slsart upgrade
+
+Upgrade local assets to latest version.
 
 Options:
   --help         Show help                                             [boolean]
@@ -1298,19 +2062,6 @@ Options:
 #### Error: npm ERR! code EACCES
 If you are installing into a node_modules owned by root and getting error `npm ERR! code EACCES`, [read this](root-owns-node-modules.md).
 
-# Glossary
-- service/ end point/ target URL
-- load/ traffic/ requests
-- deploy to AWS
-- AWS stack
-- SA script
-- load testing
-- performance testing
-- acceptance testing
-- monitoring
-- deployment assets. default vs custom
-- local deployment assets and remote deployment assets
-
 # External References
 1. [artillery.io](https://artillery.io) for documentation about how to define your load shape, volume, targets, inputs, et cetera
 2. [serverless.com](https://serverless.com/framework/docs/) for documentation about how to create a custom function configuration
@@ -1319,3 +2070,4 @@ If you are installing into a node_modules owned by root and getting error `npm E
 
 # If you've read this far
 Please let us know any feedback on this tool. We would love to hear from you. Thank you!
+
