@@ -56,7 +56,8 @@ To install each of the SA packages in the `slsart-package.list` use:
 ./test-all-versions.sh
 ```
 which will install each SA package in turn and run the tests with each.
-The `name` used for each package are the five characters.
+The `name` used for each package are the five characters, e.g.:
+`serverless-artillery@0.3.5` becomes `0-3-5`.
 
 Testing the currently installed SA package, the command:
 ```
@@ -76,4 +77,4 @@ Example:
 ```
 cat error-0-3-2-* | grep Error
 ```
-to find any `Error` in the testing output.
+to find any `Error` in the testing error output for package version 0.3.2.
