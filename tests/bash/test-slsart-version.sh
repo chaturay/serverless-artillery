@@ -3,7 +3,7 @@ count=$1
 name=$2
 delay=$3
 
-echo "Deploying, testing and removing ${count} CF stacks of SA (${name})."
+echo "Deploying, testing and removing ${count} copies of SA service (${name})."
 for d in $( seq 1 ${count} )
   do
     stage=${name}-${d}

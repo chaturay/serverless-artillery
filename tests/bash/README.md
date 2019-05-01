@@ -8,10 +8,10 @@ Currently implemented for MacOS only.
 The scripts provided can be used to test SA deployment, invocation and removal.
 
 Multiple SA packages may be validated in a single test run.
-Each SA package listed will be installed in turn and one or more service deployments will be used to test.
+Each SA package listed will installed in turn and one or more stacks will be used to test.
 
 Testing can be done with one or more SA services.
-These steps are performed for each service deployed:
+These steps are performed for each stack:
 9. Service directory is created and `slsart configure` generates a custom SA service
 9. `slsart script` is used to generate the default script
 9. Service is deployed
@@ -67,10 +67,6 @@ Testing the currently installed SA package, the command:
 * `stacks` is the number of copies the SA service to deploy
 * `name` basis for the output and error files
 * `delay` number of seconds to wait between deploying each SA service
-
-*NOTE:* Running the test in this way *will not wait for the tests to complete* before
-the script exits. The command above will start the tests which will take several
-minutes to complete, depending on the number of stacks deployed and delay used.
 
 ## Analyzing Results
 Pass/Fail results are manual.
