@@ -1,0 +1,4 @@
+serverless-artillery@0.3.5
+serverless-artillery@0.3.2
+git+https://github.com/Nordstrom/serverless-artillery.git#94983db3c3dc439c0bb9319d5aaa16a1f021fac7
+git+https://github.com/Nordstrom/serverless-artillery.git#c551f33b0c188282abacdca8e524ac64d2537173
