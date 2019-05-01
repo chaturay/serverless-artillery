@@ -68,6 +68,10 @@ Testing the currently installed SA package, the command:
 * `name` basis for the output and error files
 * `delay` number of seconds to wait between deploying each SA service
 
+*NOTE:* Running the test in this way *will not wait for the tests to complete* before
+the script exits. The command above will start the tests which will take several
+minutes to complete, depending on the number of stacks deployed and delay used.
+
 ## Analyzing Results
 Pass/Fail results are manual.
 Both the standard output and error output are captured from each test
