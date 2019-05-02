@@ -1,8 +1,8 @@
 before_script:
   - printenv
-  - which node
-  - which npm
+  - echo
+  - npm install
 
 run-test:
   script:
-    - echo this is a test
+    - npm test
