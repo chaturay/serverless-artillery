@@ -7,5 +7,5 @@ run-test:
   script:
     - npm run lint
     - npm test
-    - npm test-upgrade
-    - npm test-integration
+    - npm run test-upgrade
+    - npm run test-integration
