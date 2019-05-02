@@ -8,3 +8,8 @@ run-test:
     - npm run lint
     - npm test
     - npm run test-upgrade
+
+aws-integration-test:
+  script:
+    - creds-helper -aws
+    - npm run test-integration
