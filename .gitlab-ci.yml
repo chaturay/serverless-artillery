@@ -2,3 +2,7 @@ before_script:
   - printenv
   - which node
   - which npm
+
+run-test:
+  script:
+    - echo this is a test
