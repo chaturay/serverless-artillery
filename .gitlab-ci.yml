@@ -5,4 +5,7 @@ before_script:
 
 run-test:
   script:
+    - npm run lint
     - npm test
+    - npm test-upgrade
+    - npm test-integration
