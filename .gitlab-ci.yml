@@ -8,4 +8,3 @@ run-test:
     - npm run lint
     - npm test
     - npm run test-upgrade
-    - npm run test-integration
