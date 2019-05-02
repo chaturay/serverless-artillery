@@ -9,7 +9,8 @@ run-test:
     - npm test
     - npm run test-upgrade
 
-aws-integration-test:
-  script:
-    - creds-helper -aws
-    - npm run test-integration
+# TODO: Need SLS on builder
+#aws-integration-test:
+#  script:
+#    - creds-helper -aws
+#    - npm run test-integration

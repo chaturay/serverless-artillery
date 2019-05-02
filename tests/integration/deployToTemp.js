@@ -92,7 +92,7 @@ const impl = {
 
   deploy: (exec = impl.execAsync()) =>
     directory =>
-      (process.env.DEBUG ? exec('slsart deploy -v', { cwd: directory }) : exec('slsart deploy', { cwd: directory })),
+      (process.env.DEBUG ? exec('sls deploy -v', { cwd: directory }) : exec('sls deploy', { cwd: directory })),
 
   tempLocation: (random = () => `${Date.now()}`, root = defaultRoot) =>
     (instanceId = random()) =>
