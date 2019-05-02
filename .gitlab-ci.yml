@@ -11,6 +11,5 @@ run-test:
 
 aws-integration-test:
   script:
-    - npm install -g serverless
     - creds-helper -aws
     - npm run test-integration

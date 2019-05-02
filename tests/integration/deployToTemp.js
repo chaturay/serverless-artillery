@@ -92,7 +92,7 @@ const impl = {
 
   deploy: (exec = impl.execAsync()) =>
     directory =>
-      (process.env.DEBUG ? exec('sls deploy -v', { cwd: directory }) : exec('sls deploy', { cwd: directory })),
+      (process.env.DEBUG ? exec('slsart deploy -v', { cwd: directory }) : exec('slsart deploy', { cwd: directory })),
 
   tempLocation: (random = () => `${Date.now()}`, root = defaultRoot) =>
     (instanceId = random()) =>
@@ -131,7 +131,7 @@ const impl = {
     },
 
   remove: (exec = impl.execAsync()) =>
-    directory => exec('sls remove', { cwd: directory }),
+    directory => exec('slsart remove', { cwd: directory }),
 
   removeTempDeployment: (
     log = defaultLog,
