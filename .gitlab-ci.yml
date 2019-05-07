@@ -1,5 +1,3 @@
-image: artillery
-
 before_script:
   - printenv
   - echo
@@ -12,6 +10,7 @@ run-test:
     - npm run test-upgrade
 
 aws-integration-test:
+  image: gitlab-registry.nordstrom.com/cicd/images/artillery:latest
   script:
     - creds-helper -aws
     - npm run test-integration
