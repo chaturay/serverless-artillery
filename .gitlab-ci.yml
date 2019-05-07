@@ -1,3 +1,5 @@
+image: artillery
+
 before_script:
   - printenv
   - echo
@@ -9,8 +11,7 @@ run-test:
     - npm test
     - npm run test-upgrade
 
-# TODO: Need SLS on builder
-#aws-integration-test:
-#  script:
-#    - creds-helper -aws
-#    - npm run test-integration
+aws-integration-test:
+  script:
+    - creds-helper -aws
+    - npm run test-integration
