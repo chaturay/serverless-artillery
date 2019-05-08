@@ -12,5 +12,6 @@ run-test:
 aws-integration-test:
   image: gitlab-registry.nordstrom.com/cicd/images/incubator/artillery:unstable
   script:
+    - which git
     - creds-helper -aws
     - npm run test-integration
