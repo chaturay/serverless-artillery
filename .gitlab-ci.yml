@@ -10,7 +10,7 @@ run-test:
     - npm run test-upgrade
 
 aws-integration-test:
-  image: gitlab-registry.nordstrom.com/cicd/images/artillery:latest
+  image: gitlab-registry.nordstrom.com/cicd/images/incubator/artillery:unstable
   script:
     - creds-helper -aws
     - npm run test-integration
