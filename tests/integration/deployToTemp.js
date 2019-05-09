@@ -131,7 +131,7 @@ const impl = {
     },
 
   remove: (exec = impl.execAsync()) =>
-    directory => exec('slsart remove', { cwd: directory }),
+    directory => exec('sls remove', { cwd: directory }),
 
   removeTempDeployment: (
     log = defaultLog,
