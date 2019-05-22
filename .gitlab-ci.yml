@@ -12,10 +12,9 @@ aws-integration-test:
   image: gitlab-registry.nordstrom.com/cicd/images/incubator/artillery:unstable
   variables:
     STAGE: test
-    AWS_REGION: us-west-2
   script:
     - creds-helper -aws
-    - aws opsworks describe-my-user-profile
+    - aws opsworks --region=us-west-2 describe-my-user-profile
 #    - npm run test-integration
     - mkdir slsart-test
     - cd slsart-test
