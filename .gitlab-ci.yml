@@ -14,7 +14,6 @@ aws-integration-test:
     STAGE: test
   script:
     - creds-helper -aws
-    - aws opsworks --region=us-west-2 describe-my-user-profile
 #    - npm run test-integration
     - mkdir slsart-test
     - cd slsart-test
