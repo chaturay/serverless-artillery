@@ -1,5 +1,4 @@
 before_script:
-  - printenv
   - echo
   - npm install
 
