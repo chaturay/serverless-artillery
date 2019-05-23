@@ -10,14 +10,24 @@ run-test:
 
 aws-integration-test:
   image: gitlab-registry.nordstrom.com/cicd/images/incubator/artillery:unstable
-  variables:
-    STAGE: test
   script:
+    # Authenticate with AWS
     - creds-helper -aws
-#    - npm run test-integration
+
+    # Create test project
     - mkdir slsart-test
     - cd slsart-test
     - slsart configure
-    - slsart deploy
-    - slsart invoke
-    - slsart remove
+
+    # Check the `script` and `update` commands
+    - slsart script
+    - slsart upgrade
+
+    # Validate minimal use case is working
+    - slsart deploy --stage test
+    - slsart invoke --stage test
+    - slsart remove --stage test
+
+    # Clean up
+    - cd ..
+    - rm -rf slsart-test

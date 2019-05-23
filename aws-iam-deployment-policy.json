@@ -1,0 +1,129 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "LambdaDeploymentPermissions",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:AddPermission",
+        "lambda:CreateFunction",
+        "lambda:DeleteFunction",
+        "lambda:GetFunction",
+        "lambda:GetFunctionConfiguration",
+        "lambda:InvokeFunction",
+        "lambda:UpdateFunctionCode",
+        "lambda:PublishVersion",
+        "lambda:RemovePermission"
+      ],
+      "Resource": [
+        "arn:aws:lambda:*:*:function:serverless-artillery-*"
+      ]
+    },
+    {
+      "Sid": "SNSDeploymentPermissions",
+      "Effect": "Allow",
+      "Action": [
+        "sns:CreateTopic",
+        "sns:DeleteTopic",
+        "sns:GetTopicAttributes"
+      ],
+      "Resource": [
+        "arn:aws:sns:*:*:serverless-artillery-*"
+      ]
+    },
+    {
+      "Sid": "CloudWatchEventsDeploymentPermissions",
+      "Effect": "Allow",
+      "Action": [
+        "events:DeleteRule",
+        "events:DescribeRule",
+        "events:PutRule",
+        "events:PutTargets",
+        "events:RemoveTargets"
+      ],
+      "Resource": [
+        "arn:aws:events:*:*:rule/serverless-artillery-*"
+      ]
+    },
+    {
+      "Sid": "CloudWatchLogsDeploymentPermissions",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:DeleteLogGroup"
+      ],
+      "Resource": [
+        "arn:aws:logs:*:*:log-group:/aws/lambda/serverless-artillery-*"
+      ]
+    },
+    {
+      "Sid": "IAMDeploymentPermissions",
+      "Effect": "Allow",
+      "Action": [
+        "iam:AttachRolePolicy",
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:DeleteRolePolicy",
+        "iam:DetachRolePolicy",
+        "iam:PassRole",
+        "iam:PutRolePolicy"
+      ],
+      "Resource": [
+        "arn:aws:iam::*:role/serverless-artillery-*"
+      ]
+    },
+    {
+      "Sid": "S3BucketDeploymentPermissions",
+      "Effect": "Allow",
+      "Action": [
+        "s3:CreateBucket",
+        "s3:DeleteBucket",
+        "s3:GetEncryptionConfiguration",
+        "s3:ListBucket",
+        "s3:PutEncryptionConfiguration"
+      ],
+      "Resource": [
+        "arn:aws:s3:::serverless-artillery-*"
+      ]
+    },
+    {
+      "Sid": "S3ObjectDeploymentPermissions",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::serverless-artillery-*/*"
+      ]
+    },
+    {
+      "Sid": "CloudFormationDeploymentPermissions",
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:CreateStack",
+        "cloudformation:DeleteStack",
+        "cloudformation:DescribeStacks",
+        "cloudformation:DescribeStackEvents",
+        "cloudformation:DescribeStackResource",
+        "cloudformation:ListStackResources",
+        "cloudformation:UpdateStack"
+      ],
+      "Resource": [
+        "arn:aws:cloudformation:*:*:stack/serverless-artillery-*/*"
+      ]
+    },
+    {
+      "Sid": "GlobalResourceDeploymentPermissions",
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:DescribeStacks",
+        "cloudformation:ValidateTemplate",
+        "lambda:ListVersionsByFunction",
+        "logs:DescribeLogGroups"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
