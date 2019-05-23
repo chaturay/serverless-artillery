@@ -2109,7 +2109,7 @@ Cloud service roles that deploy SA as part of a pipeline require the appropriate
 
 #### AWS
 
-For AWS, the minimum set of permissions needed for deployment are defined in `[aws-iam-deployment-policy.json](./aws-iam-deployment-policy.json)`.
+For AWS, the minimum set of permissions needed for deployment are defined in [aws-iam-deployment-policy.json](./aws-iam-deployment-policy.json).
 This may be used to create a managed policy in you AWS account.
 For example, this command will create a new policy named `serverless-artillery-deployment-policy`:
 ```
