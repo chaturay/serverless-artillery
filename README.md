@@ -2101,6 +2101,33 @@ Options:
                  what it is attempting to accomplish.
 ```
 
+# Automated Deployment
+
+### Deployment Role Permissions
+
+Cloud service roles that deploy SA as part of a pipeline require the appropriate set of permissions to create, update or delete resources.
+
+#### AWS
+
+For AWS, the minimum set of permissions needed for deployment are defined in `[aws-iam-deployment-policy.json](./aws-iam-deployment-policy.json)`.
+This may be used to create a managed policy in you AWS account.
+For example, this command will create a new policy named `serverless-artillery-deployment-policy`:
+```
+aws iam create-policy \
+  --policy-name serverless-artillery-deployment-policy \
+  --policy-document file://aws-iam-deployment-policy.json
+```
+
+Attach that policy to the role used to build.
+Find the Arn for the policy just created from the output above and attach using `attach-role-policy`, e.g.:
+```
+aws iam attach-role-policy \
+  --role-name buildRoleName \
+  --policy-arn arn:aws:iam::999999999999:policy/serverless-artillery-deployment-policy
+```
+
+The build role now has permissions to deploy SA resources to AWS.
+
 # Troubleshooting
 ### Problems installing?
 #### Error: npm ERR! code EACCES
