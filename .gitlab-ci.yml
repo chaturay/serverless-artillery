@@ -17,16 +17,16 @@ aws-integration-test:
     # Create test project
     - mkdir slsart-test
     - cd slsart-test
-    - slsart configure
+    - bin/serverless-artillery configure
 
     # Check the `script` and `update` commands
-    - slsart script
-    - slsart upgrade
+    - bin/serverless-artillery script
+    - bin/serverless-artillery upgrade
 
     # Validate minimal use case is working
-    - slsart deploy --stage test
-    - slsart invoke --stage test
-    - slsart remove --stage test
+    - bin/serverless-artillery deploy --stage test
+    - bin/serverless-artillery invoke --stage test
+    - bin/serverless-artillery remove --stage test
 
     # Clean up
     - cd ..
