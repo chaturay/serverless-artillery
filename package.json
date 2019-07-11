@@ -1,6 +1,6 @@
 {
   "name": "serverless-artillery",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "A serverless performance testing tool. `serverless` + `artillery` = crush.  a.k.a. Orbital Laziers [sic]",
   "main": "index.js",
   "bin": {
@@ -16,7 +16,9 @@
     "lint": "./node_modules/.bin/eslint . bin/serverless-artillery",
     "fix": "./node_modules/.bin/eslint --fix . bin/serverless-artillery",
     "postinstall": "node ./postinstall.js",
-    "publish": "./node_modules/.bin/np"
+    "publish": "./node_modules/.bin/np",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -63,15 +65,16 @@
     "eslint-plugin-import": "^2.11.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
     "eslint-plugin-react": "^7.12.3",
-    "lodash.merge": "^4.6.1",
+    "lodash.merge": "^4.6.2",
     "mocha": "^5.1.1",
     "ncp": "^2.0.0",
-    "np": "^2.20.1",
-    "nyc": "^11.7.1",
+    "np": "5.0.1",
+    "nyc": "^13.0.0",
     "proxyquire": "^2.1.0",
     "quibble": "^0.5.5",
     "recursive-readdir": "^2.2.2",
     "serverless": "^1.40.0",
+    "snyk": "^1.189.0",
     "sinon": "^5.0.2",
     "sinon-chai": "^3.3.0",
     "tmp": "0.0.33"
@@ -97,5 +100,6 @@
     ],
     "cache": true,
     "all": true
-  }
+  },
+  "snyk": true
 }
