@@ -15,7 +15,6 @@
     "coverage-report": "./node_modules/.bin/nyc report --reporter=lcov",
     "lint": "./node_modules/.bin/eslint . bin/serverless-artillery",
     "fix": "./node_modules/.bin/eslint --fix . bin/serverless-artillery",
-    "postinstall": "node ./postinstall.js",
     "publish": "./node_modules/.bin/np"
   },
   "repository": {
