@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+if [ ! -d "./lib/lambda/node_modules" ]
+then
+  # Install node dependencies
+  pushd ./lib/lambda || exit
+  npm install
+  popd || return
+fi
