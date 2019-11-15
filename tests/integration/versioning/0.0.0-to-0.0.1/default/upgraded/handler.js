@@ -2,11 +2,11 @@
 const fs = require('fs')
 const { safeLoad } = require('js-yaml')
 const merge = require('lodash.merge')
-const omit = require('lodash.omit')
+const omit = require('lodash.omit') // eslint-disable-line import/no-unresolved
 const task = require('./artillery-task.js')
 const platform = require('./platform-settings.js')
 const path = require('path')
-const promisify = require('util-promisify')
+const promisify = require('util-promisify') // eslint-disable-line import/no-unresolved
 
 const mergeFileField = '>>'
 
