@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+if [ -d "./lib/lambda/node_modules" ]
+then
+  # Install node dependencies
+  rm -rf ./lib/lambda/node_modules
+fi
