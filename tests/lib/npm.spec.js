@@ -44,6 +44,7 @@ describe('./lib/npm.js:exports', function npmExports() { // eslint-disable-line 
             return slsart.configure({ debug: true, trace: true })
           })
           .then(() => {
+            npm.install(tmpdir)
             npm.install(tmpdir, 'aws-sdk') // given that it is skipped as "already present in lambda"
             require(path.join(tmpdir, 'handler.js')) // eslint-disable-line global-require, import/no-dynamic-require
           })

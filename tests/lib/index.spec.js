@@ -68,7 +68,7 @@ ServerlessFake.dirname = require.resolve(path.join('..', '..', 'node_modules', '
 
 let shortidResult = 'abcdefgh'
 
-quibble(path.join('..', '..', 'lib', 'npm'), { install: () => npmInstallResult() })
+quibble(path.join('..', '..', 'lib', 'npm'), { install: installPath => npmInstallResult(installPath) })
 quibble(path.join('..', '..', 'lib', 'serverless-fx'), ServerlessFake)
 quibble('get-stdin', () => BbPromise.resolve(testJsonScriptStringified))
 quibble('shortid', { generate: () => shortidResult })
@@ -563,12 +563,21 @@ scenarios:
     })
 
     describe('#findServicePath', () => {
-      const lambdaPath = path.resolve('lib', 'lambda')
+      let tempDir
       const replaceImpl = (cwdResult, fileExistsResult, testFunc) => (() => {
         const { cwd } = process
         const { fileExists } = slsart.impl
         process.cwd = () => cwdResult
         slsart.impl.fileExists = () => fileExistsResult
+        tempDir = null
+        if (fs.existsSync(slsart.constants.UserConfigPath)) {
+          fs.unlinkSync(slsart.constants.UserConfigPath)
+        }
+        npmInstallResult = (tempPath) => {
+          tempDir = tempPath
+          fs.mkdirSync(`${tempPath}/node_modules`)
+          return BbPromise.resolve()
+        }
         return testFunc().then(() => {
           slsart.impl.fileExists = fileExists
           process.cwd = cwd
@@ -581,20 +590,21 @@ scenarios:
           true,
           () => BbPromise.resolve()
             .then(() => {
-              const res = slsart.impl.findServicePath()
-              expect(res).to.eql('foo')
+              expect(slsart.impl.findServicePath()).to.eql('foo')
             }) // eslint-disable-line comma-dangle
         ) // eslint-disable-line comma-dangle
       )
       it(
         'detects lack of serverless.yml in current working directory',
         replaceImpl(
-          __dirname,
+          'foo',
           false,
           () => BbPromise.resolve()
             .then(() => {
-              const res = slsart.impl.findServicePath()
-              expect(res).to.eql(lambdaPath)
+              slsart.impl.findServicePath()
+                .then((res) => {
+                  expect(res).to.eql(tempDir)
+                })
             }) // eslint-disable-line comma-dangle
         ) // eslint-disable-line comma-dangle
       )
@@ -603,7 +613,7 @@ scenarios:
     describe('#serverlessRunner', () => {
       let implFindServicePathStub
       beforeEach(() => {
-        implFindServicePathStub = sinon.stub(slsart.impl, 'findServicePath').returns(__dirname)
+        implFindServicePathStub = sinon.stub(slsart.impl, 'findServicePath').returns(Promise.resolve(__dirname))
       })
       afterEach(() => {
         implFindServicePathStub.restore()
@@ -646,9 +656,19 @@ scenarios:
     describe('#deploy', () => {
       let validateServiceForDeploymentStub
       let slsRunnerStub
+      let tempDir
       beforeEach(() => {
         validateServiceForDeploymentStub = sinon.stub(slsart.impl, 'validateServiceForDeployment').returns()
         slsRunnerStub = sinon.stub(slsart.impl, 'serverlessRunner').returns(BbPromise.resolve({}))
+        tempDir = null
+        npmInstallResult = (tempPath) => {
+          tempDir = tempPath
+          fs.mkdirSync(`${tempPath}/node_modules`)
+          return BbPromise.resolve()
+        }
+        if (fs.existsSync(slsart.constants.UserConfigPath)) {
+          fs.unlinkSync(slsart.constants.UserConfigPath)
+        }
       })
       afterEach(() => {
         process.argv = argv.slice(0)
@@ -665,6 +685,20 @@ scenarios:
           .then(() => expect(validateServiceForDeploymentStub).to.be.calledBefore(slsRunnerStub))
           .should.be.fulfilled // eslint-disable-line comma-dangle
       )
+      it('copies Artillery Lambda to temp dir', () => slsart.deploy({})
+        .then(() => expect(tempDir, '`npm install` not called').to.not.be.null)
+        .then(() => expect(fs.existsSync(`${slsart.constants.UserConfigPath}`), 'SA info not written').to.be.true)
+        .then(() => {
+          slsart.constants.ServerlessFiles
+            .forEach((file) => {
+              expect(
+                fs.existsSync(`${tempDir}/${file}`),
+                `${file} not copied`
+              ).to.be.true
+            })
+        })
+      )
+      it('runs npm install on Artillery Lambda', () => {})
     })
 
     describe('#invoke', () => {
