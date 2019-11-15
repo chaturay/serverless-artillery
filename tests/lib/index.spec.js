@@ -590,8 +590,7 @@ scenarios:
           true,
           () => BbPromise.resolve()
             .then(() => {
-              slsart.impl.findServicePath()
-                .then((res) => { expect(res).to.eql('foo') })
+              expect(slsart.impl.findServicePath()).to.eql('foo')
             }) // eslint-disable-line comma-dangle
         ) // eslint-disable-line comma-dangle
       )
