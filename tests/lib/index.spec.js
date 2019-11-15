@@ -79,7 +79,7 @@ const modes = require(path.join('..', '..', 'lib', 'lambda', 'modes.js')) // esl
 const slsart = require(path.join('..', '..', 'lib', 'index.js')) // eslint-disable-line import/no-dynamic-require
 
 const cleanTempDir = () => {
-  const tempdir = path.join(os.tmpdir(), `artillery-lambda`)
+  const tempdir = path.join(os.tmpdir(), 'artillery-lambda')
   if (fs.existsSync(tempdir)) {
     rimraf(tempdir)
   }
