@@ -9,6 +9,7 @@ const fs = BbPromise.promisifyAll(require('fs'))
 const quibble = require('quibble')
 const os = require('os')
 const path = require('path')
+const rimraf = require('rimraf').sync
 const sinon = require('sinon')
 const sinonChai = require('sinon-chai')
 const yaml = require('js-yaml')
@@ -76,6 +77,13 @@ quibble('shortid', { generate: () => shortidResult })
 const sampling = require(path.join('..', '..', 'lib', 'lambda', 'sampling.js')) // eslint-disable-line import/no-dynamic-require
 const modes = require(path.join('..', '..', 'lib', 'lambda', 'modes.js')) // eslint-disable-line import/no-dynamic-require
 const slsart = require(path.join('..', '..', 'lib', 'index.js')) // eslint-disable-line import/no-dynamic-require
+
+const cleanTempDir = () => {
+  const tempdir = path.join(os.tmpdir(), `artillery-lambda`)
+  if (fs.existsSync(tempdir)) {
+    rimraf(tempdir)
+  }
+}
 
 describe('./lib/index.js', function slsArtTests() { // eslint-disable-line prefer-arrow-callback
   describe(':impl', () => {
@@ -573,6 +581,7 @@ scenarios:
         if (fs.existsSync(slsart.constants.UserConfigPath)) {
           fs.unlinkSync(slsart.constants.UserConfigPath)
         }
+        cleanTempDir()
         npmInstallResult = (tempPath) => {
           tempDir = tempPath
           fs.mkdirSync(`${tempPath}/node_modules`)
@@ -601,10 +610,7 @@ scenarios:
           false,
           () => BbPromise.resolve()
             .then(() => {
-              slsart.impl.findServicePath()
-                .then((res) => {
-                  expect(res).to.eql(tempDir)
-                })
+              expect(slsart.impl.findServicePath()).to.eql(tempDir)
             }) // eslint-disable-line comma-dangle
         ) // eslint-disable-line comma-dangle
       )
@@ -669,6 +675,7 @@ scenarios:
         if (fs.existsSync(slsart.constants.UserConfigPath)) {
           fs.unlinkSync(slsart.constants.UserConfigPath)
         }
+        cleanTempDir()
       })
       afterEach(() => {
         process.argv = argv.slice(0)
@@ -982,6 +989,7 @@ scenarios:
       beforeEach(() => {
         awsStub = sinon.stub(aws.Service.prototype, 'makeRequest')
         removeStub = sinon.stub(slsart, 'remove')
+        cleanTempDir()
       })
       afterEach(() => {
         awsStub.restore()
